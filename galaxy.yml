@@ -1,0 +1,29 @@
+authors:
+- Red Hat
+build_ignore:
+- .git
+- .github
+- .gitignore
+- .ansible-lint
+- '*.rpm'
+dependencies:
+  ansible.posix: '>=2.2.0'
+description: Ansible collection providing hardening roles for Red Hat Enterprise Linux.
+documentation: https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/10/html/security_hardening/scanning-the-system-for-configuration-compliance#remediating-the-system-to-align-with-a-specific-baseline-using-an-ssg-ansible-playbook
+homepage: https://github.com/ComplianceAsCode/content
+issues: https://redhat.atlassian.net/secure/CreateIssueDetails!init.jspa?pid=10390&issuetype=10016&components=18915
+license:
+- BSD-3-Clause
+name: rhel_hardening_roles
+namespace: redhat
+readme: README.md
+repository: https://github.com/ComplianceAsCode/content
+tags:
+- security
+- compliance
+- hardening
+- rhel
+- scap
+- openscap
+- complianceascode
+version: 1.1.82
