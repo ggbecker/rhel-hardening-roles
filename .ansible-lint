@@ -9,3 +9,27 @@ exclude_paths:
   - changelogs
   - .ansible
   - .github
+
+# The roles in this collection are machine-generated from the SCAP remediations
+# in ComplianceAsCode/content. The findings below are inherent to that
+# generation, not authored defects. The first group mirrors the waivers in
+# tests/ansible-lint_config.yml in ComplianceAsCode/content; the second group
+# covers rules that only the strict "production" profile enforces.
+skip_list:
+  # Waived upstream in ComplianceAsCode/content CI:
+  - yaml                       # yamllint is run separately upstream
+  - no-free-form               # generated set_fact/command use free-form
+  - jinja[spacing]
+  - key-order[task]
+  - fqcn[action-core]
+  - risky-file-permissions
+  - name[template]
+  - command-instead-of-module
+  - no-tabs
+  # Enforced only by the production profile:
+  - var-naming[no-role-prefix] # SCAP variable names are not role-prefixed
+  - var-naming[pattern]        # SCAP variable names
+  - no-changed-when
+  - risky-shell-pipe
+  - ignore-errors
+  - no-handler

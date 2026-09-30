@@ -19,9 +19,9 @@ galaxy_info:
   - ismosecret
   issue_tracker_url: https://github.com/ComplianceAsCode/content/issues
   license: BSD-3-Clause
-  min_ansible_version: 2.16
+  min_ansible_version: '2.16'
   platforms:
   - name: EL
     versions:
-    - 0
+    - '0'
   role_name: rhel10_ism_o_secret

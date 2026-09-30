@@ -19,9 +19,9 @@ galaxy_info:
   - cisserverl1
   issue_tracker_url: https://github.com/ComplianceAsCode/content/issues
   license: BSD-3-Clause
-  min_ansible_version: 2.16
+  min_ansible_version: '2.16'
   platforms:
   - name: EL
     versions:
-    - 8
+    - '8'
   role_name: rhel8_cis_server_l1
