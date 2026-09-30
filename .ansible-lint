@@ -1,0 +1,11 @@
+---
+# Ansible Lint configuration for the redhat.rhel_hardening_roles collection.
+# The certification checker runs the "production" profile, which is the profile
+# required for Automation Hub certification.
+profile: production
+
+# Generated collection metadata that should not be linted as playbook content.
+exclude_paths:
+  - changelogs
+  - .ansible
+  - .github
