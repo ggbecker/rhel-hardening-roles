@@ -4,7 +4,7 @@ Health Insurance Portability and Accountability Act (HIPAA)
 Ansible Role for Health Insurance Portability and Accountability Act (HIPAA)  
   
 Profile Description:  
-The HIPAA Security Rule establishes U.S. national standards to protect individuals’  
+The HIPAA Security Rule establishes U.S. national standards to protect individuals'  
 electronic personal health information that is created, received, used, or  
 maintained by a covered entity. The Security Rule requires appropriate  
 administrative, physical and technical safeguards to ensure the  
