@@ -23,5 +23,5 @@ galaxy_info:
   platforms:
   - name: EL
     versions:
-    - all
+    - '8'
   role_name: rhel8_e8

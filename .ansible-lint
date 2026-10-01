@@ -9,6 +9,13 @@ exclude_paths:
   - changelogs
   - .ansible
   - .github
+  # The RHEL 10 roles correctly declare EL version "10" in meta/main.yml, but
+  # ansible-lint's schema[meta] rule (which cannot be waived via skip_list) only
+  # accepts EL versions present in the schema bundled with the linter pinned to
+  # the ansible-core 2.16 certification floor (24.12.2), whose EL enum caps at
+  # "9". Exclude only these meta files from schema validation so the accurate
+  # version is kept; the roles' tasks are still fully linted.
+  - "roles/rhel10_*/meta/main.yml"
 
 # The roles in this collection are machine-generated from the SCAP remediations
 # in ComplianceAsCode/content. The findings below are inherent to that
