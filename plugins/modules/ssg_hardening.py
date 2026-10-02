@@ -94,7 +94,7 @@ options:
         C(rsyslog_remove) when I(mode=range).
     type: str
 author:
-  - ComplianceAsCode project
+  - ComplianceAsCode project (@ComplianceAsCode)
 """
 
 EXAMPLES = r"""
