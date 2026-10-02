@@ -376,6 +376,7 @@
     option: gpgcheck
     value: '1'
     no_extra_spaces: true
+    mode: '0644'
   loop: '{{ repo_grep_results.stdout |regex_findall( ''(.+\.repo):\[(.+)\]\n?'' ) if repo_grep_results is not skipped else
     [] }}'
   when:
@@ -648,7 +649,9 @@
   - restrict_strategy
 
 - name: 'Ensure Red Hat GPG Key Installed: Import RedHat GPG key'
-  ansible.builtin.command: rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
+  ansible.builtin.rpm_key:
+    state: present
+    key: /etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
   when:
   - DISA_STIG_RHEL_10_001020 | bool
   - ensure_redhat_gpgkey_installed | bool
@@ -795,7 +798,9 @@
       - authselect integrity check passed
   - name: Limit Password Reuse - Get authselect current features
     ansible.builtin.shell:
-      cmd: authselect current | tail -n+3 | awk '{ print $2 }'
+      cmd: 'set -o pipefail
+
+        authselect current | tail -n+3 | awk ''{ print $2 }'''
     register: result_authselect_features
     changed_when: false
     check_mode: false
@@ -805,12 +810,14 @@
     ansible.builtin.command:
       cmd: authselect enable-feature with-pwhistory
     register: result_authselect_enable_feature_cmd
+    changed_when: true
     when:
     - result_authselect_check_cmd is success
     - result_authselect_features.stdout is not search("with-pwhistory")
   - name: Limit Password Reuse - Ensure authselect changes are applied
     ansible.builtin.command:
       cmd: authselect apply-changes -b
+    changed_when: true
     when:
     - result_authselect_enable_feature_cmd is not skipped
     - result_authselect_enable_feature_cmd is success
@@ -873,7 +880,9 @@
         - authselect integrity check passed
     - name: Limit Password Reuse - Get authselect current profile
       ansible.builtin.shell:
-        cmd: authselect current -r | awk '{ print $1 }'
+        cmd: 'set -o pipefail
+
+          authselect current -r | awk ''{ print $1 }'''
       register: result_authselect_profile
       changed_when: false
       when:
@@ -894,7 +903,9 @@
       - result_authselect_profile.stdout is not match("custom/")
     - name: Limit Password Reuse - Get authselect current features to also enable them in the custom profile
       ansible.builtin.shell:
-        cmd: authselect current | tail -n+3 | awk '{ print $2 }'
+        cmd: 'set -o pipefail
+
+          authselect current | tail -n+3 | awk ''{ print $2 }'''
       register: result_authselect_features
       changed_when: false
       check_mode: false
@@ -912,6 +923,7 @@
     - name: Limit Password Reuse - Create an authselect custom profile based on the current profile
       ansible.builtin.command:
         cmd: authselect create-profile hardening -b {{ authselect_current_profile }}
+      changed_when: true
       when:
       - result_authselect_profile is not skipped
       - result_authselect_check_cmd is success
@@ -920,6 +932,7 @@
     - name: Limit Password Reuse - Create an authselect custom profile based on sssd profile
       ansible.builtin.command:
         cmd: authselect create-profile hardening -b sssd
+      changed_when: true
       when:
       - result_authselect_profile is not skipped
       - result_authselect_check_cmd is success
@@ -928,6 +941,7 @@
     - name: Limit Password Reuse - Ensure authselect changes are applied
       ansible.builtin.command:
         cmd: authselect apply-changes -b --backup=before-hardening-custom-profile
+      changed_when: true
       when:
       - result_authselect_check_cmd is success
       - result_authselect_profile is not skipped
@@ -937,6 +951,7 @@
       ansible.builtin.command:
         cmd: authselect select {{ authselect_custom_profile }}
       register: result_pam_authselect_select_profile
+      changed_when: true
       when:
       - result_authselect_check_cmd is success
       - result_authselect_profile is not skipped
@@ -954,6 +969,7 @@
     - name: Limit Password Reuse - Ensure authselect changes are applied
       ansible.builtin.command:
         cmd: authselect apply-changes -b --backup=after-hardening-custom-profile
+      changed_when: true
       when:
       - result_authselect_check_cmd is success
       - result_authselect_profile is not skipped
@@ -1005,6 +1021,7 @@
     - name: Limit Password Reuse - Ensure authselect changes are applied
       ansible.builtin.command:
         cmd: authselect apply-changes -b
+      changed_when: true
       when:
       - result_authselect_present is defined
       - result_authselect_present.stat.exists
@@ -1118,7 +1135,9 @@
             - authselect integrity check passed
         - name: Limit Password Reuse - Get authselect current profile
           ansible.builtin.shell:
-            cmd: authselect current -r | awk '{ print $1 }'
+            cmd: 'set -o pipefail
+
+              authselect current -r | awk ''{ print $1 }'''
           register: result_authselect_profile
           changed_when: false
           when:
@@ -1139,7 +1158,9 @@
           - result_authselect_profile.stdout is not match("custom/")
         - name: Limit Password Reuse - Get authselect current features to also enable them in the custom profile
           ansible.builtin.shell:
-            cmd: authselect current | tail -n+3 | awk '{ print $2 }'
+            cmd: 'set -o pipefail
+
+              authselect current | tail -n+3 | awk ''{ print $2 }'''
           register: result_authselect_features
           changed_when: false
           check_mode: false
@@ -1157,6 +1178,7 @@
         - name: Limit Password Reuse - Create an authselect custom profile based on the current profile
           ansible.builtin.command:
             cmd: authselect create-profile hardening -b {{ authselect_current_profile }}
+          changed_when: true
           when:
           - result_authselect_profile is not skipped
           - result_authselect_check_cmd is success
@@ -1165,6 +1187,7 @@
         - name: Limit Password Reuse - Create an authselect custom profile based on sssd profile
           ansible.builtin.command:
             cmd: authselect create-profile hardening -b sssd
+          changed_when: true
           when:
           - result_authselect_profile is not skipped
           - result_authselect_check_cmd is success
@@ -1173,6 +1196,7 @@
         - name: Limit Password Reuse - Ensure authselect changes are applied
           ansible.builtin.command:
             cmd: authselect apply-changes -b --backup=before-hardening-custom-profile
+          changed_when: true
           when:
           - result_authselect_check_cmd is success
           - result_authselect_profile is not skipped
@@ -1182,6 +1206,7 @@
           ansible.builtin.command:
             cmd: authselect select {{ authselect_custom_profile }}
           register: result_pam_authselect_select_profile
+          changed_when: true
           when:
           - result_authselect_check_cmd is success
           - result_authselect_profile is not skipped
@@ -1199,6 +1224,7 @@
         - name: Limit Password Reuse - Ensure authselect changes are applied
           ansible.builtin.command:
             cmd: authselect apply-changes -b --backup=after-hardening-custom-profile
+          changed_when: true
           when:
           - result_authselect_check_cmd is success
           - result_authselect_profile is not skipped
@@ -1229,6 +1255,7 @@
       - name: Limit Password Reuse - Ensure authselect changes are applied
         ansible.builtin.command:
           cmd: authselect apply-changes -b
+        changed_when: true
         when:
         - result_authselect_present.stat.exists
         - result_pam_option_removal is changed
@@ -1292,7 +1319,9 @@
         - authselect integrity check passed
     - name: Limit Password Reuse - Get authselect current profile
       ansible.builtin.shell:
-        cmd: authselect current -r | awk '{ print $1 }'
+        cmd: 'set -o pipefail
+
+          authselect current -r | awk ''{ print $1 }'''
       register: result_authselect_profile
       changed_when: false
       when:
@@ -1313,7 +1342,9 @@
       - result_authselect_profile.stdout is not match("custom/")
     - name: Limit Password Reuse - Get authselect current features to also enable them in the custom profile
       ansible.builtin.shell:
-        cmd: authselect current | tail -n+3 | awk '{ print $2 }'
+        cmd: 'set -o pipefail
+
+          authselect current | tail -n+3 | awk ''{ print $2 }'''
       register: result_authselect_features
       changed_when: false
       check_mode: false
@@ -1331,6 +1362,7 @@
     - name: Limit Password Reuse - Create an authselect custom profile based on the current profile
       ansible.builtin.command:
         cmd: authselect create-profile hardening -b {{ authselect_current_profile }}
+      changed_when: true
       when:
       - result_authselect_profile is not skipped
       - result_authselect_check_cmd is success
@@ -1339,6 +1371,7 @@
     - name: Limit Password Reuse - Create an authselect custom profile based on sssd profile
       ansible.builtin.command:
         cmd: authselect create-profile hardening -b sssd
+      changed_when: true
       when:
       - result_authselect_profile is not skipped
       - result_authselect_check_cmd is success
@@ -1347,6 +1380,7 @@
     - name: Limit Password Reuse - Ensure authselect changes are applied
       ansible.builtin.command:
         cmd: authselect apply-changes -b --backup=before-hardening-custom-profile
+      changed_when: true
       when:
       - result_authselect_check_cmd is success
       - result_authselect_profile is not skipped
@@ -1356,6 +1390,7 @@
       ansible.builtin.command:
         cmd: authselect select {{ authselect_custom_profile }}
       register: result_pam_authselect_select_profile
+      changed_when: true
       when:
       - result_authselect_check_cmd is success
       - result_authselect_profile is not skipped
@@ -1373,6 +1408,7 @@
     - name: Limit Password Reuse - Ensure authselect changes are applied
       ansible.builtin.command:
         cmd: authselect apply-changes -b --backup=after-hardening-custom-profile
+      changed_when: true
       when:
       - result_authselect_check_cmd is success
       - result_authselect_profile is not skipped
@@ -1423,6 +1459,7 @@
     - name: Limit Password Reuse - Ensure authselect changes are applied
       ansible.builtin.command:
         cmd: authselect apply-changes -b
+      changed_when: true
       when:
       - result_authselect_present is defined
       - result_authselect_present.stat.exists
@@ -1466,6 +1503,7 @@
   - name: Limit Password Reuse - Ensure authselect changes are applied
     ansible.builtin.command:
       cmd: authselect apply-changes -b
+    changed_when: true
     when:
     - result_authselect_present.stat.exists
     - (result_pam_remember_add is defined and result_pam_remember_add.changed) or (result_pam_remember_edit is defined and
@@ -1550,7 +1588,9 @@
       - authselect integrity check passed
   - name: Lock Accounts After Failed Password Attempts - Get authselect current features
     ansible.builtin.shell:
-      cmd: authselect current | tail -n+3 | awk '{ print $2 }'
+      cmd: 'set -o pipefail
+
+        authselect current | tail -n+3 | awk ''{ print $2 }'''
     register: result_authselect_features
     changed_when: false
     check_mode: false
@@ -1560,12 +1600,14 @@
     ansible.builtin.command:
       cmd: authselect enable-feature with-faillock
     register: result_authselect_enable_feature_cmd
+    changed_when: true
     when:
     - result_authselect_check_cmd is success
     - result_authselect_features.stdout is not search("with-faillock")
   - name: Lock Accounts After Failed Password Attempts - Ensure authselect changes are applied
     ansible.builtin.command:
       cmd: authselect apply-changes -b
+    changed_when: true
     when:
     - result_authselect_enable_feature_cmd is not skipped
     - result_authselect_enable_feature_cmd is success
@@ -1772,7 +1814,9 @@
           - authselect integrity check passed
       - name: Lock Accounts After Failed Password Attempts - Get authselect current profile
         ansible.builtin.shell:
-          cmd: authselect current -r | awk '{ print $1 }'
+          cmd: 'set -o pipefail
+
+            authselect current -r | awk ''{ print $1 }'''
         register: result_authselect_profile
         changed_when: false
         when:
@@ -1794,7 +1838,9 @@
       - name: Lock Accounts After Failed Password Attempts - Get authselect current features to also enable them in the custom
           profile
         ansible.builtin.shell:
-          cmd: authselect current | tail -n+3 | awk '{ print $2 }'
+          cmd: 'set -o pipefail
+
+            authselect current | tail -n+3 | awk ''{ print $2 }'''
         register: result_authselect_features
         changed_when: false
         check_mode: false
@@ -1812,6 +1858,7 @@
       - name: Lock Accounts After Failed Password Attempts - Create an authselect custom profile based on the current profile
         ansible.builtin.command:
           cmd: authselect create-profile hardening -b {{ authselect_current_profile }}
+        changed_when: true
         when:
         - result_authselect_profile is not skipped
         - result_authselect_check_cmd is success
@@ -1820,6 +1867,7 @@
       - name: Lock Accounts After Failed Password Attempts - Create an authselect custom profile based on sssd profile
         ansible.builtin.command:
           cmd: authselect create-profile hardening -b sssd
+        changed_when: true
         when:
         - result_authselect_profile is not skipped
         - result_authselect_check_cmd is success
@@ -1828,6 +1876,7 @@
       - name: Lock Accounts After Failed Password Attempts - Ensure authselect changes are applied
         ansible.builtin.command:
           cmd: authselect apply-changes -b --backup=before-hardening-custom-profile
+        changed_when: true
         when:
         - result_authselect_check_cmd is success
         - result_authselect_profile is not skipped
@@ -1837,6 +1886,7 @@
         ansible.builtin.command:
           cmd: authselect select {{ authselect_custom_profile }}
         register: result_pam_authselect_select_profile
+        changed_when: true
         when:
         - result_authselect_check_cmd is success
         - result_authselect_profile is not skipped
@@ -1854,6 +1904,7 @@
       - name: Lock Accounts After Failed Password Attempts - Ensure authselect changes are applied
         ansible.builtin.command:
           cmd: authselect apply-changes -b --backup=after-hardening-custom-profile
+        changed_when: true
         when:
         - result_authselect_check_cmd is success
         - result_authselect_profile is not skipped
@@ -1886,6 +1937,7 @@
     - name: Lock Accounts After Failed Password Attempts - Ensure authselect changes are applied
       ansible.builtin.command:
         cmd: authselect apply-changes -b
+      changed_when: true
       when:
       - result_authselect_present.stat.exists
       - result_pam_option_removal is changed
@@ -1928,7 +1980,9 @@
           - authselect integrity check passed
       - name: Lock Accounts After Failed Password Attempts - Get authselect current profile
         ansible.builtin.shell:
-          cmd: authselect current -r | awk '{ print $1 }'
+          cmd: 'set -o pipefail
+
+            authselect current -r | awk ''{ print $1 }'''
         register: result_authselect_profile
         changed_when: false
         when:
@@ -1950,7 +2004,9 @@
       - name: Lock Accounts After Failed Password Attempts - Get authselect current features to also enable them in the custom
           profile
         ansible.builtin.shell:
-          cmd: authselect current | tail -n+3 | awk '{ print $2 }'
+          cmd: 'set -o pipefail
+
+            authselect current | tail -n+3 | awk ''{ print $2 }'''
         register: result_authselect_features
         changed_when: false
         check_mode: false
@@ -1968,6 +2024,7 @@
       - name: Lock Accounts After Failed Password Attempts - Create an authselect custom profile based on the current profile
         ansible.builtin.command:
           cmd: authselect create-profile hardening -b {{ authselect_current_profile }}
+        changed_when: true
         when:
         - result_authselect_profile is not skipped
         - result_authselect_check_cmd is success
@@ -1976,6 +2033,7 @@
       - name: Lock Accounts After Failed Password Attempts - Create an authselect custom profile based on sssd profile
         ansible.builtin.command:
           cmd: authselect create-profile hardening -b sssd
+        changed_when: true
         when:
         - result_authselect_profile is not skipped
         - result_authselect_check_cmd is success
@@ -1984,6 +2042,7 @@
       - name: Lock Accounts After Failed Password Attempts - Ensure authselect changes are applied
         ansible.builtin.command:
           cmd: authselect apply-changes -b --backup=before-hardening-custom-profile
+        changed_when: true
         when:
         - result_authselect_check_cmd is success
         - result_authselect_profile is not skipped
@@ -1993,6 +2052,7 @@
         ansible.builtin.command:
           cmd: authselect select {{ authselect_custom_profile }}
         register: result_pam_authselect_select_profile
+        changed_when: true
         when:
         - result_authselect_check_cmd is success
         - result_authselect_profile is not skipped
@@ -2010,6 +2070,7 @@
       - name: Lock Accounts After Failed Password Attempts - Ensure authselect changes are applied
         ansible.builtin.command:
           cmd: authselect apply-changes -b --backup=after-hardening-custom-profile
+        changed_when: true
         when:
         - result_authselect_check_cmd is success
         - result_authselect_profile is not skipped
@@ -2042,6 +2103,7 @@
     - name: Lock Accounts After Failed Password Attempts - Ensure authselect changes are applied
       ansible.builtin.command:
         cmd: authselect apply-changes -b
+      changed_when: true
       when:
       - result_authselect_present.stat.exists
       - result_pam_option_removal is changed
@@ -2217,7 +2279,9 @@
       - authselect integrity check passed
   - name: Configure the root Account for Failed Password Attempts - Get authselect current features
     ansible.builtin.shell:
-      cmd: authselect current | tail -n+3 | awk '{ print $2 }'
+      cmd: 'set -o pipefail
+
+        authselect current | tail -n+3 | awk ''{ print $2 }'''
     register: result_authselect_features
     changed_when: false
     check_mode: false
@@ -2228,12 +2292,14 @@
     ansible.builtin.command:
       cmd: authselect enable-feature with-faillock
     register: result_authselect_enable_feature_cmd
+    changed_when: true
     when:
     - result_authselect_check_cmd is success
     - result_authselect_features.stdout is not search("with-faillock")
   - name: Configure the root Account for Failed Password Attempts - Ensure authselect changes are applied
     ansible.builtin.command:
       cmd: authselect apply-changes -b
+    changed_when: true
     when:
     - result_authselect_enable_feature_cmd is not skipped
     - result_authselect_enable_feature_cmd is success
@@ -2427,7 +2493,9 @@
           - authselect integrity check passed
       - name: Configure the root Account for Failed Password Attempts - Get authselect current profile
         ansible.builtin.shell:
-          cmd: authselect current -r | awk '{ print $1 }'
+          cmd: 'set -o pipefail
+
+            authselect current -r | awk ''{ print $1 }'''
         register: result_authselect_profile
         changed_when: false
         when:
@@ -2450,7 +2518,9 @@
       - name: Configure the root Account for Failed Password Attempts - Get authselect current features to also enable them
           in the custom profile
         ansible.builtin.shell:
-          cmd: authselect current | tail -n+3 | awk '{ print $2 }'
+          cmd: 'set -o pipefail
+
+            authselect current | tail -n+3 | awk ''{ print $2 }'''
         register: result_authselect_features
         changed_when: false
         check_mode: false
@@ -2470,6 +2540,7 @@
           profile
         ansible.builtin.command:
           cmd: authselect create-profile hardening -b {{ authselect_current_profile }}
+        changed_when: true
         when:
         - result_authselect_profile is not skipped
         - result_authselect_check_cmd is success
@@ -2479,6 +2550,7 @@
           profile
         ansible.builtin.command:
           cmd: authselect create-profile hardening -b sssd
+        changed_when: true
         when:
         - result_authselect_profile is not skipped
         - result_authselect_check_cmd is success
@@ -2487,6 +2559,7 @@
       - name: Configure the root Account for Failed Password Attempts - Ensure authselect changes are applied
         ansible.builtin.command:
           cmd: authselect apply-changes -b --backup=before-hardening-custom-profile
+        changed_when: true
         when:
         - result_authselect_check_cmd is success
         - result_authselect_profile is not skipped
@@ -2496,6 +2569,7 @@
         ansible.builtin.command:
           cmd: authselect select {{ authselect_custom_profile }}
         register: result_pam_authselect_select_profile
+        changed_when: true
         when:
         - result_authselect_check_cmd is success
         - result_authselect_profile is not skipped
@@ -2513,6 +2587,7 @@
       - name: Configure the root Account for Failed Password Attempts - Ensure authselect changes are applied
         ansible.builtin.command:
           cmd: authselect apply-changes -b --backup=after-hardening-custom-profile
+        changed_when: true
         when:
         - result_authselect_check_cmd is success
         - result_authselect_profile is not skipped
@@ -2545,6 +2620,7 @@
     - name: Configure the root Account for Failed Password Attempts - Ensure authselect changes are applied
       ansible.builtin.command:
         cmd: authselect apply-changes -b
+      changed_when: true
       when:
       - result_authselect_present.stat.exists
       - result_pam_option_removal is changed
@@ -2589,7 +2665,9 @@
           - authselect integrity check passed
       - name: Configure the root Account for Failed Password Attempts - Get authselect current profile
         ansible.builtin.shell:
-          cmd: authselect current -r | awk '{ print $1 }'
+          cmd: 'set -o pipefail
+
+            authselect current -r | awk ''{ print $1 }'''
         register: result_authselect_profile
         changed_when: false
         when:
@@ -2612,7 +2690,9 @@
       - name: Configure the root Account for Failed Password Attempts - Get authselect current features to also enable them
           in the custom profile
         ansible.builtin.shell:
-          cmd: authselect current | tail -n+3 | awk '{ print $2 }'
+          cmd: 'set -o pipefail
+
+            authselect current | tail -n+3 | awk ''{ print $2 }'''
         register: result_authselect_features
         changed_when: false
         check_mode: false
@@ -2632,6 +2712,7 @@
           profile
         ansible.builtin.command:
           cmd: authselect create-profile hardening -b {{ authselect_current_profile }}
+        changed_when: true
         when:
         - result_authselect_profile is not skipped
         - result_authselect_check_cmd is success
@@ -2641,6 +2722,7 @@
           profile
         ansible.builtin.command:
           cmd: authselect create-profile hardening -b sssd
+        changed_when: true
         when:
         - result_authselect_profile is not skipped
         - result_authselect_check_cmd is success
@@ -2649,6 +2731,7 @@
       - name: Configure the root Account for Failed Password Attempts - Ensure authselect changes are applied
         ansible.builtin.command:
           cmd: authselect apply-changes -b --backup=before-hardening-custom-profile
+        changed_when: true
         when:
         - result_authselect_check_cmd is success
         - result_authselect_profile is not skipped
@@ -2658,6 +2741,7 @@
         ansible.builtin.command:
           cmd: authselect select {{ authselect_custom_profile }}
         register: result_pam_authselect_select_profile
+        changed_when: true
         when:
         - result_authselect_check_cmd is success
         - result_authselect_profile is not skipped
@@ -2675,6 +2759,7 @@
       - name: Configure the root Account for Failed Password Attempts - Ensure authselect changes are applied
         ansible.builtin.command:
           cmd: authselect apply-changes -b --backup=after-hardening-custom-profile
+        changed_when: true
         when:
         - result_authselect_check_cmd is success
         - result_authselect_profile is not skipped
@@ -2707,6 +2792,7 @@
     - name: Configure the root Account for Failed Password Attempts - Ensure authselect changes are applied
       ansible.builtin.command:
         cmd: authselect apply-changes -b
+      changed_when: true
       when:
       - result_authselect_present.stat.exists
       - result_pam_option_removal is changed
@@ -2848,7 +2934,9 @@
       - authselect integrity check passed
   - name: Set Interval For Counting Failed Password Attempts - Get authselect current features
     ansible.builtin.shell:
-      cmd: authselect current | tail -n+3 | awk '{ print $2 }'
+      cmd: 'set -o pipefail
+
+        authselect current | tail -n+3 | awk ''{ print $2 }'''
     register: result_authselect_features
     changed_when: false
     check_mode: false
@@ -2859,12 +2947,14 @@
     ansible.builtin.command:
       cmd: authselect enable-feature with-faillock
     register: result_authselect_enable_feature_cmd
+    changed_when: true
     when:
     - result_authselect_check_cmd is success
     - result_authselect_features.stdout is not search("with-faillock")
   - name: Set Interval For Counting Failed Password Attempts - Ensure authselect changes are applied
     ansible.builtin.command:
       cmd: authselect apply-changes -b
+    changed_when: true
     when:
     - result_authselect_enable_feature_cmd is not skipped
     - result_authselect_enable_feature_cmd is success
@@ -3054,7 +3144,9 @@
           - authselect integrity check passed
       - name: Set Interval For Counting Failed Password Attempts - Get authselect current profile
         ansible.builtin.shell:
-          cmd: authselect current -r | awk '{ print $1 }'
+          cmd: 'set -o pipefail
+
+            authselect current -r | awk ''{ print $1 }'''
         register: result_authselect_profile
         changed_when: false
         when:
@@ -3076,7 +3168,9 @@
       - name: Set Interval For Counting Failed Password Attempts - Get authselect current features to also enable them in
           the custom profile
         ansible.builtin.shell:
-          cmd: authselect current | tail -n+3 | awk '{ print $2 }'
+          cmd: 'set -o pipefail
+
+            authselect current | tail -n+3 | awk ''{ print $2 }'''
         register: result_authselect_features
         changed_when: false
         check_mode: false
@@ -3096,6 +3190,7 @@
           profile
         ansible.builtin.command:
           cmd: authselect create-profile hardening -b {{ authselect_current_profile }}
+        changed_when: true
         when:
         - result_authselect_profile is not skipped
         - result_authselect_check_cmd is success
@@ -3104,6 +3199,7 @@
       - name: Set Interval For Counting Failed Password Attempts - Create an authselect custom profile based on sssd profile
         ansible.builtin.command:
           cmd: authselect create-profile hardening -b sssd
+        changed_when: true
         when:
         - result_authselect_profile is not skipped
         - result_authselect_check_cmd is success
@@ -3112,6 +3208,7 @@
       - name: Set Interval For Counting Failed Password Attempts - Ensure authselect changes are applied
         ansible.builtin.command:
           cmd: authselect apply-changes -b --backup=before-hardening-custom-profile
+        changed_when: true
         when:
         - result_authselect_check_cmd is success
         - result_authselect_profile is not skipped
@@ -3121,6 +3218,7 @@
         ansible.builtin.command:
           cmd: authselect select {{ authselect_custom_profile }}
         register: result_pam_authselect_select_profile
+        changed_when: true
         when:
         - result_authselect_check_cmd is success
         - result_authselect_profile is not skipped
@@ -3138,6 +3236,7 @@
       - name: Set Interval For Counting Failed Password Attempts - Ensure authselect changes are applied
         ansible.builtin.command:
           cmd: authselect apply-changes -b --backup=after-hardening-custom-profile
+        changed_when: true
         when:
         - result_authselect_check_cmd is success
         - result_authselect_profile is not skipped
@@ -3170,6 +3269,7 @@
     - name: Set Interval For Counting Failed Password Attempts - Ensure authselect changes are applied
       ansible.builtin.command:
         cmd: authselect apply-changes -b
+      changed_when: true
       when:
       - result_authselect_present.stat.exists
       - result_pam_option_removal is changed
@@ -3214,7 +3314,9 @@
           - authselect integrity check passed
       - name: Set Interval For Counting Failed Password Attempts - Get authselect current profile
         ansible.builtin.shell:
-          cmd: authselect current -r | awk '{ print $1 }'
+          cmd: 'set -o pipefail
+
+            authselect current -r | awk ''{ print $1 }'''
         register: result_authselect_profile
         changed_when: false
         when:
@@ -3236,7 +3338,9 @@
       - name: Set Interval For Counting Failed Password Attempts - Get authselect current features to also enable them in
           the custom profile
         ansible.builtin.shell:
-          cmd: authselect current | tail -n+3 | awk '{ print $2 }'
+          cmd: 'set -o pipefail
+
+            authselect current | tail -n+3 | awk ''{ print $2 }'''
         register: result_authselect_features
         changed_when: false
         check_mode: false
@@ -3256,6 +3360,7 @@
           profile
         ansible.builtin.command:
           cmd: authselect create-profile hardening -b {{ authselect_current_profile }}
+        changed_when: true
         when:
         - result_authselect_profile is not skipped
         - result_authselect_check_cmd is success
@@ -3264,6 +3369,7 @@
       - name: Set Interval For Counting Failed Password Attempts - Create an authselect custom profile based on sssd profile
         ansible.builtin.command:
           cmd: authselect create-profile hardening -b sssd
+        changed_when: true
         when:
         - result_authselect_profile is not skipped
         - result_authselect_check_cmd is success
@@ -3272,6 +3378,7 @@
       - name: Set Interval For Counting Failed Password Attempts - Ensure authselect changes are applied
         ansible.builtin.command:
           cmd: authselect apply-changes -b --backup=before-hardening-custom-profile
+        changed_when: true
         when:
         - result_authselect_check_cmd is success
         - result_authselect_profile is not skipped
@@ -3281,6 +3388,7 @@
         ansible.builtin.command:
           cmd: authselect select {{ authselect_custom_profile }}
         register: result_pam_authselect_select_profile
+        changed_when: true
         when:
         - result_authselect_check_cmd is success
         - result_authselect_profile is not skipped
@@ -3298,6 +3406,7 @@
       - name: Set Interval For Counting Failed Password Attempts - Ensure authselect changes are applied
         ansible.builtin.command:
           cmd: authselect apply-changes -b --backup=after-hardening-custom-profile
+        changed_when: true
         when:
         - result_authselect_check_cmd is success
         - result_authselect_profile is not skipped
@@ -3330,6 +3439,7 @@
     - name: Set Interval For Counting Failed Password Attempts - Ensure authselect changes are applied
       ansible.builtin.command:
         cmd: authselect apply-changes -b
+      changed_when: true
       when:
       - result_authselect_present.stat.exists
       - result_pam_option_removal is changed
@@ -3498,7 +3608,9 @@
       - authselect integrity check passed
   - name: Set Lockout Time for Failed Password Attempts - Get authselect current features
     ansible.builtin.shell:
-      cmd: authselect current | tail -n+3 | awk '{ print $2 }'
+      cmd: 'set -o pipefail
+
+        authselect current | tail -n+3 | awk ''{ print $2 }'''
     register: result_authselect_features
     changed_when: false
     check_mode: false
@@ -3508,12 +3620,14 @@
     ansible.builtin.command:
       cmd: authselect enable-feature with-faillock
     register: result_authselect_enable_feature_cmd
+    changed_when: true
     when:
     - result_authselect_check_cmd is success
     - result_authselect_features.stdout is not search("with-faillock")
   - name: Set Lockout Time for Failed Password Attempts - Ensure authselect changes are applied
     ansible.builtin.command:
       cmd: authselect apply-changes -b
+    changed_when: true
     when:
     - result_authselect_enable_feature_cmd is not skipped
     - result_authselect_enable_feature_cmd is success
@@ -3721,7 +3835,9 @@
           - authselect integrity check passed
       - name: Set Lockout Time for Failed Password Attempts - Get authselect current profile
         ansible.builtin.shell:
-          cmd: authselect current -r | awk '{ print $1 }'
+          cmd: 'set -o pipefail
+
+            authselect current -r | awk ''{ print $1 }'''
         register: result_authselect_profile
         changed_when: false
         when:
@@ -3743,7 +3859,9 @@
       - name: Set Lockout Time for Failed Password Attempts - Get authselect current features to also enable them in the custom
           profile
         ansible.builtin.shell:
-          cmd: authselect current | tail -n+3 | awk '{ print $2 }'
+          cmd: 'set -o pipefail
+
+            authselect current | tail -n+3 | awk ''{ print $2 }'''
         register: result_authselect_features
         changed_when: false
         check_mode: false
@@ -3761,6 +3879,7 @@
       - name: Set Lockout Time for Failed Password Attempts - Create an authselect custom profile based on the current profile
         ansible.builtin.command:
           cmd: authselect create-profile hardening -b {{ authselect_current_profile }}
+        changed_when: true
         when:
         - result_authselect_profile is not skipped
         - result_authselect_check_cmd is success
@@ -3769,6 +3888,7 @@
       - name: Set Lockout Time for Failed Password Attempts - Create an authselect custom profile based on sssd profile
         ansible.builtin.command:
           cmd: authselect create-profile hardening -b sssd
+        changed_when: true
         when:
         - result_authselect_profile is not skipped
         - result_authselect_check_cmd is success
@@ -3777,6 +3897,7 @@
       - name: Set Lockout Time for Failed Password Attempts - Ensure authselect changes are applied
         ansible.builtin.command:
           cmd: authselect apply-changes -b --backup=before-hardening-custom-profile
+        changed_when: true
         when:
         - result_authselect_check_cmd is success
         - result_authselect_profile is not skipped
@@ -3786,6 +3907,7 @@
         ansible.builtin.command:
           cmd: authselect select {{ authselect_custom_profile }}
         register: result_pam_authselect_select_profile
+        changed_when: true
         when:
         - result_authselect_check_cmd is success
         - result_authselect_profile is not skipped
@@ -3803,6 +3925,7 @@
       - name: Set Lockout Time for Failed Password Attempts - Ensure authselect changes are applied
         ansible.builtin.command:
           cmd: authselect apply-changes -b --backup=after-hardening-custom-profile
+        changed_when: true
         when:
         - result_authselect_check_cmd is success
         - result_authselect_profile is not skipped
@@ -3835,6 +3958,7 @@
     - name: Set Lockout Time for Failed Password Attempts - Ensure authselect changes are applied
       ansible.builtin.command:
         cmd: authselect apply-changes -b
+      changed_when: true
       when:
       - result_authselect_present.stat.exists
       - result_pam_option_removal is changed
@@ -3878,7 +4002,9 @@
           - authselect integrity check passed
       - name: Set Lockout Time for Failed Password Attempts - Get authselect current profile
         ansible.builtin.shell:
-          cmd: authselect current -r | awk '{ print $1 }'
+          cmd: 'set -o pipefail
+
+            authselect current -r | awk ''{ print $1 }'''
         register: result_authselect_profile
         changed_when: false
         when:
@@ -3900,7 +4026,9 @@
       - name: Set Lockout Time for Failed Password Attempts - Get authselect current features to also enable them in the custom
           profile
         ansible.builtin.shell:
-          cmd: authselect current | tail -n+3 | awk '{ print $2 }'
+          cmd: 'set -o pipefail
+
+            authselect current | tail -n+3 | awk ''{ print $2 }'''
         register: result_authselect_features
         changed_when: false
         check_mode: false
@@ -3918,6 +4046,7 @@
       - name: Set Lockout Time for Failed Password Attempts - Create an authselect custom profile based on the current profile
         ansible.builtin.command:
           cmd: authselect create-profile hardening -b {{ authselect_current_profile }}
+        changed_when: true
         when:
         - result_authselect_profile is not skipped
         - result_authselect_check_cmd is success
@@ -3926,6 +4055,7 @@
       - name: Set Lockout Time for Failed Password Attempts - Create an authselect custom profile based on sssd profile
         ansible.builtin.command:
           cmd: authselect create-profile hardening -b sssd
+        changed_when: true
         when:
         - result_authselect_profile is not skipped
         - result_authselect_check_cmd is success
@@ -3934,6 +4064,7 @@
       - name: Set Lockout Time for Failed Password Attempts - Ensure authselect changes are applied
         ansible.builtin.command:
           cmd: authselect apply-changes -b --backup=before-hardening-custom-profile
+        changed_when: true
         when:
         - result_authselect_check_cmd is success
         - result_authselect_profile is not skipped
@@ -3943,6 +4074,7 @@
         ansible.builtin.command:
           cmd: authselect select {{ authselect_custom_profile }}
         register: result_pam_authselect_select_profile
+        changed_when: true
         when:
         - result_authselect_check_cmd is success
         - result_authselect_profile is not skipped
@@ -3960,6 +4092,7 @@
       - name: Set Lockout Time for Failed Password Attempts - Ensure authselect changes are applied
         ansible.builtin.command:
           cmd: authselect apply-changes -b --backup=after-hardening-custom-profile
+        changed_when: true
         when:
         - result_authselect_check_cmd is success
         - result_authselect_profile is not skipped
@@ -3992,6 +4125,7 @@
     - name: Set Lockout Time for Failed Password Attempts - Ensure authselect changes are applied
       ansible.builtin.command:
         cmd: authselect apply-changes -b
+      changed_when: true
       when:
       - result_authselect_present.stat.exists
       - result_pam_option_removal is changed
@@ -4754,7 +4888,9 @@
         - authselect integrity check passed
     - name: Set PAM Password Hashing Algorithm - system-auth - Get authselect current profile
       ansible.builtin.shell:
-        cmd: authselect current -r | awk '{ print $1 }'
+        cmd: 'set -o pipefail
+
+          authselect current -r | awk ''{ print $1 }'''
       register: result_authselect_profile
       changed_when: false
       when:
@@ -4776,7 +4912,9 @@
     - name: Set PAM Password Hashing Algorithm - system-auth - Get authselect current features to also enable them in the
         custom profile
       ansible.builtin.shell:
-        cmd: authselect current | tail -n+3 | awk '{ print $2 }'
+        cmd: 'set -o pipefail
+
+          authselect current | tail -n+3 | awk ''{ print $2 }'''
       register: result_authselect_features
       changed_when: false
       check_mode: false
@@ -4795,6 +4933,7 @@
     - name: Set PAM Password Hashing Algorithm - system-auth - Create an authselect custom profile based on the current profile
       ansible.builtin.command:
         cmd: authselect create-profile hardening -b {{ authselect_current_profile }}
+      changed_when: true
       when:
       - result_authselect_profile is not skipped
       - result_authselect_check_cmd is success
@@ -4803,6 +4942,7 @@
     - name: Set PAM Password Hashing Algorithm - system-auth - Create an authselect custom profile based on sssd profile
       ansible.builtin.command:
         cmd: authselect create-profile hardening -b sssd
+      changed_when: true
       when:
       - result_authselect_profile is not skipped
       - result_authselect_check_cmd is success
@@ -4811,6 +4951,7 @@
     - name: Set PAM Password Hashing Algorithm - system-auth - Ensure authselect changes are applied
       ansible.builtin.command:
         cmd: authselect apply-changes -b --backup=before-hardening-custom-profile
+      changed_when: true
       when:
       - result_authselect_check_cmd is success
       - result_authselect_profile is not skipped
@@ -4820,6 +4961,7 @@
       ansible.builtin.command:
         cmd: authselect select {{ authselect_custom_profile }}
       register: result_pam_authselect_select_profile
+      changed_when: true
       when:
       - result_authselect_check_cmd is success
       - result_authselect_profile is not skipped
@@ -4837,6 +4979,7 @@
     - name: Set PAM Password Hashing Algorithm - system-auth - Ensure authselect changes are applied
       ansible.builtin.command:
         cmd: authselect apply-changes -b --backup=after-hardening-custom-profile
+      changed_when: true
       when:
       - result_authselect_check_cmd is success
       - result_authselect_profile is not skipped
@@ -4893,6 +5036,7 @@
     - name: Set PAM Password Hashing Algorithm - system-auth - Ensure authselect changes are applied
       ansible.builtin.command:
         cmd: authselect apply-changes -b
+      changed_when: true
       when:
       - result_authselect_present is defined
       - result_authselect_present.stat.exists
@@ -4930,6 +5074,7 @@
   - name: Set PAM Password Hashing Algorithm - system-auth - Ensure authselect changes are applied
     ansible.builtin.command:
       cmd: authselect apply-changes -b
+    changed_when: true
     when:
     - result_authselect_present.stat.exists
     - "(result_pam_set_password_hashing_algorithm_systemauth_add is defined and result_pam_set_password_hashing_algorithm_systemauth_add.changed)\n\
@@ -5028,7 +5173,9 @@
         - authselect integrity check passed
     - name: Set PAM Password Hashing Algorithm - system-auth - Get authselect current profile
       ansible.builtin.shell:
-        cmd: authselect current -r | awk '{ print $1 }'
+        cmd: 'set -o pipefail
+
+          authselect current -r | awk ''{ print $1 }'''
       register: result_authselect_profile
       changed_when: false
       when:
@@ -5050,7 +5197,9 @@
     - name: Set PAM Password Hashing Algorithm - system-auth - Get authselect current features to also enable them in the
         custom profile
       ansible.builtin.shell:
-        cmd: authselect current | tail -n+3 | awk '{ print $2 }'
+        cmd: 'set -o pipefail
+
+          authselect current | tail -n+3 | awk ''{ print $2 }'''
       register: result_authselect_features
       changed_when: false
       check_mode: false
@@ -5069,6 +5218,7 @@
     - name: Set PAM Password Hashing Algorithm - system-auth - Create an authselect custom profile based on the current profile
       ansible.builtin.command:
         cmd: authselect create-profile hardening -b {{ authselect_current_profile }}
+      changed_when: true
       when:
       - result_authselect_profile is not skipped
       - result_authselect_check_cmd is success
@@ -5077,6 +5227,7 @@
     - name: Set PAM Password Hashing Algorithm - system-auth - Create an authselect custom profile based on sssd profile
       ansible.builtin.command:
         cmd: authselect create-profile hardening -b sssd
+      changed_when: true
       when:
       - result_authselect_profile is not skipped
       - result_authselect_check_cmd is success
@@ -5085,6 +5236,7 @@
     - name: Set PAM Password Hashing Algorithm - system-auth - Ensure authselect changes are applied
       ansible.builtin.command:
         cmd: authselect apply-changes -b --backup=before-hardening-custom-profile
+      changed_when: true
       when:
       - result_authselect_check_cmd is success
       - result_authselect_profile is not skipped
@@ -5094,6 +5246,7 @@
       ansible.builtin.command:
         cmd: authselect select {{ authselect_custom_profile }}
       register: result_pam_authselect_select_profile
+      changed_when: true
       when:
       - result_authselect_check_cmd is success
       - result_authselect_profile is not skipped
@@ -5111,6 +5264,7 @@
     - name: Set PAM Password Hashing Algorithm - system-auth - Ensure authselect changes are applied
       ansible.builtin.command:
         cmd: authselect apply-changes -b --backup=after-hardening-custom-profile
+      changed_when: true
       when:
       - result_authselect_check_cmd is success
       - result_authselect_profile is not skipped
@@ -5148,6 +5302,7 @@
   - name: Set PAM Password Hashing Algorithm - system-auth - Ensure authselect changes are applied
     ansible.builtin.command:
       cmd: authselect apply-changes -b
+    changed_when: true
     when:
     - result_authselect_present.stat.exists
     - result_pam_hashing_options_removal is changed
@@ -5288,7 +5443,9 @@
         - authselect integrity check passed
     - name: Set number of Password Hashing Rounds - password-auth - Get authselect current profile
       ansible.builtin.shell:
-        cmd: authselect current -r | awk '{ print $1 }'
+        cmd: 'set -o pipefail
+
+          authselect current -r | awk ''{ print $1 }'''
       register: result_authselect_profile
       changed_when: false
       when:
@@ -5310,7 +5467,9 @@
     - name: Set number of Password Hashing Rounds - password-auth - Get authselect current features to also enable them in
         the custom profile
       ansible.builtin.shell:
-        cmd: authselect current | tail -n+3 | awk '{ print $2 }'
+        cmd: 'set -o pipefail
+
+          authselect current | tail -n+3 | awk ''{ print $2 }'''
       register: result_authselect_features
       changed_when: false
       check_mode: false
@@ -5330,6 +5489,7 @@
         profile
       ansible.builtin.command:
         cmd: authselect create-profile hardening -b {{ authselect_current_profile }}
+      changed_when: true
       when:
       - result_authselect_profile is not skipped
       - result_authselect_check_cmd is success
@@ -5338,6 +5498,7 @@
     - name: Set number of Password Hashing Rounds - password-auth - Create an authselect custom profile based on sssd profile
       ansible.builtin.command:
         cmd: authselect create-profile hardening -b sssd
+      changed_when: true
       when:
       - result_authselect_profile is not skipped
       - result_authselect_check_cmd is success
@@ -5346,6 +5507,7 @@
     - name: Set number of Password Hashing Rounds - password-auth - Ensure authselect changes are applied
       ansible.builtin.command:
         cmd: authselect apply-changes -b --backup=before-hardening-custom-profile
+      changed_when: true
       when:
       - result_authselect_check_cmd is success
       - result_authselect_profile is not skipped
@@ -5355,6 +5517,7 @@
       ansible.builtin.command:
         cmd: authselect select {{ authselect_custom_profile }}
       register: result_pam_authselect_select_profile
+      changed_when: true
       when:
       - result_authselect_check_cmd is success
       - result_authselect_profile is not skipped
@@ -5372,6 +5535,7 @@
     - name: Set number of Password Hashing Rounds - password-auth - Ensure authselect changes are applied
       ansible.builtin.command:
         cmd: authselect apply-changes -b --backup=after-hardening-custom-profile
+      changed_when: true
       when:
       - result_authselect_check_cmd is success
       - result_authselect_profile is not skipped
@@ -5429,6 +5593,7 @@
     - name: Set number of Password Hashing Rounds - password-auth - Ensure authselect changes are applied
       ansible.builtin.command:
         cmd: authselect apply-changes -b
+      changed_when: true
       when:
       - result_authselect_present is defined
       - result_authselect_present.stat.exists
@@ -5475,6 +5640,7 @@
   - name: Set number of Password Hashing Rounds - password-auth - Ensure authselect changes are applied
     ansible.builtin.command:
       cmd: authselect apply-changes -b
+    changed_when: true
     when:
     - result_authselect_present.stat.exists
     - "(result_pam_accounts_password_pam_unix_rounds_password_auth_add is defined and result_pam_accounts_password_pam_unix_rounds_password_auth_add.changed)\n\
@@ -5556,7 +5722,9 @@
         - authselect integrity check passed
     - name: Set number of Password Hashing Rounds - system-auth - Get authselect current profile
       ansible.builtin.shell:
-        cmd: authselect current -r | awk '{ print $1 }'
+        cmd: 'set -o pipefail
+
+          authselect current -r | awk ''{ print $1 }'''
       register: result_authselect_profile
       changed_when: false
       when:
@@ -5578,7 +5746,9 @@
     - name: Set number of Password Hashing Rounds - system-auth - Get authselect current features to also enable them in the
         custom profile
       ansible.builtin.shell:
-        cmd: authselect current | tail -n+3 | awk '{ print $2 }'
+        cmd: 'set -o pipefail
+
+          authselect current | tail -n+3 | awk ''{ print $2 }'''
       register: result_authselect_features
       changed_when: false
       check_mode: false
@@ -5598,6 +5768,7 @@
         profile
       ansible.builtin.command:
         cmd: authselect create-profile hardening -b {{ authselect_current_profile }}
+      changed_when: true
       when:
       - result_authselect_profile is not skipped
       - result_authselect_check_cmd is success
@@ -5606,6 +5777,7 @@
     - name: Set number of Password Hashing Rounds - system-auth - Create an authselect custom profile based on sssd profile
       ansible.builtin.command:
         cmd: authselect create-profile hardening -b sssd
+      changed_when: true
       when:
       - result_authselect_profile is not skipped
       - result_authselect_check_cmd is success
@@ -5614,6 +5786,7 @@
     - name: Set number of Password Hashing Rounds - system-auth - Ensure authselect changes are applied
       ansible.builtin.command:
         cmd: authselect apply-changes -b --backup=before-hardening-custom-profile
+      changed_when: true
       when:
       - result_authselect_check_cmd is success
       - result_authselect_profile is not skipped
@@ -5623,6 +5796,7 @@
       ansible.builtin.command:
         cmd: authselect select {{ authselect_custom_profile }}
       register: result_pam_authselect_select_profile
+      changed_when: true
       when:
       - result_authselect_check_cmd is success
       - result_authselect_profile is not skipped
@@ -5640,6 +5814,7 @@
     - name: Set number of Password Hashing Rounds - system-auth - Ensure authselect changes are applied
       ansible.builtin.command:
         cmd: authselect apply-changes -b --backup=after-hardening-custom-profile
+      changed_when: true
       when:
       - result_authselect_check_cmd is success
       - result_authselect_profile is not skipped
@@ -5697,6 +5872,7 @@
     - name: Set number of Password Hashing Rounds - system-auth - Ensure authselect changes are applied
       ansible.builtin.command:
         cmd: authselect apply-changes -b
+      changed_when: true
       when:
       - result_authselect_present is defined
       - result_authselect_present.stat.exists
@@ -5743,6 +5919,7 @@
   - name: Set number of Password Hashing Rounds - system-auth - Ensure authselect changes are applied
     ansible.builtin.command:
       cmd: authselect apply-changes -b
+    changed_when: true
     when:
     - result_authselect_present.stat.exists
     - "(result_pam_accounts_password_pam_unix_rounds_system_auth_add is defined and result_pam_accounts_password_pam_unix_rounds_system_auth_add.changed)\n\

@@ -887,24 +887,23 @@
 
 - name: Disable Bluetooth Service - Disable service bluetooth
   block:
-  - name: Disable Bluetooth Service - Collect systemd Services Present in the System
-    ansible.builtin.command: systemctl -q list-unit-files --type service
-    register: service_exists
-    changed_when: false
-    failed_when: service_exists.rc not in [0, 1]
-    check_mode: false
   - name: Disable Bluetooth Service - Ensure bluetooth.service is Masked
     ansible.builtin.systemd:
       name: bluetooth.service
       state: stopped
       enabled: false
       masked: true
-    when: service_exists.stdout_lines is search("bluetooth.service", multiline=True)
+    when: '"bluetooth.service" in ansible_facts.services'
   - name: Unit Socket Exists - bluetooth.socket
-    ansible.builtin.command: systemctl -q list-unit-files bluetooth.socket
+    ansible.builtin.find:
+      paths:
+      - /etc/systemd/system
+      - /run/systemd/system
+      - /usr/lib/systemd/system
+      - /usr/local/lib/systemd/system
+      patterns: bluetooth.socket
+      file_type: any
     register: socket_file_exists
-    changed_when: false
-    failed_when: socket_file_exists.rc not in [0, 1]
     check_mode: false
   - name: Disable Bluetooth Service - Disable Socket bluetooth
     ansible.builtin.systemd:
@@ -912,7 +911,7 @@
       enabled: false
       state: stopped
       masked: true
-    when: socket_file_exists.stdout_lines is search("bluetooth.socket", multiline=True)
+    when: socket_file_exists.matched > 0
   tags:
   - CCE-90381-5
   - NIST-800-171-3.1.16
@@ -941,24 +940,23 @@
 
 - name: Disable the Automounter - Disable service autofs
   block:
-  - name: Disable the Automounter - Collect systemd Services Present in the System
-    ansible.builtin.command: systemctl -q list-unit-files --type service
-    register: service_exists
-    changed_when: false
-    failed_when: service_exists.rc not in [0, 1]
-    check_mode: false
   - name: Disable the Automounter - Ensure autofs.service is Masked
     ansible.builtin.systemd:
       name: autofs.service
       state: stopped
       enabled: false
       masked: true
-    when: service_exists.stdout_lines is search("autofs.service", multiline=True)
+    when: '"autofs.service" in ansible_facts.services'
   - name: Unit Socket Exists - autofs.socket
-    ansible.builtin.command: systemctl -q list-unit-files autofs.socket
+    ansible.builtin.find:
+      paths:
+      - /etc/systemd/system
+      - /run/systemd/system
+      - /usr/lib/systemd/system
+      - /usr/local/lib/systemd/system
+      patterns: autofs.socket
+      file_type: any
     register: socket_file_exists
-    changed_when: false
-    failed_when: socket_file_exists.rc not in [0, 1]
     check_mode: false
   - name: Disable the Automounter - Disable Socket autofs
     ansible.builtin.systemd:
@@ -966,7 +964,7 @@
       enabled: false
       state: stopped
       masked: true
-    when: socket_file_exists.stdout_lines is search("autofs.socket", multiline=True)
+    when: socket_file_exists.matched > 0
   tags:
   - CCE-88947-7
   - DISA-STIG-RHEL-10-701210
@@ -995,24 +993,23 @@
 
 - name: Disable Avahi Server Software - Disable service avahi-daemon
   block:
-  - name: Disable Avahi Server Software - Collect systemd Services Present in the System
-    ansible.builtin.command: systemctl -q list-unit-files --type service
-    register: service_exists
-    changed_when: false
-    failed_when: service_exists.rc not in [0, 1]
-    check_mode: false
   - name: Disable Avahi Server Software - Ensure avahi-daemon.service is Masked
     ansible.builtin.systemd:
       name: avahi-daemon.service
       state: stopped
       enabled: false
       masked: true
-    when: service_exists.stdout_lines is search("avahi-daemon.service", multiline=True)
+    when: '"avahi-daemon.service" in ansible_facts.services'
   - name: Unit Socket Exists - avahi-daemon.socket
-    ansible.builtin.command: systemctl -q list-unit-files avahi-daemon.socket
+    ansible.builtin.find:
+      paths:
+      - /etc/systemd/system
+      - /run/systemd/system
+      - /usr/lib/systemd/system
+      - /usr/local/lib/systemd/system
+      patterns: avahi-daemon.socket
+      file_type: any
     register: socket_file_exists
-    changed_when: false
-    failed_when: socket_file_exists.rc not in [0, 1]
     check_mode: false
   - name: Disable Avahi Server Software - Disable Socket avahi-daemon
     ansible.builtin.systemd:
@@ -1020,7 +1017,7 @@
       enabled: false
       state: stopped
       masked: true
-    when: socket_file_exists.stdout_lines is search("avahi-daemon.socket", multiline=True)
+    when: socket_file_exists.matched > 0
   tags:
   - CCE-90062-1
   - NIST-800-53-CM-6(a)
@@ -1077,24 +1074,23 @@
 
 - name: Disable dnsmasq Service - Disable service dnsmasq
   block:
-  - name: Disable dnsmasq Service - Collect systemd Services Present in the System
-    ansible.builtin.command: systemctl -q list-unit-files --type service
-    register: service_exists
-    changed_when: false
-    failed_when: service_exists.rc not in [0, 1]
-    check_mode: false
   - name: Disable dnsmasq Service - Ensure dnsmasq.service is Masked
     ansible.builtin.systemd:
       name: dnsmasq.service
       state: stopped
       enabled: false
       masked: true
-    when: service_exists.stdout_lines is search("dnsmasq.service", multiline=True)
+    when: '"dnsmasq.service" in ansible_facts.services'
   - name: Unit Socket Exists - dnsmasq.socket
-    ansible.builtin.command: systemctl -q list-unit-files dnsmasq.socket
+    ansible.builtin.find:
+      paths:
+      - /etc/systemd/system
+      - /run/systemd/system
+      - /usr/lib/systemd/system
+      - /usr/local/lib/systemd/system
+      patterns: dnsmasq.socket
+      file_type: any
     register: socket_file_exists
-    changed_when: false
-    failed_when: socket_file_exists.rc not in [0, 1]
     check_mode: false
   - name: Disable dnsmasq Service - Disable Socket dnsmasq
     ansible.builtin.systemd:
@@ -1102,7 +1098,7 @@
       enabled: false
       state: stopped
       masked: true
-    when: socket_file_exists.stdout_lines is search("dnsmasq.socket", multiline=True)
+    when: socket_file_exists.matched > 0
   tags:
   - CCE-90722-0
   - disable_strategy
@@ -1124,24 +1120,23 @@
 
 - name: Disable rpcbind Service - Disable service rpcbind
   block:
-  - name: Disable rpcbind Service - Collect systemd Services Present in the System
-    ansible.builtin.command: systemctl -q list-unit-files --type service
-    register: service_exists
-    changed_when: false
-    failed_when: service_exists.rc not in [0, 1]
-    check_mode: false
   - name: Disable rpcbind Service - Ensure rpcbind.service is Masked
     ansible.builtin.systemd:
       name: rpcbind.service
       state: stopped
       enabled: false
       masked: true
-    when: service_exists.stdout_lines is search("rpcbind.service", multiline=True)
+    when: '"rpcbind.service" in ansible_facts.services'
   - name: Unit Socket Exists - rpcbind.socket
-    ansible.builtin.command: systemctl -q list-unit-files rpcbind.socket
+    ansible.builtin.find:
+      paths:
+      - /etc/systemd/system
+      - /run/systemd/system
+      - /usr/lib/systemd/system
+      - /usr/local/lib/systemd/system
+      patterns: rpcbind.socket
+      file_type: any
     register: socket_file_exists
-    changed_when: false
-    failed_when: socket_file_exists.rc not in [0, 1]
     check_mode: false
   - name: Disable rpcbind Service - Disable Socket rpcbind
     ansible.builtin.systemd:
@@ -1149,7 +1144,7 @@
       enabled: false
       state: stopped
       masked: true
-    when: socket_file_exists.stdout_lines is search("rpcbind.socket", multiline=True)
+    when: socket_file_exists.matched > 0
   tags:
   - CCE-88459-3
   - PCI-DSSv4-2.2
@@ -1173,24 +1168,23 @@
 
 - name: Disable Network File System (nfs) - Disable service nfs-server
   block:
-  - name: Disable Network File System (nfs) - Collect systemd Services Present in the System
-    ansible.builtin.command: systemctl -q list-unit-files --type service
-    register: service_exists
-    changed_when: false
-    failed_when: service_exists.rc not in [0, 1]
-    check_mode: false
   - name: Disable Network File System (nfs) - Ensure nfs-server.service is Masked
     ansible.builtin.systemd:
       name: nfs-server.service
       state: stopped
       enabled: false
       masked: true
-    when: service_exists.stdout_lines is search("nfs-server.service", multiline=True)
+    when: '"nfs-server.service" in ansible_facts.services'
   - name: Unit Socket Exists - nfs-server.socket
-    ansible.builtin.command: systemctl -q list-unit-files nfs-server.socket
+    ansible.builtin.find:
+      paths:
+      - /etc/systemd/system
+      - /run/systemd/system
+      - /usr/lib/systemd/system
+      - /usr/local/lib/systemd/system
+      patterns: nfs-server.socket
+      file_type: any
     register: socket_file_exists
-    changed_when: false
-    failed_when: socket_file_exists.rc not in [0, 1]
     check_mode: false
   - name: Disable Network File System (nfs) - Disable Socket nfs-server
     ansible.builtin.systemd:
@@ -1198,7 +1192,7 @@
       enabled: false
       state: stopped
       masked: true
-    when: socket_file_exists.stdout_lines is search("nfs-server.socket", multiline=True)
+    when: socket_file_exists.matched > 0
   tags:
   - CCE-88764-6
   - NIST-800-53-CM-6(a)
@@ -1223,24 +1217,23 @@
 
 - name: Disable the CUPS Service - Disable service cups
   block:
-  - name: Disable the CUPS Service - Collect systemd Services Present in the System
-    ansible.builtin.command: systemctl -q list-unit-files --type service
-    register: service_exists
-    changed_when: false
-    failed_when: service_exists.rc not in [0, 1]
-    check_mode: false
   - name: Disable the CUPS Service - Ensure cups.service is Masked
     ansible.builtin.systemd:
       name: cups.service
       state: stopped
       enabled: false
       masked: true
-    when: service_exists.stdout_lines is search("cups.service", multiline=True)
+    when: '"cups.service" in ansible_facts.services'
   - name: Unit Socket Exists - cups.socket
-    ansible.builtin.command: systemctl -q list-unit-files cups.socket
+    ansible.builtin.find:
+      paths:
+      - /etc/systemd/system
+      - /run/systemd/system
+      - /usr/lib/systemd/system
+      - /usr/local/lib/systemd/system
+      patterns: cups.socket
+      file_type: any
     register: socket_file_exists
-    changed_when: false
-    failed_when: socket_file_exists.rc not in [0, 1]
     check_mode: false
   - name: Disable the CUPS Service - Disable Socket cups
     ansible.builtin.systemd:
@@ -1248,7 +1241,7 @@
       enabled: false
       state: stopped
       masked: true
-    when: socket_file_exists.stdout_lines is search("cups.socket", multiline=True)
+    when: socket_file_exists.matched > 0
   tags:
   - CCE-86174-0
   - NIST-800-53-CM-6(a)
@@ -1702,6 +1695,7 @@
 
 - name: Implement Custom Crypto Policy Modules for CIS Benchmark - Update crypto-policies
   ansible.builtin.command: update-crypto-policies --set {{ expected_crypto_policy }}
+  changed_when: true
   when:
   - configure_custom_crypto_policy_cis | bool
   - configure_strategy | bool
@@ -1777,6 +1771,7 @@
 - name: Make sure that the dconf databases are up-to-date with regards to respective keyfiles - Run dconf update for distro
   ansible.builtin.command:
     cmd: dconf update
+  changed_when: true
   when:
   - DISA_STIG_RHEL_10_700800 | bool
   - dconf_db_up_to_date | bool
@@ -1860,6 +1855,7 @@
 - name: Make sure that the dconf databases are up-to-date with regards to respective keyfiles - Run dconf update for local
   ansible.builtin.command:
     cmd: dconf update
+  changed_when: true
   when:
   - DISA_STIG_RHEL_10_700800 | bool
   - dconf_db_up_to_date | bool
@@ -1947,6 +1943,7 @@
 
 - name: Dconf Update
   ansible.builtin.command: dconf update
+  changed_when: true
   when:
   - DISA_STIG_RHEL_10_700840 | bool
   - dconf_gnome_disable_user_list | bool
@@ -2035,6 +2032,7 @@
 
 - name: Dconf Update
   ansible.builtin.command: dconf update
+  changed_when: true
   when:
   - dconf_gnome_disable_automount | bool
   - low_complexity | bool
@@ -2133,6 +2131,7 @@
 
 - name: Dconf Update
   ansible.builtin.command: dconf update
+  changed_when: true
   when:
   - DISA_STIG_RHEL_10_700700 | bool
   - DISA_STIG_RHEL_10_700880 | bool
@@ -2231,6 +2230,7 @@
 
 - name: Dconf Update
   ansible.builtin.command: dconf update
+  changed_when: true
   when:
   - DISA_STIG_RHEL_10_700710 | bool
   - DISA_STIG_RHEL_10_700890 | bool
@@ -2295,6 +2295,7 @@
 
 - name: Dconf Update
   ansible.builtin.command: dconf update
+  changed_when: true
   when:
   - DISA_STIG_RHEL_10_700750 | bool
   - dconf_gnome_screensaver_idle_delay | bool
@@ -2359,6 +2360,7 @@
 
 - name: Dconf Update
   ansible.builtin.command: dconf update
+  changed_when: true
   when:
   - DISA_STIG_RHEL_10_700770 | bool
   - dconf_gnome_screensaver_lock_delay | bool
@@ -2416,6 +2418,7 @@
 
 - name: Dconf Update
   ansible.builtin.command: dconf update
+  changed_when: true
   when:
   - DISA_STIG_RHEL_10_700780 | bool
   - dconf_gnome_screensaver_user_locks | bool
@@ -2472,6 +2475,7 @@
 
 - name: Dconf Update
   ansible.builtin.command: dconf update
+  changed_when: true
   when:
   - DISA_STIG_RHEL_10_700760 | bool
   - dconf_gnome_session_idle_user_locks | bool
@@ -3066,7 +3070,9 @@
   - restrict_strategy
 
 - name: 'Ensure Red Hat GPG Key Installed: Import RedHat GPG key'
-  ansible.builtin.command: rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
+  ansible.builtin.rpm_key:
+    state: present
+    key: /etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
   when:
   - DISA_STIG_RHEL_10_001020 | bool
   - ensure_redhat_gpgkey_installed | bool
@@ -3736,6 +3742,7 @@
 
 - name: Dconf Update
   ansible.builtin.command: dconf update
+  changed_when: true
   when:
   - DISA_STIG_RHEL_10_700030 | bool
   - dconf_gnome_banner_enabled | bool
@@ -3889,6 +3896,7 @@
 
 - name: Dconf Update
   ansible.builtin.command: dconf update
+  changed_when: true
   when:
   - DISA_STIG_RHEL_10_700020 | bool
   - dconf_gnome_login_banner_text | bool
@@ -3968,7 +3976,9 @@
 
 - name: Ensure Active Authselect Profile Includes PAM Modules - Get authselect current profile
   ansible.builtin.shell:
-    cmd: authselect current -r | awk '{ print $1 }'
+    cmd: 'set -o pipefail
+
+      authselect current -r | awk ''{ print $1 }'''
   register: result_authselect_profile
   changed_when: false
   when:
@@ -4038,7 +4048,9 @@
 - name: Ensure Active Authselect Profile Includes PAM Modules - Get authselect current features to also enable them in the
     custom profile
   ansible.builtin.shell:
-    cmd: authselect current | tail -n+3 | awk '{ print $2 }'
+    cmd: 'set -o pipefail
+
+      authselect current | tail -n+3 | awk ''{ print $2 }'''
   register: result_authselect_features
   changed_when: false
   check_mode: false
@@ -4089,6 +4101,7 @@
 - name: Ensure Active Authselect Profile Includes PAM Modules - Create an authselect custom profile based on the current profile
   ansible.builtin.command:
     cmd: authselect create-profile hardening -b {{ authselect_current_profile }}
+  changed_when: true
   when:
   - accounts_password_pam_modules_in_authselect_profile | bool
   - low_complexity | bool
@@ -4113,6 +4126,7 @@
 - name: Ensure Active Authselect Profile Includes PAM Modules - Create an authselect custom profile based on sssd profile
   ansible.builtin.command:
     cmd: authselect create-profile hardening -b sssd
+  changed_when: true
   when:
   - accounts_password_pam_modules_in_authselect_profile | bool
   - low_complexity | bool
@@ -4137,6 +4151,7 @@
 - name: Ensure Active Authselect Profile Includes PAM Modules - Ensure authselect changes are applied
   ansible.builtin.command:
     cmd: authselect apply-changes -b --backup=before-hardening-custom-profile
+  changed_when: true
   when:
   - accounts_password_pam_modules_in_authselect_profile | bool
   - low_complexity | bool
@@ -4162,6 +4177,7 @@
   ansible.builtin.command:
     cmd: authselect select {{ authselect_custom_profile }}
   register: result_pam_authselect_select_profile
+  changed_when: true
   when:
   - accounts_password_pam_modules_in_authselect_profile | bool
   - low_complexity | bool
@@ -4211,6 +4227,7 @@
 - name: Ensure Active Authselect Profile Includes PAM Modules - Ensure authselect changes are applied
   ansible.builtin.command:
     cmd: authselect apply-changes -b --backup=after-hardening-custom-profile
+  changed_when: true
   when:
   - accounts_password_pam_modules_in_authselect_profile | bool
   - low_complexity | bool
@@ -4500,6 +4517,7 @@
 - name: Ensure Active Authselect Profile Includes PAM Modules - Ensure authselect changes are applied
   ansible.builtin.command:
     cmd: authselect apply-changes -b
+  changed_when: true
   when:
   - accounts_password_pam_modules_in_authselect_profile | bool
   - low_complexity | bool
@@ -4548,6 +4566,7 @@
     profile
   ansible.builtin.command:
     cmd: authselect select {{ authselect_current_profile.stdout }} --force
+  changed_when: true
   when:
   - DISA_STIG_RHEL_10_600610 | bool
   - account_password_pam_faillock_password_auth | bool
@@ -4619,7 +4638,9 @@
       - authselect integrity check passed
   - name: Configure the Use of the pam_faillock.so Module in the /etc/pam.d/password-auth File. - Get authselect current features
     ansible.builtin.shell:
-      cmd: authselect current | tail -n+3 | awk '{ print $2 }'
+      cmd: 'set -o pipefail
+
+        authselect current | tail -n+3 | awk ''{ print $2 }'''
     register: result_authselect_features
     changed_when: false
     check_mode: false
@@ -4630,6 +4651,7 @@
     ansible.builtin.command:
       cmd: authselect enable-feature with-faillock
     register: result_authselect_enable_feature_cmd
+    changed_when: true
     when:
     - result_authselect_check_cmd is success
     - result_authselect_features.stdout is not search("with-faillock")
@@ -4637,6 +4659,7 @@
       are applied
     ansible.builtin.command:
       cmd: authselect apply-changes -b
+    changed_when: true
     when:
     - result_authselect_enable_feature_cmd is not skipped
     - result_authselect_enable_feature_cmd is success
@@ -4781,7 +4804,9 @@
       - authselect integrity check passed
   - name: Configure the Use of the pam_faillock.so Module in the /etc/pam.d/system-auth File. - Get authselect current features
     ansible.builtin.shell:
-      cmd: authselect current | tail -n+3 | awk '{ print $2 }'
+      cmd: 'set -o pipefail
+
+        authselect current | tail -n+3 | awk ''{ print $2 }'''
     register: result_authselect_features
     changed_when: false
     check_mode: false
@@ -4792,6 +4817,7 @@
     ansible.builtin.command:
       cmd: authselect enable-feature with-faillock
     register: result_authselect_enable_feature_cmd
+    changed_when: true
     when:
     - result_authselect_check_cmd is success
     - result_authselect_features.stdout is not search("with-faillock")
@@ -4799,6 +4825,7 @@
       are applied
     ansible.builtin.command:
       cmd: authselect apply-changes -b
+    changed_when: true
     when:
     - result_authselect_enable_feature_cmd is not skipped
     - result_authselect_enable_feature_cmd is success
@@ -4897,6 +4924,7 @@
     path: /etc/security/pwhistory.conf
     create: true
     regexp: ''
+    mode: '0644'
     line: enforce_for_root
     state: present
   when:
@@ -5001,7 +5029,9 @@
       - authselect integrity check passed
   - name: 'Limit Password Reuse: password-auth - Get authselect current features'
     ansible.builtin.shell:
-      cmd: authselect current | tail -n+3 | awk '{ print $2 }'
+      cmd: 'set -o pipefail
+
+        authselect current | tail -n+3 | awk ''{ print $2 }'''
     register: result_authselect_features
     changed_when: false
     check_mode: false
@@ -5011,12 +5041,14 @@
     ansible.builtin.command:
       cmd: authselect enable-feature with-pwhistory
     register: result_authselect_enable_feature_cmd
+    changed_when: true
     when:
     - result_authselect_check_cmd is success
     - result_authselect_features.stdout is not search("with-pwhistory")
   - name: 'Limit Password Reuse: password-auth - Ensure authselect changes are applied'
     ansible.builtin.command:
       cmd: authselect apply-changes -b
+    changed_when: true
     when:
     - result_authselect_enable_feature_cmd is not skipped
     - result_authselect_enable_feature_cmd is success
@@ -5079,7 +5111,9 @@
         - authselect integrity check passed
     - name: 'Limit Password Reuse: password-auth - Get authselect current profile'
       ansible.builtin.shell:
-        cmd: authselect current -r | awk '{ print $1 }'
+        cmd: 'set -o pipefail
+
+          authselect current -r | awk ''{ print $1 }'''
       register: result_authselect_profile
       changed_when: false
       when:
@@ -5100,7 +5134,9 @@
       - result_authselect_profile.stdout is not match("custom/")
     - name: 'Limit Password Reuse: password-auth - Get authselect current features to also enable them in the custom profile'
       ansible.builtin.shell:
-        cmd: authselect current | tail -n+3 | awk '{ print $2 }'
+        cmd: 'set -o pipefail
+
+          authselect current | tail -n+3 | awk ''{ print $2 }'''
       register: result_authselect_features
       changed_when: false
       check_mode: false
@@ -5118,6 +5154,7 @@
     - name: 'Limit Password Reuse: password-auth - Create an authselect custom profile based on the current profile'
       ansible.builtin.command:
         cmd: authselect create-profile hardening -b {{ authselect_current_profile }}
+      changed_when: true
       when:
       - result_authselect_profile is not skipped
       - result_authselect_check_cmd is success
@@ -5126,6 +5163,7 @@
     - name: 'Limit Password Reuse: password-auth - Create an authselect custom profile based on sssd profile'
       ansible.builtin.command:
         cmd: authselect create-profile hardening -b sssd
+      changed_when: true
       when:
       - result_authselect_profile is not skipped
       - result_authselect_check_cmd is success
@@ -5134,6 +5172,7 @@
     - name: 'Limit Password Reuse: password-auth - Ensure authselect changes are applied'
       ansible.builtin.command:
         cmd: authselect apply-changes -b --backup=before-hardening-custom-profile
+      changed_when: true
       when:
       - result_authselect_check_cmd is success
       - result_authselect_profile is not skipped
@@ -5143,6 +5182,7 @@
       ansible.builtin.command:
         cmd: authselect select {{ authselect_custom_profile }}
       register: result_pam_authselect_select_profile
+      changed_when: true
       when:
       - result_authselect_check_cmd is success
       - result_authselect_profile is not skipped
@@ -5160,6 +5200,7 @@
     - name: 'Limit Password Reuse: password-auth - Ensure authselect changes are applied'
       ansible.builtin.command:
         cmd: authselect apply-changes -b --backup=after-hardening-custom-profile
+      changed_when: true
       when:
       - result_authselect_check_cmd is success
       - result_authselect_profile is not skipped
@@ -5213,6 +5254,7 @@
     - name: 'Limit Password Reuse: password-auth - Ensure authselect changes are applied'
       ansible.builtin.command:
         cmd: authselect apply-changes -b
+      changed_when: true
       when:
       - result_authselect_present is defined
       - result_authselect_present.stat.exists
@@ -5327,7 +5369,9 @@
             - authselect integrity check passed
         - name: 'Limit Password Reuse: password-auth - Get authselect current profile'
           ansible.builtin.shell:
-            cmd: authselect current -r | awk '{ print $1 }'
+            cmd: 'set -o pipefail
+
+              authselect current -r | awk ''{ print $1 }'''
           register: result_authselect_profile
           changed_when: false
           when:
@@ -5348,7 +5392,9 @@
           - result_authselect_profile.stdout is not match("custom/")
         - name: 'Limit Password Reuse: password-auth - Get authselect current features to also enable them in the custom profile'
           ansible.builtin.shell:
-            cmd: authselect current | tail -n+3 | awk '{ print $2 }'
+            cmd: 'set -o pipefail
+
+              authselect current | tail -n+3 | awk ''{ print $2 }'''
           register: result_authselect_features
           changed_when: false
           check_mode: false
@@ -5366,6 +5412,7 @@
         - name: 'Limit Password Reuse: password-auth - Create an authselect custom profile based on the current profile'
           ansible.builtin.command:
             cmd: authselect create-profile hardening -b {{ authselect_current_profile }}
+          changed_when: true
           when:
           - result_authselect_profile is not skipped
           - result_authselect_check_cmd is success
@@ -5374,6 +5421,7 @@
         - name: 'Limit Password Reuse: password-auth - Create an authselect custom profile based on sssd profile'
           ansible.builtin.command:
             cmd: authselect create-profile hardening -b sssd
+          changed_when: true
           when:
           - result_authselect_profile is not skipped
           - result_authselect_check_cmd is success
@@ -5382,6 +5430,7 @@
         - name: 'Limit Password Reuse: password-auth - Ensure authselect changes are applied'
           ansible.builtin.command:
             cmd: authselect apply-changes -b --backup=before-hardening-custom-profile
+          changed_when: true
           when:
           - result_authselect_check_cmd is success
           - result_authselect_profile is not skipped
@@ -5391,6 +5440,7 @@
           ansible.builtin.command:
             cmd: authselect select {{ authselect_custom_profile }}
           register: result_pam_authselect_select_profile
+          changed_when: true
           when:
           - result_authselect_check_cmd is success
           - result_authselect_profile is not skipped
@@ -5408,6 +5458,7 @@
         - name: 'Limit Password Reuse: password-auth - Ensure authselect changes are applied'
           ansible.builtin.command:
             cmd: authselect apply-changes -b --backup=after-hardening-custom-profile
+          changed_when: true
           when:
           - result_authselect_check_cmd is success
           - result_authselect_profile is not skipped
@@ -5439,6 +5490,7 @@
       - name: 'Limit Password Reuse: password-auth - Ensure authselect changes are applied'
         ansible.builtin.command:
           cmd: authselect apply-changes -b
+        changed_when: true
         when:
         - result_authselect_present.stat.exists
         - result_pam_option_removal is changed
@@ -5502,7 +5554,9 @@
         - authselect integrity check passed
     - name: 'Limit Password Reuse: password-auth - Get authselect current profile'
       ansible.builtin.shell:
-        cmd: authselect current -r | awk '{ print $1 }'
+        cmd: 'set -o pipefail
+
+          authselect current -r | awk ''{ print $1 }'''
       register: result_authselect_profile
       changed_when: false
       when:
@@ -5523,7 +5577,9 @@
       - result_authselect_profile.stdout is not match("custom/")
     - name: 'Limit Password Reuse: password-auth - Get authselect current features to also enable them in the custom profile'
       ansible.builtin.shell:
-        cmd: authselect current | tail -n+3 | awk '{ print $2 }'
+        cmd: 'set -o pipefail
+
+          authselect current | tail -n+3 | awk ''{ print $2 }'''
       register: result_authselect_features
       changed_when: false
       check_mode: false
@@ -5541,6 +5597,7 @@
     - name: 'Limit Password Reuse: password-auth - Create an authselect custom profile based on the current profile'
       ansible.builtin.command:
         cmd: authselect create-profile hardening -b {{ authselect_current_profile }}
+      changed_when: true
       when:
       - result_authselect_profile is not skipped
       - result_authselect_check_cmd is success
@@ -5549,6 +5606,7 @@
     - name: 'Limit Password Reuse: password-auth - Create an authselect custom profile based on sssd profile'
       ansible.builtin.command:
         cmd: authselect create-profile hardening -b sssd
+      changed_when: true
       when:
       - result_authselect_profile is not skipped
       - result_authselect_check_cmd is success
@@ -5557,6 +5615,7 @@
     - name: 'Limit Password Reuse: password-auth - Ensure authselect changes are applied'
       ansible.builtin.command:
         cmd: authselect apply-changes -b --backup=before-hardening-custom-profile
+      changed_when: true
       when:
       - result_authselect_check_cmd is success
       - result_authselect_profile is not skipped
@@ -5566,6 +5625,7 @@
       ansible.builtin.command:
         cmd: authselect select {{ authselect_custom_profile }}
       register: result_pam_authselect_select_profile
+      changed_when: true
       when:
       - result_authselect_check_cmd is success
       - result_authselect_profile is not skipped
@@ -5583,6 +5643,7 @@
     - name: 'Limit Password Reuse: password-auth - Ensure authselect changes are applied'
       ansible.builtin.command:
         cmd: authselect apply-changes -b --backup=after-hardening-custom-profile
+      changed_when: true
       when:
       - result_authselect_check_cmd is success
       - result_authselect_profile is not skipped
@@ -5635,6 +5696,7 @@
     - name: 'Limit Password Reuse: password-auth - Ensure authselect changes are applied'
       ansible.builtin.command:
         cmd: authselect apply-changes -b
+      changed_when: true
       when:
       - result_authselect_present is defined
       - result_authselect_present.stat.exists
@@ -5679,6 +5741,7 @@
   - name: 'Limit Password Reuse: password-auth - Ensure authselect changes are applied'
     ansible.builtin.command:
       cmd: authselect apply-changes -b
+    changed_when: true
     when:
     - result_authselect_present.stat.exists
     - (result_pam_remember_add is defined and result_pam_remember_add.changed) or (result_pam_remember_edit is defined and
@@ -5793,7 +5856,9 @@
       - authselect integrity check passed
   - name: 'Limit Password Reuse: system-auth - Get authselect current features'
     ansible.builtin.shell:
-      cmd: authselect current | tail -n+3 | awk '{ print $2 }'
+      cmd: 'set -o pipefail
+
+        authselect current | tail -n+3 | awk ''{ print $2 }'''
     register: result_authselect_features
     changed_when: false
     check_mode: false
@@ -5803,12 +5868,14 @@
     ansible.builtin.command:
       cmd: authselect enable-feature with-pwhistory
     register: result_authselect_enable_feature_cmd
+    changed_when: true
     when:
     - result_authselect_check_cmd is success
     - result_authselect_features.stdout is not search("with-pwhistory")
   - name: 'Limit Password Reuse: system-auth - Ensure authselect changes are applied'
     ansible.builtin.command:
       cmd: authselect apply-changes -b
+    changed_when: true
     when:
     - result_authselect_enable_feature_cmd is not skipped
     - result_authselect_enable_feature_cmd is success
@@ -5871,7 +5938,9 @@
         - authselect integrity check passed
     - name: 'Limit Password Reuse: system-auth - Get authselect current profile'
       ansible.builtin.shell:
-        cmd: authselect current -r | awk '{ print $1 }'
+        cmd: 'set -o pipefail
+
+          authselect current -r | awk ''{ print $1 }'''
       register: result_authselect_profile
       changed_when: false
       when:
@@ -5892,7 +5961,9 @@
       - result_authselect_profile.stdout is not match("custom/")
     - name: 'Limit Password Reuse: system-auth - Get authselect current features to also enable them in the custom profile'
       ansible.builtin.shell:
-        cmd: authselect current | tail -n+3 | awk '{ print $2 }'
+        cmd: 'set -o pipefail
+
+          authselect current | tail -n+3 | awk ''{ print $2 }'''
       register: result_authselect_features
       changed_when: false
       check_mode: false
@@ -5910,6 +5981,7 @@
     - name: 'Limit Password Reuse: system-auth - Create an authselect custom profile based on the current profile'
       ansible.builtin.command:
         cmd: authselect create-profile hardening -b {{ authselect_current_profile }}
+      changed_when: true
       when:
       - result_authselect_profile is not skipped
       - result_authselect_check_cmd is success
@@ -5918,6 +5990,7 @@
     - name: 'Limit Password Reuse: system-auth - Create an authselect custom profile based on sssd profile'
       ansible.builtin.command:
         cmd: authselect create-profile hardening -b sssd
+      changed_when: true
       when:
       - result_authselect_profile is not skipped
       - result_authselect_check_cmd is success
@@ -5926,6 +5999,7 @@
     - name: 'Limit Password Reuse: system-auth - Ensure authselect changes are applied'
       ansible.builtin.command:
         cmd: authselect apply-changes -b --backup=before-hardening-custom-profile
+      changed_when: true
       when:
       - result_authselect_check_cmd is success
       - result_authselect_profile is not skipped
@@ -5935,6 +6009,7 @@
       ansible.builtin.command:
         cmd: authselect select {{ authselect_custom_profile }}
       register: result_pam_authselect_select_profile
+      changed_when: true
       when:
       - result_authselect_check_cmd is success
       - result_authselect_profile is not skipped
@@ -5952,6 +6027,7 @@
     - name: 'Limit Password Reuse: system-auth - Ensure authselect changes are applied'
       ansible.builtin.command:
         cmd: authselect apply-changes -b --backup=after-hardening-custom-profile
+      changed_when: true
       when:
       - result_authselect_check_cmd is success
       - result_authselect_profile is not skipped
@@ -6005,6 +6081,7 @@
     - name: 'Limit Password Reuse: system-auth - Ensure authselect changes are applied'
       ansible.builtin.command:
         cmd: authselect apply-changes -b
+      changed_when: true
       when:
       - result_authselect_present is defined
       - result_authselect_present.stat.exists
@@ -6118,7 +6195,9 @@
             - authselect integrity check passed
         - name: 'Limit Password Reuse: system-auth - Get authselect current profile'
           ansible.builtin.shell:
-            cmd: authselect current -r | awk '{ print $1 }'
+            cmd: 'set -o pipefail
+
+              authselect current -r | awk ''{ print $1 }'''
           register: result_authselect_profile
           changed_when: false
           when:
@@ -6139,7 +6218,9 @@
           - result_authselect_profile.stdout is not match("custom/")
         - name: 'Limit Password Reuse: system-auth - Get authselect current features to also enable them in the custom profile'
           ansible.builtin.shell:
-            cmd: authselect current | tail -n+3 | awk '{ print $2 }'
+            cmd: 'set -o pipefail
+
+              authselect current | tail -n+3 | awk ''{ print $2 }'''
           register: result_authselect_features
           changed_when: false
           check_mode: false
@@ -6157,6 +6238,7 @@
         - name: 'Limit Password Reuse: system-auth - Create an authselect custom profile based on the current profile'
           ansible.builtin.command:
             cmd: authselect create-profile hardening -b {{ authselect_current_profile }}
+          changed_when: true
           when:
           - result_authselect_profile is not skipped
           - result_authselect_check_cmd is success
@@ -6165,6 +6247,7 @@
         - name: 'Limit Password Reuse: system-auth - Create an authselect custom profile based on sssd profile'
           ansible.builtin.command:
             cmd: authselect create-profile hardening -b sssd
+          changed_when: true
           when:
           - result_authselect_profile is not skipped
           - result_authselect_check_cmd is success
@@ -6173,6 +6256,7 @@
         - name: 'Limit Password Reuse: system-auth - Ensure authselect changes are applied'
           ansible.builtin.command:
             cmd: authselect apply-changes -b --backup=before-hardening-custom-profile
+          changed_when: true
           when:
           - result_authselect_check_cmd is success
           - result_authselect_profile is not skipped
@@ -6182,6 +6266,7 @@
           ansible.builtin.command:
             cmd: authselect select {{ authselect_custom_profile }}
           register: result_pam_authselect_select_profile
+          changed_when: true
           when:
           - result_authselect_check_cmd is success
           - result_authselect_profile is not skipped
@@ -6199,6 +6284,7 @@
         - name: 'Limit Password Reuse: system-auth - Ensure authselect changes are applied'
           ansible.builtin.command:
             cmd: authselect apply-changes -b --backup=after-hardening-custom-profile
+          changed_when: true
           when:
           - result_authselect_check_cmd is success
           - result_authselect_profile is not skipped
@@ -6229,6 +6315,7 @@
       - name: 'Limit Password Reuse: system-auth - Ensure authselect changes are applied'
         ansible.builtin.command:
           cmd: authselect apply-changes -b
+        changed_when: true
         when:
         - result_authselect_present.stat.exists
         - result_pam_option_removal is changed
@@ -6292,7 +6379,9 @@
         - authselect integrity check passed
     - name: 'Limit Password Reuse: system-auth - Get authselect current profile'
       ansible.builtin.shell:
-        cmd: authselect current -r | awk '{ print $1 }'
+        cmd: 'set -o pipefail
+
+          authselect current -r | awk ''{ print $1 }'''
       register: result_authselect_profile
       changed_when: false
       when:
@@ -6313,7 +6402,9 @@
       - result_authselect_profile.stdout is not match("custom/")
     - name: 'Limit Password Reuse: system-auth - Get authselect current features to also enable them in the custom profile'
       ansible.builtin.shell:
-        cmd: authselect current | tail -n+3 | awk '{ print $2 }'
+        cmd: 'set -o pipefail
+
+          authselect current | tail -n+3 | awk ''{ print $2 }'''
       register: result_authselect_features
       changed_when: false
       check_mode: false
@@ -6331,6 +6422,7 @@
     - name: 'Limit Password Reuse: system-auth - Create an authselect custom profile based on the current profile'
       ansible.builtin.command:
         cmd: authselect create-profile hardening -b {{ authselect_current_profile }}
+      changed_when: true
       when:
       - result_authselect_profile is not skipped
       - result_authselect_check_cmd is success
@@ -6339,6 +6431,7 @@
     - name: 'Limit Password Reuse: system-auth - Create an authselect custom profile based on sssd profile'
       ansible.builtin.command:
         cmd: authselect create-profile hardening -b sssd
+      changed_when: true
       when:
       - result_authselect_profile is not skipped
       - result_authselect_check_cmd is success
@@ -6347,6 +6440,7 @@
     - name: 'Limit Password Reuse: system-auth - Ensure authselect changes are applied'
       ansible.builtin.command:
         cmd: authselect apply-changes -b --backup=before-hardening-custom-profile
+      changed_when: true
       when:
       - result_authselect_check_cmd is success
       - result_authselect_profile is not skipped
@@ -6356,6 +6450,7 @@
       ansible.builtin.command:
         cmd: authselect select {{ authselect_custom_profile }}
       register: result_pam_authselect_select_profile
+      changed_when: true
       when:
       - result_authselect_check_cmd is success
       - result_authselect_profile is not skipped
@@ -6373,6 +6468,7 @@
     - name: 'Limit Password Reuse: system-auth - Ensure authselect changes are applied'
       ansible.builtin.command:
         cmd: authselect apply-changes -b --backup=after-hardening-custom-profile
+      changed_when: true
       when:
       - result_authselect_check_cmd is success
       - result_authselect_profile is not skipped
@@ -6425,6 +6521,7 @@
     - name: 'Limit Password Reuse: system-auth - Ensure authselect changes are applied'
       ansible.builtin.command:
         cmd: authselect apply-changes -b
+      changed_when: true
       when:
       - result_authselect_present is defined
       - result_authselect_present.stat.exists
@@ -6469,6 +6566,7 @@
   - name: 'Limit Password Reuse: system-auth - Ensure authselect changes are applied'
     ansible.builtin.command:
       cmd: authselect apply-changes -b
+    changed_when: true
     when:
     - result_authselect_present.stat.exists
     - (result_pam_remember_add is defined and result_pam_remember_add.changed) or (result_pam_remember_edit is defined and
@@ -6544,7 +6642,9 @@
       - authselect integrity check passed
   - name: Enforce Password History with use_authtok - Get authselect current profile
     ansible.builtin.shell:
-      cmd: authselect current -r | awk '{ print $1 }'
+      cmd: 'set -o pipefail
+
+        authselect current -r | awk ''{ print $1 }'''
     register: result_authselect_profile
     changed_when: false
     when:
@@ -6565,7 +6665,9 @@
     - result_authselect_profile.stdout is not match("custom/")
   - name: Enforce Password History with use_authtok - Get authselect current features to also enable them in the custom profile
     ansible.builtin.shell:
-      cmd: authselect current | tail -n+3 | awk '{ print $2 }'
+      cmd: 'set -o pipefail
+
+        authselect current | tail -n+3 | awk ''{ print $2 }'''
     register: result_authselect_features
     changed_when: false
     check_mode: false
@@ -6583,6 +6685,7 @@
   - name: Enforce Password History with use_authtok - Create an authselect custom profile based on the current profile
     ansible.builtin.command:
       cmd: authselect create-profile hardening -b {{ authselect_current_profile }}
+    changed_when: true
     when:
     - result_authselect_profile is not skipped
     - result_authselect_check_cmd is success
@@ -6591,6 +6694,7 @@
   - name: Enforce Password History with use_authtok - Create an authselect custom profile based on sssd profile
     ansible.builtin.command:
       cmd: authselect create-profile hardening -b sssd
+    changed_when: true
     when:
     - result_authselect_profile is not skipped
     - result_authselect_check_cmd is success
@@ -6599,6 +6703,7 @@
   - name: Enforce Password History with use_authtok - Ensure authselect changes are applied
     ansible.builtin.command:
       cmd: authselect apply-changes -b --backup=before-hardening-custom-profile
+    changed_when: true
     when:
     - result_authselect_check_cmd is success
     - result_authselect_profile is not skipped
@@ -6608,6 +6713,7 @@
     ansible.builtin.command:
       cmd: authselect select {{ authselect_custom_profile }}
     register: result_pam_authselect_select_profile
+    changed_when: true
     when:
     - result_authselect_check_cmd is success
     - result_authselect_profile is not skipped
@@ -6625,6 +6731,7 @@
   - name: Enforce Password History with use_authtok - Ensure authselect changes are applied
     ansible.builtin.command:
       cmd: authselect apply-changes -b --backup=after-hardening-custom-profile
+    changed_when: true
     when:
     - result_authselect_check_cmd is success
     - result_authselect_profile is not skipped
@@ -6650,7 +6757,9 @@
 
 - name: Enforce Password History with use_authtok - Get authselect current profile
   ansible.builtin.shell:
-    cmd: authselect current -r | awk '{ print $1 }'
+    cmd: 'set -o pipefail
+
+      authselect current -r | awk ''{ print $1 }'''
   register: result_authselect_profile
   changed_when: false
   when:
@@ -6815,6 +6924,7 @@
 - name: Enforce Password History with use_authtok - Ensure authselect changes are applied
   ansible.builtin.command:
     cmd: authselect apply-changes -b
+  changed_when: true
   when:
   - accounts_password_pam_pwhistory_use_authtok | bool
   - configure_strategy | bool
@@ -6935,6 +7045,7 @@
   - name: Require use_authtok for pam_unix.so - Ensure authselect changes are applied
     ansible.builtin.command:
       cmd: authselect apply-changes -b
+    changed_when: true
     when:
     - result_authselect_present is defined
     - result_authselect_present.stat.exists
@@ -7110,6 +7221,7 @@
   - name: Require use_authtok for pam_unix.so - Ensure authselect changes are applied
     ansible.builtin.command:
       cmd: authselect apply-changes -b
+    changed_when: true
     when:
     - result_authselect_present is defined
     - result_authselect_present.stat.exists
@@ -7263,7 +7375,9 @@
       - authselect integrity check passed
   - name: Lock Accounts After Failed Password Attempts - Get authselect current features
     ansible.builtin.shell:
-      cmd: authselect current | tail -n+3 | awk '{ print $2 }'
+      cmd: 'set -o pipefail
+
+        authselect current | tail -n+3 | awk ''{ print $2 }'''
     register: result_authselect_features
     changed_when: false
     check_mode: false
@@ -7273,12 +7387,14 @@
     ansible.builtin.command:
       cmd: authselect enable-feature with-faillock
     register: result_authselect_enable_feature_cmd
+    changed_when: true
     when:
     - result_authselect_check_cmd is success
     - result_authselect_features.stdout is not search("with-faillock")
   - name: Lock Accounts After Failed Password Attempts - Ensure authselect changes are applied
     ansible.builtin.command:
       cmd: authselect apply-changes -b
+    changed_when: true
     when:
     - result_authselect_enable_feature_cmd is not skipped
     - result_authselect_enable_feature_cmd is success
@@ -7485,7 +7601,9 @@
           - authselect integrity check passed
       - name: Lock Accounts After Failed Password Attempts - Get authselect current profile
         ansible.builtin.shell:
-          cmd: authselect current -r | awk '{ print $1 }'
+          cmd: 'set -o pipefail
+
+            authselect current -r | awk ''{ print $1 }'''
         register: result_authselect_profile
         changed_when: false
         when:
@@ -7507,7 +7625,9 @@
       - name: Lock Accounts After Failed Password Attempts - Get authselect current features to also enable them in the custom
           profile
         ansible.builtin.shell:
-          cmd: authselect current | tail -n+3 | awk '{ print $2 }'
+          cmd: 'set -o pipefail
+
+            authselect current | tail -n+3 | awk ''{ print $2 }'''
         register: result_authselect_features
         changed_when: false
         check_mode: false
@@ -7525,6 +7645,7 @@
       - name: Lock Accounts After Failed Password Attempts - Create an authselect custom profile based on the current profile
         ansible.builtin.command:
           cmd: authselect create-profile hardening -b {{ authselect_current_profile }}
+        changed_when: true
         when:
         - result_authselect_profile is not skipped
         - result_authselect_check_cmd is success
@@ -7533,6 +7654,7 @@
       - name: Lock Accounts After Failed Password Attempts - Create an authselect custom profile based on sssd profile
         ansible.builtin.command:
           cmd: authselect create-profile hardening -b sssd
+        changed_when: true
         when:
         - result_authselect_profile is not skipped
         - result_authselect_check_cmd is success
@@ -7541,6 +7663,7 @@
       - name: Lock Accounts After Failed Password Attempts - Ensure authselect changes are applied
         ansible.builtin.command:
           cmd: authselect apply-changes -b --backup=before-hardening-custom-profile
+        changed_when: true
         when:
         - result_authselect_check_cmd is success
         - result_authselect_profile is not skipped
@@ -7550,6 +7673,7 @@
         ansible.builtin.command:
           cmd: authselect select {{ authselect_custom_profile }}
         register: result_pam_authselect_select_profile
+        changed_when: true
         when:
         - result_authselect_check_cmd is success
         - result_authselect_profile is not skipped
@@ -7567,6 +7691,7 @@
       - name: Lock Accounts After Failed Password Attempts - Ensure authselect changes are applied
         ansible.builtin.command:
           cmd: authselect apply-changes -b --backup=after-hardening-custom-profile
+        changed_when: true
         when:
         - result_authselect_check_cmd is success
         - result_authselect_profile is not skipped
@@ -7599,6 +7724,7 @@
     - name: Lock Accounts After Failed Password Attempts - Ensure authselect changes are applied
       ansible.builtin.command:
         cmd: authselect apply-changes -b
+      changed_when: true
       when:
       - result_authselect_present.stat.exists
       - result_pam_option_removal is changed
@@ -7641,7 +7767,9 @@
           - authselect integrity check passed
       - name: Lock Accounts After Failed Password Attempts - Get authselect current profile
         ansible.builtin.shell:
-          cmd: authselect current -r | awk '{ print $1 }'
+          cmd: 'set -o pipefail
+
+            authselect current -r | awk ''{ print $1 }'''
         register: result_authselect_profile
         changed_when: false
         when:
@@ -7663,7 +7791,9 @@
       - name: Lock Accounts After Failed Password Attempts - Get authselect current features to also enable them in the custom
           profile
         ansible.builtin.shell:
-          cmd: authselect current | tail -n+3 | awk '{ print $2 }'
+          cmd: 'set -o pipefail
+
+            authselect current | tail -n+3 | awk ''{ print $2 }'''
         register: result_authselect_features
         changed_when: false
         check_mode: false
@@ -7681,6 +7811,7 @@
       - name: Lock Accounts After Failed Password Attempts - Create an authselect custom profile based on the current profile
         ansible.builtin.command:
           cmd: authselect create-profile hardening -b {{ authselect_current_profile }}
+        changed_when: true
         when:
         - result_authselect_profile is not skipped
         - result_authselect_check_cmd is success
@@ -7689,6 +7820,7 @@
       - name: Lock Accounts After Failed Password Attempts - Create an authselect custom profile based on sssd profile
         ansible.builtin.command:
           cmd: authselect create-profile hardening -b sssd
+        changed_when: true
         when:
         - result_authselect_profile is not skipped
         - result_authselect_check_cmd is success
@@ -7697,6 +7829,7 @@
       - name: Lock Accounts After Failed Password Attempts - Ensure authselect changes are applied
         ansible.builtin.command:
           cmd: authselect apply-changes -b --backup=before-hardening-custom-profile
+        changed_when: true
         when:
         - result_authselect_check_cmd is success
         - result_authselect_profile is not skipped
@@ -7706,6 +7839,7 @@
         ansible.builtin.command:
           cmd: authselect select {{ authselect_custom_profile }}
         register: result_pam_authselect_select_profile
+        changed_when: true
         when:
         - result_authselect_check_cmd is success
         - result_authselect_profile is not skipped
@@ -7723,6 +7857,7 @@
       - name: Lock Accounts After Failed Password Attempts - Ensure authselect changes are applied
         ansible.builtin.command:
           cmd: authselect apply-changes -b --backup=after-hardening-custom-profile
+        changed_when: true
         when:
         - result_authselect_check_cmd is success
         - result_authselect_profile is not skipped
@@ -7755,6 +7890,7 @@
     - name: Lock Accounts After Failed Password Attempts - Ensure authselect changes are applied
       ansible.builtin.command:
         cmd: authselect apply-changes -b
+      changed_when: true
       when:
       - result_authselect_present.stat.exists
       - result_pam_option_removal is changed
@@ -7924,7 +8060,9 @@
       - authselect integrity check passed
   - name: Set Lockout Time for Failed Password Attempts - Get authselect current features
     ansible.builtin.shell:
-      cmd: authselect current | tail -n+3 | awk '{ print $2 }'
+      cmd: 'set -o pipefail
+
+        authselect current | tail -n+3 | awk ''{ print $2 }'''
     register: result_authselect_features
     changed_when: false
     check_mode: false
@@ -7934,12 +8072,14 @@
     ansible.builtin.command:
       cmd: authselect enable-feature with-faillock
     register: result_authselect_enable_feature_cmd
+    changed_when: true
     when:
     - result_authselect_check_cmd is success
     - result_authselect_features.stdout is not search("with-faillock")
   - name: Set Lockout Time for Failed Password Attempts - Ensure authselect changes are applied
     ansible.builtin.command:
       cmd: authselect apply-changes -b
+    changed_when: true
     when:
     - result_authselect_enable_feature_cmd is not skipped
     - result_authselect_enable_feature_cmd is success
@@ -8111,7 +8251,9 @@
           - authselect integrity check passed
       - name: Set Lockout Time for Failed Password Attempts - Get authselect current profile
         ansible.builtin.shell:
-          cmd: authselect current -r | awk '{ print $1 }'
+          cmd: 'set -o pipefail
+
+            authselect current -r | awk ''{ print $1 }'''
         register: result_authselect_profile
         changed_when: false
         when:
@@ -8133,7 +8275,9 @@
       - name: Set Lockout Time for Failed Password Attempts - Get authselect current features to also enable them in the custom
           profile
         ansible.builtin.shell:
-          cmd: authselect current | tail -n+3 | awk '{ print $2 }'
+          cmd: 'set -o pipefail
+
+            authselect current | tail -n+3 | awk ''{ print $2 }'''
         register: result_authselect_features
         changed_when: false
         check_mode: false
@@ -8151,6 +8295,7 @@
       - name: Set Lockout Time for Failed Password Attempts - Create an authselect custom profile based on the current profile
         ansible.builtin.command:
           cmd: authselect create-profile hardening -b {{ authselect_current_profile }}
+        changed_when: true
         when:
         - result_authselect_profile is not skipped
         - result_authselect_check_cmd is success
@@ -8159,6 +8304,7 @@
       - name: Set Lockout Time for Failed Password Attempts - Create an authselect custom profile based on sssd profile
         ansible.builtin.command:
           cmd: authselect create-profile hardening -b sssd
+        changed_when: true
         when:
         - result_authselect_profile is not skipped
         - result_authselect_check_cmd is success
@@ -8167,6 +8313,7 @@
       - name: Set Lockout Time for Failed Password Attempts - Ensure authselect changes are applied
         ansible.builtin.command:
           cmd: authselect apply-changes -b --backup=before-hardening-custom-profile
+        changed_when: true
         when:
         - result_authselect_check_cmd is success
         - result_authselect_profile is not skipped
@@ -8176,6 +8323,7 @@
         ansible.builtin.command:
           cmd: authselect select {{ authselect_custom_profile }}
         register: result_pam_authselect_select_profile
+        changed_when: true
         when:
         - result_authselect_check_cmd is success
         - result_authselect_profile is not skipped
@@ -8193,6 +8341,7 @@
       - name: Set Lockout Time for Failed Password Attempts - Ensure authselect changes are applied
         ansible.builtin.command:
           cmd: authselect apply-changes -b --backup=after-hardening-custom-profile
+        changed_when: true
         when:
         - result_authselect_check_cmd is success
         - result_authselect_profile is not skipped
@@ -8225,6 +8374,7 @@
     - name: Set Lockout Time for Failed Password Attempts - Ensure authselect changes are applied
       ansible.builtin.command:
         cmd: authselect apply-changes -b
+      changed_when: true
       when:
       - result_authselect_present.stat.exists
       - result_pam_option_removal is changed
@@ -8268,7 +8418,9 @@
           - authselect integrity check passed
       - name: Set Lockout Time for Failed Password Attempts - Get authselect current profile
         ansible.builtin.shell:
-          cmd: authselect current -r | awk '{ print $1 }'
+          cmd: 'set -o pipefail
+
+            authselect current -r | awk ''{ print $1 }'''
         register: result_authselect_profile
         changed_when: false
         when:
@@ -8290,7 +8442,9 @@
       - name: Set Lockout Time for Failed Password Attempts - Get authselect current features to also enable them in the custom
           profile
         ansible.builtin.shell:
-          cmd: authselect current | tail -n+3 | awk '{ print $2 }'
+          cmd: 'set -o pipefail
+
+            authselect current | tail -n+3 | awk ''{ print $2 }'''
         register: result_authselect_features
         changed_when: false
         check_mode: false
@@ -8308,6 +8462,7 @@
       - name: Set Lockout Time for Failed Password Attempts - Create an authselect custom profile based on the current profile
         ansible.builtin.command:
           cmd: authselect create-profile hardening -b {{ authselect_current_profile }}
+        changed_when: true
         when:
         - result_authselect_profile is not skipped
         - result_authselect_check_cmd is success
@@ -8316,6 +8471,7 @@
       - name: Set Lockout Time for Failed Password Attempts - Create an authselect custom profile based on sssd profile
         ansible.builtin.command:
           cmd: authselect create-profile hardening -b sssd
+        changed_when: true
         when:
         - result_authselect_profile is not skipped
         - result_authselect_check_cmd is success
@@ -8324,6 +8480,7 @@
       - name: Set Lockout Time for Failed Password Attempts - Ensure authselect changes are applied
         ansible.builtin.command:
           cmd: authselect apply-changes -b --backup=before-hardening-custom-profile
+        changed_when: true
         when:
         - result_authselect_check_cmd is success
         - result_authselect_profile is not skipped
@@ -8333,6 +8490,7 @@
         ansible.builtin.command:
           cmd: authselect select {{ authselect_custom_profile }}
         register: result_pam_authselect_select_profile
+        changed_when: true
         when:
         - result_authselect_check_cmd is success
         - result_authselect_profile is not skipped
@@ -8350,6 +8508,7 @@
       - name: Set Lockout Time for Failed Password Attempts - Ensure authselect changes are applied
         ansible.builtin.command:
           cmd: authselect apply-changes -b --backup=after-hardening-custom-profile
+        changed_when: true
         when:
         - result_authselect_check_cmd is success
         - result_authselect_profile is not skipped
@@ -8382,6 +8541,7 @@
     - name: Set Lockout Time for Failed Password Attempts - Ensure authselect changes are applied
       ansible.builtin.command:
         cmd: authselect apply-changes -b
+      changed_when: true
       when:
       - result_authselect_present.stat.exists
       - result_pam_option_removal is changed
@@ -8677,6 +8837,7 @@
     path: /etc/security/pwquality.conf
     create: true
     regexp: ''
+    mode: '0644'
     line: enforce_for_root
     state: present
   when:
@@ -9113,7 +9274,9 @@
         - authselect integrity check passed
     - name: Ensure PAM password complexity module is enabled in password-auth - Get authselect current profile
       ansible.builtin.shell:
-        cmd: authselect current -r | awk '{ print $1 }'
+        cmd: 'set -o pipefail
+
+          authselect current -r | awk ''{ print $1 }'''
       register: result_authselect_profile
       changed_when: false
       when:
@@ -9137,7 +9300,9 @@
     - name: Ensure PAM password complexity module is enabled in password-auth - Get authselect current features to also enable
         them in the custom profile
       ansible.builtin.shell:
-        cmd: authselect current | tail -n+3 | awk '{ print $2 }'
+        cmd: 'set -o pipefail
+
+          authselect current | tail -n+3 | awk ''{ print $2 }'''
       register: result_authselect_features
       changed_when: false
       check_mode: false
@@ -9157,6 +9322,7 @@
         on the current profile
       ansible.builtin.command:
         cmd: authselect create-profile hardening -b {{ authselect_current_profile }}
+      changed_when: true
       when:
       - result_authselect_profile is not skipped
       - result_authselect_check_cmd is success
@@ -9166,6 +9332,7 @@
         on sssd profile
       ansible.builtin.command:
         cmd: authselect create-profile hardening -b sssd
+      changed_when: true
       when:
       - result_authselect_profile is not skipped
       - result_authselect_check_cmd is success
@@ -9174,6 +9341,7 @@
     - name: Ensure PAM password complexity module is enabled in password-auth - Ensure authselect changes are applied
       ansible.builtin.command:
         cmd: authselect apply-changes -b --backup=before-hardening-custom-profile
+      changed_when: true
       when:
       - result_authselect_check_cmd is success
       - result_authselect_profile is not skipped
@@ -9183,6 +9351,7 @@
       ansible.builtin.command:
         cmd: authselect select {{ authselect_custom_profile }}
       register: result_pam_authselect_select_profile
+      changed_when: true
       when:
       - result_authselect_check_cmd is success
       - result_authselect_profile is not skipped
@@ -9201,6 +9370,7 @@
     - name: Ensure PAM password complexity module is enabled in password-auth - Ensure authselect changes are applied
       ansible.builtin.command:
         cmd: authselect apply-changes -b --backup=after-hardening-custom-profile
+      changed_when: true
       when:
       - result_authselect_check_cmd is success
       - result_authselect_profile is not skipped
@@ -9259,6 +9429,7 @@
     - name: Ensure PAM password complexity module is enabled in password-auth - Ensure authselect changes are applied
       ansible.builtin.command:
         cmd: authselect apply-changes -b
+      changed_when: true
       when:
       - result_authselect_present is defined
       - result_authselect_present.stat.exists
@@ -9270,6 +9441,7 @@
   - name: Ensure PAM password complexity module is enabled in password-auth - Ensure authselect changes are applied
     ansible.builtin.command:
       cmd: authselect apply-changes -b
+    changed_when: true
     when:
     - result_authselect_present.stat.exists
     - "(result_pam_accounts_password_pam_pwquality_password_auth_add is defined and result_pam_accounts_password_pam_pwquality_password_auth_add.changed)\n\
@@ -9353,7 +9525,9 @@
         - authselect integrity check passed
     - name: Ensure PAM password complexity module is enabled in system-auth - Get authselect current profile
       ansible.builtin.shell:
-        cmd: authselect current -r | awk '{ print $1 }'
+        cmd: 'set -o pipefail
+
+          authselect current -r | awk ''{ print $1 }'''
       register: result_authselect_profile
       changed_when: false
       when:
@@ -9377,7 +9551,9 @@
     - name: Ensure PAM password complexity module is enabled in system-auth - Get authselect current features to also enable
         them in the custom profile
       ansible.builtin.shell:
-        cmd: authselect current | tail -n+3 | awk '{ print $2 }'
+        cmd: 'set -o pipefail
+
+          authselect current | tail -n+3 | awk ''{ print $2 }'''
       register: result_authselect_features
       changed_when: false
       check_mode: false
@@ -9397,6 +9573,7 @@
         the current profile
       ansible.builtin.command:
         cmd: authselect create-profile hardening -b {{ authselect_current_profile }}
+      changed_when: true
       when:
       - result_authselect_profile is not skipped
       - result_authselect_check_cmd is success
@@ -9406,6 +9583,7 @@
         sssd profile
       ansible.builtin.command:
         cmd: authselect create-profile hardening -b sssd
+      changed_when: true
       when:
       - result_authselect_profile is not skipped
       - result_authselect_check_cmd is success
@@ -9414,6 +9592,7 @@
     - name: Ensure PAM password complexity module is enabled in system-auth - Ensure authselect changes are applied
       ansible.builtin.command:
         cmd: authselect apply-changes -b --backup=before-hardening-custom-profile
+      changed_when: true
       when:
       - result_authselect_check_cmd is success
       - result_authselect_profile is not skipped
@@ -9423,6 +9602,7 @@
       ansible.builtin.command:
         cmd: authselect select {{ authselect_custom_profile }}
       register: result_pam_authselect_select_profile
+      changed_when: true
       when:
       - result_authselect_check_cmd is success
       - result_authselect_profile is not skipped
@@ -9441,6 +9621,7 @@
     - name: Ensure PAM password complexity module is enabled in system-auth - Ensure authselect changes are applied
       ansible.builtin.command:
         cmd: authselect apply-changes -b --backup=after-hardening-custom-profile
+      changed_when: true
       when:
       - result_authselect_check_cmd is success
       - result_authselect_profile is not skipped
@@ -9499,6 +9680,7 @@
     - name: Ensure PAM password complexity module is enabled in system-auth - Ensure authselect changes are applied
       ansible.builtin.command:
         cmd: authselect apply-changes -b
+      changed_when: true
       when:
       - result_authselect_present is defined
       - result_authselect_present.stat.exists
@@ -9510,6 +9692,7 @@
   - name: Ensure PAM password complexity module is enabled in system-auth - Ensure authselect changes are applied
     ansible.builtin.command:
       cmd: authselect apply-changes -b
+    changed_when: true
     when:
     - result_authselect_present.stat.exists
     - "(result_pam_accounts_password_pam_pwquality_system_auth_add is defined and result_pam_accounts_password_pam_pwquality_system_auth_add.changed)\n\
@@ -9634,7 +9817,9 @@
         - authselect integrity check passed
     - name: Set PAM Password Hashing Algorithm - password-auth - Get authselect current profile
       ansible.builtin.shell:
-        cmd: authselect current -r | awk '{ print $1 }'
+        cmd: 'set -o pipefail
+
+          authselect current -r | awk ''{ print $1 }'''
       register: result_authselect_profile
       changed_when: false
       when:
@@ -9656,7 +9841,9 @@
     - name: Set PAM Password Hashing Algorithm - password-auth - Get authselect current features to also enable them in the
         custom profile
       ansible.builtin.shell:
-        cmd: authselect current | tail -n+3 | awk '{ print $2 }'
+        cmd: 'set -o pipefail
+
+          authselect current | tail -n+3 | awk ''{ print $2 }'''
       register: result_authselect_features
       changed_when: false
       check_mode: false
@@ -9676,6 +9863,7 @@
         profile
       ansible.builtin.command:
         cmd: authselect create-profile hardening -b {{ authselect_current_profile }}
+      changed_when: true
       when:
       - result_authselect_profile is not skipped
       - result_authselect_check_cmd is success
@@ -9684,6 +9872,7 @@
     - name: Set PAM Password Hashing Algorithm - password-auth - Create an authselect custom profile based on sssd profile
       ansible.builtin.command:
         cmd: authselect create-profile hardening -b sssd
+      changed_when: true
       when:
       - result_authselect_profile is not skipped
       - result_authselect_check_cmd is success
@@ -9692,6 +9881,7 @@
     - name: Set PAM Password Hashing Algorithm - password-auth - Ensure authselect changes are applied
       ansible.builtin.command:
         cmd: authselect apply-changes -b --backup=before-hardening-custom-profile
+      changed_when: true
       when:
       - result_authselect_check_cmd is success
       - result_authselect_profile is not skipped
@@ -9701,6 +9891,7 @@
       ansible.builtin.command:
         cmd: authselect select {{ authselect_custom_profile }}
       register: result_pam_authselect_select_profile
+      changed_when: true
       when:
       - result_authselect_check_cmd is success
       - result_authselect_profile is not skipped
@@ -9718,6 +9909,7 @@
     - name: Set PAM Password Hashing Algorithm - password-auth - Ensure authselect changes are applied
       ansible.builtin.command:
         cmd: authselect apply-changes -b --backup=after-hardening-custom-profile
+      changed_when: true
       when:
       - result_authselect_check_cmd is success
       - result_authselect_profile is not skipped
@@ -9774,6 +9966,7 @@
     - name: Set PAM Password Hashing Algorithm - password-auth - Ensure authselect changes are applied
       ansible.builtin.command:
         cmd: authselect apply-changes -b
+      changed_when: true
       when:
       - result_authselect_present is defined
       - result_authselect_present.stat.exists
@@ -9811,6 +10004,7 @@
   - name: Set PAM Password Hashing Algorithm - password-auth - Ensure authselect changes are applied
     ansible.builtin.command:
       cmd: authselect apply-changes -b
+    changed_when: true
     when:
     - result_authselect_present.stat.exists
     - "(result_pam_set_password_hashing_algorithm_passwordauth_add is defined and result_pam_set_password_hashing_algorithm_passwordauth_add.changed)\n\
@@ -9905,7 +10099,9 @@
         - authselect integrity check passed
     - name: Set PAM Password Hashing Algorithm - password-auth - Get authselect current profile
       ansible.builtin.shell:
-        cmd: authselect current -r | awk '{ print $1 }'
+        cmd: 'set -o pipefail
+
+          authselect current -r | awk ''{ print $1 }'''
       register: result_authselect_profile
       changed_when: false
       when:
@@ -9927,7 +10123,9 @@
     - name: Set PAM Password Hashing Algorithm - password-auth - Get authselect current features to also enable them in the
         custom profile
       ansible.builtin.shell:
-        cmd: authselect current | tail -n+3 | awk '{ print $2 }'
+        cmd: 'set -o pipefail
+
+          authselect current | tail -n+3 | awk ''{ print $2 }'''
       register: result_authselect_features
       changed_when: false
       check_mode: false
@@ -9947,6 +10145,7 @@
         profile
       ansible.builtin.command:
         cmd: authselect create-profile hardening -b {{ authselect_current_profile }}
+      changed_when: true
       when:
       - result_authselect_profile is not skipped
       - result_authselect_check_cmd is success
@@ -9955,6 +10154,7 @@
     - name: Set PAM Password Hashing Algorithm - password-auth - Create an authselect custom profile based on sssd profile
       ansible.builtin.command:
         cmd: authselect create-profile hardening -b sssd
+      changed_when: true
       when:
       - result_authselect_profile is not skipped
       - result_authselect_check_cmd is success
@@ -9963,6 +10163,7 @@
     - name: Set PAM Password Hashing Algorithm - password-auth - Ensure authselect changes are applied
       ansible.builtin.command:
         cmd: authselect apply-changes -b --backup=before-hardening-custom-profile
+      changed_when: true
       when:
       - result_authselect_check_cmd is success
       - result_authselect_profile is not skipped
@@ -9972,6 +10173,7 @@
       ansible.builtin.command:
         cmd: authselect select {{ authselect_custom_profile }}
       register: result_pam_authselect_select_profile
+      changed_when: true
       when:
       - result_authselect_check_cmd is success
       - result_authselect_profile is not skipped
@@ -9989,6 +10191,7 @@
     - name: Set PAM Password Hashing Algorithm - password-auth - Ensure authselect changes are applied
       ansible.builtin.command:
         cmd: authselect apply-changes -b --backup=after-hardening-custom-profile
+      changed_when: true
       when:
       - result_authselect_check_cmd is success
       - result_authselect_profile is not skipped
@@ -10026,6 +10229,7 @@
   - name: Set PAM Password Hashing Algorithm - password-auth - Ensure authselect changes are applied
     ansible.builtin.command:
       cmd: authselect apply-changes -b
+    changed_when: true
     when:
     - result_authselect_present.stat.exists
     - result_pam_hashing_options_removal is changed
@@ -10121,7 +10325,9 @@
         - authselect integrity check passed
     - name: Set PAM Password Hashing Algorithm - system-auth - Get authselect current profile
       ansible.builtin.shell:
-        cmd: authselect current -r | awk '{ print $1 }'
+        cmd: 'set -o pipefail
+
+          authselect current -r | awk ''{ print $1 }'''
       register: result_authselect_profile
       changed_when: false
       when:
@@ -10143,7 +10349,9 @@
     - name: Set PAM Password Hashing Algorithm - system-auth - Get authselect current features to also enable them in the
         custom profile
       ansible.builtin.shell:
-        cmd: authselect current | tail -n+3 | awk '{ print $2 }'
+        cmd: 'set -o pipefail
+
+          authselect current | tail -n+3 | awk ''{ print $2 }'''
       register: result_authselect_features
       changed_when: false
       check_mode: false
@@ -10162,6 +10370,7 @@
     - name: Set PAM Password Hashing Algorithm - system-auth - Create an authselect custom profile based on the current profile
       ansible.builtin.command:
         cmd: authselect create-profile hardening -b {{ authselect_current_profile }}
+      changed_when: true
       when:
       - result_authselect_profile is not skipped
       - result_authselect_check_cmd is success
@@ -10170,6 +10379,7 @@
     - name: Set PAM Password Hashing Algorithm - system-auth - Create an authselect custom profile based on sssd profile
       ansible.builtin.command:
         cmd: authselect create-profile hardening -b sssd
+      changed_when: true
       when:
       - result_authselect_profile is not skipped
       - result_authselect_check_cmd is success
@@ -10178,6 +10388,7 @@
     - name: Set PAM Password Hashing Algorithm - system-auth - Ensure authselect changes are applied
       ansible.builtin.command:
         cmd: authselect apply-changes -b --backup=before-hardening-custom-profile
+      changed_when: true
       when:
       - result_authselect_check_cmd is success
       - result_authselect_profile is not skipped
@@ -10187,6 +10398,7 @@
       ansible.builtin.command:
         cmd: authselect select {{ authselect_custom_profile }}
       register: result_pam_authselect_select_profile
+      changed_when: true
       when:
       - result_authselect_check_cmd is success
       - result_authselect_profile is not skipped
@@ -10204,6 +10416,7 @@
     - name: Set PAM Password Hashing Algorithm - system-auth - Ensure authselect changes are applied
       ansible.builtin.command:
         cmd: authselect apply-changes -b --backup=after-hardening-custom-profile
+      changed_when: true
       when:
       - result_authselect_check_cmd is success
       - result_authselect_profile is not skipped
@@ -10260,6 +10473,7 @@
     - name: Set PAM Password Hashing Algorithm - system-auth - Ensure authselect changes are applied
       ansible.builtin.command:
         cmd: authselect apply-changes -b
+      changed_when: true
       when:
       - result_authselect_present is defined
       - result_authselect_present.stat.exists
@@ -10297,6 +10511,7 @@
   - name: Set PAM Password Hashing Algorithm - system-auth - Ensure authselect changes are applied
     ansible.builtin.command:
       cmd: authselect apply-changes -b
+    changed_when: true
     when:
     - result_authselect_present.stat.exists
     - "(result_pam_set_password_hashing_algorithm_systemauth_add is defined and result_pam_set_password_hashing_algorithm_systemauth_add.changed)\n\
@@ -10395,7 +10610,9 @@
         - authselect integrity check passed
     - name: Set PAM Password Hashing Algorithm - system-auth - Get authselect current profile
       ansible.builtin.shell:
-        cmd: authselect current -r | awk '{ print $1 }'
+        cmd: 'set -o pipefail
+
+          authselect current -r | awk ''{ print $1 }'''
       register: result_authselect_profile
       changed_when: false
       when:
@@ -10417,7 +10634,9 @@
     - name: Set PAM Password Hashing Algorithm - system-auth - Get authselect current features to also enable them in the
         custom profile
       ansible.builtin.shell:
-        cmd: authselect current | tail -n+3 | awk '{ print $2 }'
+        cmd: 'set -o pipefail
+
+          authselect current | tail -n+3 | awk ''{ print $2 }'''
       register: result_authselect_features
       changed_when: false
       check_mode: false
@@ -10436,6 +10655,7 @@
     - name: Set PAM Password Hashing Algorithm - system-auth - Create an authselect custom profile based on the current profile
       ansible.builtin.command:
         cmd: authselect create-profile hardening -b {{ authselect_current_profile }}
+      changed_when: true
       when:
       - result_authselect_profile is not skipped
       - result_authselect_check_cmd is success
@@ -10444,6 +10664,7 @@
     - name: Set PAM Password Hashing Algorithm - system-auth - Create an authselect custom profile based on sssd profile
       ansible.builtin.command:
         cmd: authselect create-profile hardening -b sssd
+      changed_when: true
       when:
       - result_authselect_profile is not skipped
       - result_authselect_check_cmd is success
@@ -10452,6 +10673,7 @@
     - name: Set PAM Password Hashing Algorithm - system-auth - Ensure authselect changes are applied
       ansible.builtin.command:
         cmd: authselect apply-changes -b --backup=before-hardening-custom-profile
+      changed_when: true
       when:
       - result_authselect_check_cmd is success
       - result_authselect_profile is not skipped
@@ -10461,6 +10683,7 @@
       ansible.builtin.command:
         cmd: authselect select {{ authselect_custom_profile }}
       register: result_pam_authselect_select_profile
+      changed_when: true
       when:
       - result_authselect_check_cmd is success
       - result_authselect_profile is not skipped
@@ -10478,6 +10701,7 @@
     - name: Set PAM Password Hashing Algorithm - system-auth - Ensure authselect changes are applied
       ansible.builtin.command:
         cmd: authselect apply-changes -b --backup=after-hardening-custom-profile
+      changed_when: true
       when:
       - result_authselect_check_cmd is success
       - result_authselect_profile is not skipped
@@ -10515,6 +10739,7 @@
   - name: Set PAM Password Hashing Algorithm - system-auth - Ensure authselect changes are applied
     ansible.builtin.command:
       cmd: authselect apply-changes -b
+    changed_when: true
     when:
     - result_authselect_present.stat.exists
     - result_pam_hashing_options_removal is changed
@@ -10707,6 +10932,7 @@
 - name: Set Existing Passwords Warning Age - Ensure the Number of Days of Warning Before Password Expires
   ansible.builtin.command:
     cmd: chage --warndays {{ var_accounts_password_warn_age_login_defs }} {{ item }}
+  changed_when: true
   with_items: '{{ result_pass_warn_age_user_names.stdout_lines }}'
   when:
   - accounts_password_set_warn_age_existing | bool
@@ -10796,6 +11022,7 @@
 - name: Change the period of inactivity
   ansible.builtin.command:
     cmd: chage --inactive {{ var_account_disable_post_pw_expiration }} {{ item }}
+  changed_when: true
   with_items: '{{ user_names.stdout_lines }}'
   when:
   - accounts_set_post_pw_existing | bool
@@ -10875,7 +11102,9 @@
         - authselect integrity check passed
     - name: Avoid using remember in pam_unix module - Get authselect current profile
       ansible.builtin.shell:
-        cmd: authselect current -r | awk '{ print $1 }'
+        cmd: 'set -o pipefail
+
+          authselect current -r | awk ''{ print $1 }'''
       register: result_authselect_profile
       changed_when: false
       when:
@@ -10896,7 +11125,9 @@
       - result_authselect_profile.stdout is not match("custom/")
     - name: Avoid using remember in pam_unix module - Get authselect current features to also enable them in the custom profile
       ansible.builtin.shell:
-        cmd: authselect current | tail -n+3 | awk '{ print $2 }'
+        cmd: 'set -o pipefail
+
+          authselect current | tail -n+3 | awk ''{ print $2 }'''
       register: result_authselect_features
       changed_when: false
       check_mode: false
@@ -10914,6 +11145,7 @@
     - name: Avoid using remember in pam_unix module - Create an authselect custom profile based on the current profile
       ansible.builtin.command:
         cmd: authselect create-profile hardening -b {{ authselect_current_profile }}
+      changed_when: true
       when:
       - result_authselect_profile is not skipped
       - result_authselect_check_cmd is success
@@ -10922,6 +11154,7 @@
     - name: Avoid using remember in pam_unix module - Create an authselect custom profile based on sssd profile
       ansible.builtin.command:
         cmd: authselect create-profile hardening -b sssd
+      changed_when: true
       when:
       - result_authselect_profile is not skipped
       - result_authselect_check_cmd is success
@@ -10930,6 +11163,7 @@
     - name: Avoid using remember in pam_unix module - Ensure authselect changes are applied
       ansible.builtin.command:
         cmd: authselect apply-changes -b --backup=before-hardening-custom-profile
+      changed_when: true
       when:
       - result_authselect_check_cmd is success
       - result_authselect_profile is not skipped
@@ -10939,6 +11173,7 @@
       ansible.builtin.command:
         cmd: authselect select {{ authselect_custom_profile }}
       register: result_pam_authselect_select_profile
+      changed_when: true
       when:
       - result_authselect_check_cmd is success
       - result_authselect_profile is not skipped
@@ -10956,6 +11191,7 @@
     - name: Avoid using remember in pam_unix module - Ensure authselect changes are applied
       ansible.builtin.command:
         cmd: authselect apply-changes -b --backup=after-hardening-custom-profile
+      changed_when: true
       when:
       - result_authselect_check_cmd is success
       - result_authselect_profile is not skipped
@@ -10987,6 +11223,7 @@
   - name: Avoid using remember in pam_unix module - Ensure authselect changes are applied
     ansible.builtin.command:
       cmd: authselect apply-changes -b
+    changed_when: true
     when:
     - result_authselect_present.stat.exists
     - result_pam_option_removal is changed
@@ -11061,7 +11298,9 @@
         - authselect integrity check passed
     - name: Avoid using remember in pam_unix module - Get authselect current profile
       ansible.builtin.shell:
-        cmd: authselect current -r | awk '{ print $1 }'
+        cmd: 'set -o pipefail
+
+          authselect current -r | awk ''{ print $1 }'''
       register: result_authselect_profile
       changed_when: false
       when:
@@ -11082,7 +11321,9 @@
       - result_authselect_profile.stdout is not match("custom/")
     - name: Avoid using remember in pam_unix module - Get authselect current features to also enable them in the custom profile
       ansible.builtin.shell:
-        cmd: authselect current | tail -n+3 | awk '{ print $2 }'
+        cmd: 'set -o pipefail
+
+          authselect current | tail -n+3 | awk ''{ print $2 }'''
       register: result_authselect_features
       changed_when: false
       check_mode: false
@@ -11100,6 +11341,7 @@
     - name: Avoid using remember in pam_unix module - Create an authselect custom profile based on the current profile
       ansible.builtin.command:
         cmd: authselect create-profile hardening -b {{ authselect_current_profile }}
+      changed_when: true
       when:
       - result_authselect_profile is not skipped
       - result_authselect_check_cmd is success
@@ -11108,6 +11350,7 @@
     - name: Avoid using remember in pam_unix module - Create an authselect custom profile based on sssd profile
       ansible.builtin.command:
         cmd: authselect create-profile hardening -b sssd
+      changed_when: true
       when:
       - result_authselect_profile is not skipped
       - result_authselect_check_cmd is success
@@ -11116,6 +11359,7 @@
     - name: Avoid using remember in pam_unix module - Ensure authselect changes are applied
       ansible.builtin.command:
         cmd: authselect apply-changes -b --backup=before-hardening-custom-profile
+      changed_when: true
       when:
       - result_authselect_check_cmd is success
       - result_authselect_profile is not skipped
@@ -11125,6 +11369,7 @@
       ansible.builtin.command:
         cmd: authselect select {{ authselect_custom_profile }}
       register: result_pam_authselect_select_profile
+      changed_when: true
       when:
       - result_authselect_check_cmd is success
       - result_authselect_profile is not skipped
@@ -11142,6 +11387,7 @@
     - name: Avoid using remember in pam_unix module - Ensure authselect changes are applied
       ansible.builtin.command:
         cmd: authselect apply-changes -b --backup=after-hardening-custom-profile
+      changed_when: true
       when:
       - result_authselect_check_cmd is success
       - result_authselect_profile is not skipped
@@ -11173,6 +11419,7 @@
   - name: Avoid using remember in pam_unix module - Ensure authselect changes are applied
     ansible.builtin.command:
       cmd: authselect apply-changes -b
+    changed_when: true
     when:
     - result_authselect_present.stat.exists
     - result_pam_option_removal is changed
@@ -11249,7 +11496,9 @@
       - authselect integrity check passed
   - name: Prevent Login to Accounts With Empty Password - Get authselect current features
     ansible.builtin.shell:
-      cmd: authselect current | tail -n+3 | awk '{ print $2 }'
+      cmd: 'set -o pipefail
+
+        authselect current | tail -n+3 | awk ''{ print $2 }'''
     register: result_authselect_features
     changed_when: false
     check_mode: false
@@ -11259,12 +11508,14 @@
     ansible.builtin.command:
       cmd: authselect enable-feature without-nullok
     register: result_authselect_enable_feature_cmd
+    changed_when: true
     when:
     - result_authselect_check_cmd is success
     - result_authselect_features.stdout is not search("without-nullok")
   - name: Prevent Login to Accounts With Empty Password - Ensure authselect changes are applied
     ansible.builtin.command:
       cmd: authselect apply-changes -b
+    changed_when: true
     when:
     - result_authselect_enable_feature_cmd is not skipped
     - result_authselect_enable_feature_cmd is success
@@ -11366,6 +11617,7 @@
   ansible.builtin.command: 'passwd -l {{ item }}
 
     '
+  changed_when: true
   with_items: '{{ users_nopasswd.stdout_lines }}'
   when:
   - DISA_STIG_RHEL_10_600460 | bool
@@ -11424,6 +11676,7 @@
 
 - name: Lock the password of the user accounts other than root with uid 0
   ansible.builtin.command: passwd -l {{ item.key }}
+  changed_when: true
   loop: '{{ getent_passwd | dict2items | rejectattr(''key'', ''equalto'', ''root'') | list }}'
   when:
   - DISA_STIG_RHEL_10_600400 | bool
@@ -13957,6 +14210,7 @@
     value: 'yes'
     state: present
     no_extra_spaces: true
+    mode: 420
   when:
   - journald_compress | bool
   - low_complexity | bool
@@ -14066,6 +14320,7 @@
     value: 'no'
     state: present
     no_extra_spaces: true
+    mode: 420
   when:
   - journald_disable_forward_to_syslog | bool
   - low_complexity | bool
@@ -14176,6 +14431,7 @@
     value: persistent
     state: present
     no_extra_spaces: true
+    mode: 420
   when:
   - journald_storage | bool
   - low_complexity | bool
@@ -14225,10 +14481,15 @@
   - restrict_strategy
 
 - name: Disable systemd-journal-remote Socket - Collect systemd Socket Units Present in the System
-  ansible.builtin.command:
-    cmd: systemctl -q list-unit-files --type socket
+  ansible.builtin.find:
+    paths:
+    - /etc/systemd/system
+    - /run/systemd/system
+    - /usr/lib/systemd/system
+    - /usr/local/lib/systemd/system
+    patterns: systemd-journal-remote.socket
+    file_type: any
   register: result_systemd_unit_files
-  changed_when: false
   check_mode: false
   when:
   - disable_strategy | bool
@@ -14259,7 +14520,7 @@
   - medium_severity | bool
   - no_reboot_needed | bool
   - '"kernel-core" in ansible_facts.packages'
-  - result_systemd_unit_files.stdout_lines is search("systemd-journal-remote.socket")
+  - result_systemd_unit_files.matched > 0
   tags:
   - CCE-87754-8
   - disable_strategy
@@ -14276,6 +14537,7 @@
       path: /etc/firewalld/firewalld.conf
       create: true
       regexp: (?i)^\s*FirewallBackend=
+      mode: '0644'
       state: absent
     check_mode: true
     changed_when: false
@@ -14285,6 +14547,7 @@
       path: /etc/firewalld/firewalld.conf
       create: true
       regexp: (?i)^\s*FirewallBackend=
+      mode: '0644'
       state: absent
     when: dupes.found is defined and dupes.found > 1
   - name: Insert correct line to /etc/firewalld/firewalld.conf
@@ -14292,6 +14555,7 @@
       path: /etc/firewalld/firewalld.conf
       create: true
       regexp: (?i)^\s*FirewallBackend=
+      mode: '0644'
       line: FirewallBackend=nftables
       state: present
       insertbefore: ^# FirewallBackend
@@ -14319,17 +14583,12 @@
 - name: Configure Firewalld to Trust Loopback Traffic - Remediation is Applicable if firewalld Service is Running
   block:
   - name: Configure Firewalld to Trust Loopback Traffic - Ensure firewalld trusted Zone Includes lo Interface
-    ansible.builtin.command:
-      cmd: firewall-cmd --permanent --zone=trusted --add-interface=lo
-    register: result_lo_interface_assignment
-    changed_when:
-    - '''ALREADY_ENABLED'' not in result_lo_interface_assignment.stderr'
-  - name: Configure Firewalld to Trust Loopback Traffic - Ensure firewalld Changes are Applied
-    ansible.builtin.service:
-      name: firewalld
-      state: reloaded
-    when:
-    - result_lo_interface_assignment is changed
+    ansible.posix.firewalld:
+      zone: trusted
+      interface: lo
+      permanent: true
+      immediate: true
+      state: enabled
   when:
   - configure_strategy | bool
   - firewalld_loopback_traffic_trusted | bool
@@ -14411,7 +14670,11 @@
 
 - name: Configure Accepting Router Advertisements on All IPv6 Interfaces - Find all files that contain net.ipv6.conf.all.accept_ra
   ansible.builtin.shell:
-    cmd: find -L {{ sysctl_paths | join(" ") }} -type f -name '*.conf' | xargs grep -HP '^\s*net.ipv6.conf.all.accept_ra\s*=\s*.*$'
+    cmd: 'set -o pipefail
+
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.all.accept_ra\s*=\s*.*$''
+
+      '
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -14442,8 +14705,12 @@
 - name: Configure Accepting Router Advertisements on All IPv6 Interfaces - Find all files that set net.ipv6.conf.all.accept_ra
     to correct value
   ansible.builtin.shell:
-    cmd: find -L {{ sysctl_paths | join(" ") }} -type f -name '*.conf' | xargs grep -HP '^\s*net.ipv6.conf.all.accept_ra\s*=\s*{{
-      sysctl_net_ipv6_conf_all_accept_ra_value }}$'
+    cmd: 'set -o pipefail
+
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.all.accept_ra\s*=\s*{{
+      sysctl_net_ipv6_conf_all_accept_ra_value }}$''
+
+      '
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -14597,7 +14864,11 @@
 
 - name: Disable Accepting ICMP Redirects for All IPv6 Interfaces - Find all files that contain net.ipv6.conf.all.accept_redirects
   ansible.builtin.shell:
-    cmd: find -L {{ sysctl_paths | join(" ") }} -type f -name '*.conf' | xargs grep -HP '^\s*net.ipv6.conf.all.accept_redirects\s*=\s*.*$'
+    cmd: 'set -o pipefail
+
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.all.accept_redirects\s*=\s*.*$''
+
+      '
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -14630,8 +14901,12 @@
 - name: Disable Accepting ICMP Redirects for All IPv6 Interfaces - Find all files that set net.ipv6.conf.all.accept_redirects
     to correct value
   ansible.builtin.shell:
-    cmd: find -L {{ sysctl_paths | join(" ") }} -type f -name '*.conf' | xargs grep -HP '^\s*net.ipv6.conf.all.accept_redirects\s*=\s*{{
-      sysctl_net_ipv6_conf_all_accept_redirects_value }}$'
+    cmd: 'set -o pipefail
+
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.all.accept_redirects\s*=\s*{{
+      sysctl_net_ipv6_conf_all_accept_redirects_value }}$''
+
+      '
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -14792,7 +15067,11 @@
 - name: Disable Kernel Parameter for Accepting Source-Routed Packets on all IPv6 Interfaces - Find all files that contain
     net.ipv6.conf.all.accept_source_route
   ansible.builtin.shell:
-    cmd: find -L {{ sysctl_paths | join(" ") }} -type f -name '*.conf' | xargs grep -HP '^\s*net.ipv6.conf.all.accept_source_route\s*=\s*.*$'
+    cmd: 'set -o pipefail
+
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.all.accept_source_route\s*=\s*.*$''
+
+      '
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -14823,8 +15102,12 @@
 - name: Disable Kernel Parameter for Accepting Source-Routed Packets on all IPv6 Interfaces - Find all files that set net.ipv6.conf.all.accept_source_route
     to correct value
   ansible.builtin.shell:
-    cmd: find -L {{ sysctl_paths | join(" ") }} -type f -name '*.conf' | xargs grep -HP '^\s*net.ipv6.conf.all.accept_source_route\s*=\s*{{
-      sysctl_net_ipv6_conf_all_accept_source_route_value }}$'
+    cmd: 'set -o pipefail
+
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.all.accept_source_route\s*=\s*{{
+      sysctl_net_ipv6_conf_all_accept_source_route_value }}$''
+
+      '
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -14978,7 +15261,11 @@
 
 - name: Disable Kernel Parameter for IPv6 Forwarding - Find all files that contain net.ipv6.conf.all.forwarding
   ansible.builtin.shell:
-    cmd: find -L {{ sysctl_paths | join(" ") }} -type f -name '*.conf' | xargs grep -HP '^\s*net.ipv6.conf.all.forwarding\s*=\s*.*$'
+    cmd: 'set -o pipefail
+
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.all.forwarding\s*=\s*.*$''
+
+      '
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -15009,8 +15296,12 @@
 
 - name: Disable Kernel Parameter for IPv6 Forwarding - Find all files that set net.ipv6.conf.all.forwarding to correct value
   ansible.builtin.shell:
-    cmd: find -L {{ sysctl_paths | join(" ") }} -type f -name '*.conf' | xargs grep -HP '^\s*net.ipv6.conf.all.forwarding\s*=\s*{{
-      sysctl_net_ipv6_conf_all_forwarding_value }}$'
+    cmd: 'set -o pipefail
+
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.all.forwarding\s*=\s*{{
+      sysctl_net_ipv6_conf_all_forwarding_value }}$''
+
+      '
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -15165,7 +15456,11 @@
 
 - name: Disable Accepting Router Advertisements on all IPv6 Interfaces by Default - Find all files that contain net.ipv6.conf.default.accept_ra
   ansible.builtin.shell:
-    cmd: find -L {{ sysctl_paths | join(" ") }} -type f -name '*.conf' | xargs grep -HP '^\s*net.ipv6.conf.default.accept_ra\s*=\s*.*$'
+    cmd: 'set -o pipefail
+
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.default.accept_ra\s*=\s*.*$''
+
+      '
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -15196,8 +15491,12 @@
 - name: Disable Accepting Router Advertisements on all IPv6 Interfaces by Default - Find all files that set net.ipv6.conf.default.accept_ra
     to correct value
   ansible.builtin.shell:
-    cmd: find -L {{ sysctl_paths | join(" ") }} -type f -name '*.conf' | xargs grep -HP '^\s*net.ipv6.conf.default.accept_ra\s*=\s*{{
-      sysctl_net_ipv6_conf_default_accept_ra_value }}$'
+    cmd: 'set -o pipefail
+
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.default.accept_ra\s*=\s*{{
+      sysctl_net_ipv6_conf_default_accept_ra_value }}$''
+
+      '
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -15351,7 +15650,11 @@
 - name: Disable Kernel Parameter for Accepting ICMP Redirects by Default on IPv6 Interfaces - Find all files that contain
     net.ipv6.conf.default.accept_redirects
   ansible.builtin.shell:
-    cmd: find -L {{ sysctl_paths | join(" ") }} -type f -name '*.conf' | xargs grep -HP '^\s*net.ipv6.conf.default.accept_redirects\s*=\s*.*$'
+    cmd: 'set -o pipefail
+
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.default.accept_redirects\s*=\s*.*$''
+
+      '
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -15382,8 +15685,12 @@
 - name: Disable Kernel Parameter for Accepting ICMP Redirects by Default on IPv6 Interfaces - Find all files that set net.ipv6.conf.default.accept_redirects
     to correct value
   ansible.builtin.shell:
-    cmd: find -L {{ sysctl_paths | join(" ") }} -type f -name '*.conf' | xargs grep -HP '^\s*net.ipv6.conf.default.accept_redirects\s*=\s*{{
-      sysctl_net_ipv6_conf_default_accept_redirects_value }}$'
+    cmd: 'set -o pipefail
+
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.default.accept_redirects\s*=\s*{{
+      sysctl_net_ipv6_conf_default_accept_redirects_value }}$''
+
+      '
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -15542,7 +15849,11 @@
 - name: Disable Kernel Parameter for Accepting Source-Routed Packets on IPv6 Interfaces by Default - Find all files that contain
     net.ipv6.conf.default.accept_source_route
   ansible.builtin.shell:
-    cmd: find -L {{ sysctl_paths | join(" ") }} -type f -name '*.conf' | xargs grep -HP '^\s*net.ipv6.conf.default.accept_source_route\s*=\s*.*$'
+    cmd: 'set -o pipefail
+
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.default.accept_source_route\s*=\s*.*$''
+
+      '
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -15578,8 +15889,12 @@
 - name: Disable Kernel Parameter for Accepting Source-Routed Packets on IPv6 Interfaces by Default - Find all files that set
     net.ipv6.conf.default.accept_source_route to correct value
   ansible.builtin.shell:
-    cmd: find -L {{ sysctl_paths | join(" ") }} -type f -name '*.conf' | xargs grep -HP '^\s*net.ipv6.conf.default.accept_source_route\s*=\s*{{
-      sysctl_net_ipv6_conf_default_accept_source_route_value }}$'
+    cmd: 'set -o pipefail
+
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.default.accept_source_route\s*=\s*{{
+      sysctl_net_ipv6_conf_default_accept_source_route_value }}$''
+
+      '
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -15748,7 +16063,11 @@
 
 - name: Disable Kernel Parameter for IPv6 Forwarding by default - Find all files that contain net.ipv6.conf.default.forwarding
   ansible.builtin.shell:
-    cmd: find -L {{ sysctl_paths | join(" ") }} -type f -name '*.conf' | xargs grep -HP '^\s*net.ipv6.conf.default.forwarding\s*=\s*.*$'
+    cmd: 'set -o pipefail
+
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.default.forwarding\s*=\s*.*$''
+
+      '
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -15775,8 +16094,12 @@
 - name: Disable Kernel Parameter for IPv6 Forwarding by default - Find all files that set net.ipv6.conf.default.forwarding
     to correct value
   ansible.builtin.shell:
-    cmd: find -L {{ sysctl_paths | join(" ") }} -type f -name '*.conf' | xargs grep -HP '^\s*net.ipv6.conf.default.forwarding\s*=\s*{{
-      sysctl_net_ipv6_conf_default_forwarding_value }}$'
+    cmd: 'set -o pipefail
+
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.default.forwarding\s*=\s*{{
+      sysctl_net_ipv6_conf_default_forwarding_value }}$''
+
+      '
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -15914,7 +16237,11 @@
 
 - name: Disable Accepting ICMP Redirects for All IPv4 Interfaces - Find all files that contain net.ipv4.conf.all.accept_redirects
   ansible.builtin.shell:
-    cmd: find -L {{ sysctl_paths | join(" ") }} -type f -name '*.conf' | xargs grep -HP '^\s*net.ipv4.conf.all.accept_redirects\s*=\s*.*$'
+    cmd: 'set -o pipefail
+
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.all.accept_redirects\s*=\s*.*$''
+
+      '
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -15947,8 +16274,12 @@
 - name: Disable Accepting ICMP Redirects for All IPv4 Interfaces - Find all files that set net.ipv4.conf.all.accept_redirects
     to correct value
   ansible.builtin.shell:
-    cmd: find -L {{ sysctl_paths | join(" ") }} -type f -name '*.conf' | xargs grep -HP '^\s*net.ipv4.conf.all.accept_redirects\s*=\s*{{
-      sysctl_net_ipv4_conf_all_accept_redirects_value }}$'
+    cmd: 'set -o pipefail
+
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.all.accept_redirects\s*=\s*{{
+      sysctl_net_ipv4_conf_all_accept_redirects_value }}$''
+
+      '
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -16111,7 +16442,11 @@
 - name: Disable Kernel Parameter for Accepting Source-Routed Packets on all IPv4 Interfaces - Find all files that contain
     net.ipv4.conf.all.accept_source_route
   ansible.builtin.shell:
-    cmd: find -L {{ sysctl_paths | join(" ") }} -type f -name '*.conf' | xargs grep -HP '^\s*net.ipv4.conf.all.accept_source_route\s*=\s*.*$'
+    cmd: 'set -o pipefail
+
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.all.accept_source_route\s*=\s*.*$''
+
+      '
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -16144,8 +16479,12 @@
 - name: Disable Kernel Parameter for Accepting Source-Routed Packets on all IPv4 Interfaces - Find all files that set net.ipv4.conf.all.accept_source_route
     to correct value
   ansible.builtin.shell:
-    cmd: find -L {{ sysctl_paths | join(" ") }} -type f -name '*.conf' | xargs grep -HP '^\s*net.ipv4.conf.all.accept_source_route\s*=\s*{{
-      sysctl_net_ipv4_conf_all_accept_source_route_value }}$'
+    cmd: 'set -o pipefail
+
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.all.accept_source_route\s*=\s*{{
+      sysctl_net_ipv4_conf_all_accept_source_route_value }}$''
+
+      '
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -16303,7 +16642,11 @@
 
 - name: Disable Kernel Parameter for IPv4 Forwarding on all IPv4 Interfaces - Find all files that contain net.ipv4.conf.all.forwarding
   ansible.builtin.shell:
-    cmd: find -L {{ sysctl_paths | join(" ") }} -type f -name '*.conf' | xargs grep -HP '^\s*net.ipv4.conf.all.forwarding\s*=\s*.*$'
+    cmd: 'set -o pipefail
+
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.all.forwarding\s*=\s*.*$''
+
+      '
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -16331,8 +16674,12 @@
 - name: Disable Kernel Parameter for IPv4 Forwarding on all IPv4 Interfaces - Find all files that set net.ipv4.conf.all.forwarding
     to correct value
   ansible.builtin.shell:
-    cmd: find -L {{ sysctl_paths | join(" ") }} -type f -name '*.conf' | xargs grep -HP '^\s*net.ipv4.conf.all.forwarding\s*=\s*{{
-      sysctl_net_ipv4_conf_all_forwarding_value }}$'
+    cmd: 'set -o pipefail
+
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.all.forwarding\s*=\s*{{
+      sysctl_net_ipv4_conf_all_forwarding_value }}$''
+
+      '
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -16473,7 +16820,11 @@
 
 - name: Enable Kernel Parameter to Log Martian Packets on all IPv4 Interfaces - Find all files that contain net.ipv4.conf.all.log_martians
   ansible.builtin.shell:
-    cmd: find -L {{ sysctl_paths | join(" ") }} -type f -name '*.conf' | xargs grep -HP '^\s*net.ipv4.conf.all.log_martians\s*=\s*.*$'
+    cmd: 'set -o pipefail
+
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.all.log_martians\s*=\s*.*$''
+
+      '
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -16504,8 +16855,12 @@
 - name: Enable Kernel Parameter to Log Martian Packets on all IPv4 Interfaces - Find all files that set net.ipv4.conf.all.log_martians
     to correct value
   ansible.builtin.shell:
-    cmd: find -L {{ sysctl_paths | join(" ") }} -type f -name '*.conf' | xargs grep -HP '^\s*net.ipv4.conf.all.log_martians\s*=\s*{{
-      sysctl_net_ipv4_conf_all_log_martians_value }}$'
+    cmd: 'set -o pipefail
+
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.all.log_martians\s*=\s*{{
+      sysctl_net_ipv4_conf_all_log_martians_value }}$''
+
+      '
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -16662,7 +17017,11 @@
 
 - name: Enable Kernel Parameter to Use Reverse Path Filtering on all IPv4 Interfaces - Find all files that contain net.ipv4.conf.all.rp_filter
   ansible.builtin.shell:
-    cmd: find -L {{ sysctl_paths | join(" ") }} -type f -name '*.conf' | xargs grep -HP '^\s*net.ipv4.conf.all.rp_filter\s*=\s*.*$'
+    cmd: 'set -o pipefail
+
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.all.rp_filter\s*=\s*.*$''
+
+      '
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -16697,8 +17056,12 @@
 - name: Enable Kernel Parameter to Use Reverse Path Filtering on all IPv4 Interfaces - Find all files that set net.ipv4.conf.all.rp_filter
     to correct value
   ansible.builtin.shell:
-    cmd: find -L {{ sysctl_paths | join(" ") }} -type f -name '*.conf' | xargs grep -HP '^\s*net.ipv4.conf.all.rp_filter\s*=\s*{{
-      sysctl_net_ipv4_conf_all_rp_filter_value }}$'
+    cmd: 'set -o pipefail
+
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.all.rp_filter\s*=\s*{{
+      sysctl_net_ipv4_conf_all_rp_filter_value }}$''
+
+      '
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -16870,7 +17233,11 @@
 - name: Disable Kernel Parameter for Accepting Secure ICMP Redirects on all IPv4 Interfaces - Find all files that contain
     net.ipv4.conf.all.secure_redirects
   ansible.builtin.shell:
-    cmd: find -L {{ sysctl_paths | join(" ") }} -type f -name '*.conf' | xargs grep -HP '^\s*net.ipv4.conf.all.secure_redirects\s*=\s*.*$'
+    cmd: 'set -o pipefail
+
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.all.secure_redirects\s*=\s*.*$''
+
+      '
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -16903,8 +17270,12 @@
 - name: Disable Kernel Parameter for Accepting Secure ICMP Redirects on all IPv4 Interfaces - Find all files that set net.ipv4.conf.all.secure_redirects
     to correct value
   ansible.builtin.shell:
-    cmd: find -L {{ sysctl_paths | join(" ") }} -type f -name '*.conf' | xargs grep -HP '^\s*net.ipv4.conf.all.secure_redirects\s*=\s*{{
-      sysctl_net_ipv4_conf_all_secure_redirects_value }}$'
+    cmd: 'set -o pipefail
+
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.all.secure_redirects\s*=\s*{{
+      sysctl_net_ipv4_conf_all_secure_redirects_value }}$''
+
+      '
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -17071,7 +17442,11 @@
 - name: Disable Kernel Parameter for Accepting ICMP Redirects by Default on IPv4 Interfaces - Find all files that contain
     net.ipv4.conf.default.accept_redirects
   ansible.builtin.shell:
-    cmd: find -L {{ sysctl_paths | join(" ") }} -type f -name '*.conf' | xargs grep -HP '^\s*net.ipv4.conf.default.accept_redirects\s*=\s*.*$'
+    cmd: 'set -o pipefail
+
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.default.accept_redirects\s*=\s*.*$''
+
+      '
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -17107,8 +17482,12 @@
 - name: Disable Kernel Parameter for Accepting ICMP Redirects by Default on IPv4 Interfaces - Find all files that set net.ipv4.conf.default.accept_redirects
     to correct value
   ansible.builtin.shell:
-    cmd: find -L {{ sysctl_paths | join(" ") }} -type f -name '*.conf' | xargs grep -HP '^\s*net.ipv4.conf.default.accept_redirects\s*=\s*{{
-      sysctl_net_ipv4_conf_default_accept_redirects_value }}$'
+    cmd: 'set -o pipefail
+
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.default.accept_redirects\s*=\s*{{
+      sysctl_net_ipv4_conf_default_accept_redirects_value }}$''
+
+      '
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -17284,7 +17663,11 @@
 - name: Disable Kernel Parameter for Accepting Source-Routed Packets on IPv4 Interfaces by Default - Find all files that contain
     net.ipv4.conf.default.accept_source_route
   ansible.builtin.shell:
-    cmd: find -L {{ sysctl_paths | join(" ") }} -type f -name '*.conf' | xargs grep -HP '^\s*net.ipv4.conf.default.accept_source_route\s*=\s*.*$'
+    cmd: 'set -o pipefail
+
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.default.accept_source_route\s*=\s*.*$''
+
+      '
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -17317,8 +17700,12 @@
 - name: Disable Kernel Parameter for Accepting Source-Routed Packets on IPv4 Interfaces by Default - Find all files that set
     net.ipv4.conf.default.accept_source_route to correct value
   ansible.builtin.shell:
-    cmd: find -L {{ sysctl_paths | join(" ") }} -type f -name '*.conf' | xargs grep -HP '^\s*net.ipv4.conf.default.accept_source_route\s*=\s*{{
-      sysctl_net_ipv4_conf_default_accept_source_route_value }}$'
+    cmd: 'set -o pipefail
+
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.default.accept_source_route\s*=\s*{{
+      sysctl_net_ipv4_conf_default_accept_source_route_value }}$''
+
+      '
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -17473,7 +17860,11 @@
 
 - name: Disable Kernel Parameter for IPv4 Forwarding By Default - Find all files that contain net.ipv4.conf.default.forwarding
   ansible.builtin.shell:
-    cmd: find -L {{ sysctl_paths | join(" ") }} -type f -name '*.conf' | xargs grep -HP '^\s*net.ipv4.conf.default.forwarding\s*=\s*.*$'
+    cmd: 'set -o pipefail
+
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.default.forwarding\s*=\s*.*$''
+
+      '
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -17498,8 +17889,12 @@
 - name: Disable Kernel Parameter for IPv4 Forwarding By Default - Find all files that set net.ipv4.conf.default.forwarding
     to correct value
   ansible.builtin.shell:
-    cmd: find -L {{ sysctl_paths | join(" ") }} -type f -name '*.conf' | xargs grep -HP '^\s*net.ipv4.conf.default.forwarding\s*=\s*{{
-      sysctl_net_ipv4_conf_default_forwarding_value }}$'
+    cmd: 'set -o pipefail
+
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.default.forwarding\s*=\s*{{
+      sysctl_net_ipv4_conf_default_forwarding_value }}$''
+
+      '
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -17627,7 +18022,11 @@
 
 - name: Enable Kernel Parameter to Log Martian Packets on all IPv4 Interfaces by Default - Find all files that contain net.ipv4.conf.default.log_martians
   ansible.builtin.shell:
-    cmd: find -L {{ sysctl_paths | join(" ") }} -type f -name '*.conf' | xargs grep -HP '^\s*net.ipv4.conf.default.log_martians\s*=\s*.*$'
+    cmd: 'set -o pipefail
+
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.default.log_martians\s*=\s*.*$''
+
+      '
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -17658,8 +18057,12 @@
 - name: Enable Kernel Parameter to Log Martian Packets on all IPv4 Interfaces by Default - Find all files that set net.ipv4.conf.default.log_martians
     to correct value
   ansible.builtin.shell:
-    cmd: find -L {{ sysctl_paths | join(" ") }} -type f -name '*.conf' | xargs grep -HP '^\s*net.ipv4.conf.default.log_martians\s*=\s*{{
-      sysctl_net_ipv4_conf_default_log_martians_value }}$'
+    cmd: 'set -o pipefail
+
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.default.log_martians\s*=\s*{{
+      sysctl_net_ipv4_conf_default_log_martians_value }}$''
+
+      '
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -17814,7 +18217,11 @@
 - name: Enable Kernel Parameter to Use Reverse Path Filtering on all IPv4 Interfaces by Default - Find all files that contain
     net.ipv4.conf.default.rp_filter
   ansible.builtin.shell:
-    cmd: find -L {{ sysctl_paths | join(" ") }} -type f -name '*.conf' | xargs grep -HP '^\s*net.ipv4.conf.default.rp_filter\s*=\s*.*$'
+    cmd: 'set -o pipefail
+
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.default.rp_filter\s*=\s*.*$''
+
+      '
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -17846,8 +18253,12 @@
 - name: Enable Kernel Parameter to Use Reverse Path Filtering on all IPv4 Interfaces by Default - Find all files that set
     net.ipv4.conf.default.rp_filter to correct value
   ansible.builtin.shell:
-    cmd: find -L {{ sysctl_paths | join(" ") }} -type f -name '*.conf' | xargs grep -HP '^\s*net.ipv4.conf.default.rp_filter\s*=\s*{{
-      sysctl_net_ipv4_conf_default_rp_filter_value }}$'
+    cmd: 'set -o pipefail
+
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.default.rp_filter\s*=\s*{{
+      sysctl_net_ipv4_conf_default_rp_filter_value }}$''
+
+      '
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -18003,7 +18414,11 @@
 
 - name: Configure Kernel Parameter for Accepting Secure Redirects By Default - Find all files that contain net.ipv4.conf.default.secure_redirects
   ansible.builtin.shell:
-    cmd: find -L {{ sysctl_paths | join(" ") }} -type f -name '*.conf' | xargs grep -HP '^\s*net.ipv4.conf.default.secure_redirects\s*=\s*.*$'
+    cmd: 'set -o pipefail
+
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.default.secure_redirects\s*=\s*.*$''
+
+      '
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -18033,8 +18448,12 @@
 - name: Configure Kernel Parameter for Accepting Secure Redirects By Default - Find all files that set net.ipv4.conf.default.secure_redirects
     to correct value
   ansible.builtin.shell:
-    cmd: find -L {{ sysctl_paths | join(" ") }} -type f -name '*.conf' | xargs grep -HP '^\s*net.ipv4.conf.default.secure_redirects\s*=\s*{{
-      sysctl_net_ipv4_conf_default_secure_redirects_value }}$'
+    cmd: 'set -o pipefail
+
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.default.secure_redirects\s*=\s*{{
+      sysctl_net_ipv4_conf_default_secure_redirects_value }}$''
+
+      '
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -18187,7 +18606,11 @@
 
 - name: Enable Kernel Parameter to Ignore ICMP Broadcast Echo Requests on IPv4 Interfaces - Find all files that contain net.ipv4.icmp_echo_ignore_broadcasts
   ansible.builtin.shell:
-    cmd: find -L {{ sysctl_paths | join(" ") }} -type f -name '*.conf' | xargs grep -HP '^\s*net.ipv4.icmp_echo_ignore_broadcasts\s*=\s*.*$'
+    cmd: 'set -o pipefail
+
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.icmp_echo_ignore_broadcasts\s*=\s*.*$''
+
+      '
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -18222,8 +18645,12 @@
 - name: Enable Kernel Parameter to Ignore ICMP Broadcast Echo Requests on IPv4 Interfaces - Find all files that set net.ipv4.icmp_echo_ignore_broadcasts
     to correct value
   ansible.builtin.shell:
-    cmd: find -L {{ sysctl_paths | join(" ") }} -type f -name '*.conf' | xargs grep -HP '^\s*net.ipv4.icmp_echo_ignore_broadcasts\s*=\s*{{
-      sysctl_net_ipv4_icmp_echo_ignore_broadcasts_value }}$'
+    cmd: 'set -o pipefail
+
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.icmp_echo_ignore_broadcasts\s*=\s*{{
+      sysctl_net_ipv4_icmp_echo_ignore_broadcasts_value }}$''
+
+      '
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -18395,7 +18822,11 @@
 
 - name: Enable Kernel Parameter to Ignore Bogus ICMP Error Responses on IPv4 Interfaces - Find all files that contain net.ipv4.icmp_ignore_bogus_error_responses
   ansible.builtin.shell:
-    cmd: find -L {{ sysctl_paths | join(" ") }} -type f -name '*.conf' | xargs grep -HP '^\s*net.ipv4.icmp_ignore_bogus_error_responses\s*=\s*.*$'
+    cmd: 'set -o pipefail
+
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.icmp_ignore_bogus_error_responses\s*=\s*.*$''
+
+      '
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -18429,8 +18860,12 @@
 - name: Enable Kernel Parameter to Ignore Bogus ICMP Error Responses on IPv4 Interfaces - Find all files that set net.ipv4.icmp_ignore_bogus_error_responses
     to correct value
   ansible.builtin.shell:
-    cmd: find -L {{ sysctl_paths | join(" ") }} -type f -name '*.conf' | xargs grep -HP '^\s*net.ipv4.icmp_ignore_bogus_error_responses\s*=\s*{{
-      sysctl_net_ipv4_icmp_ignore_bogus_error_responses_value }}$'
+    cmd: 'set -o pipefail
+
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.icmp_ignore_bogus_error_responses\s*=\s*{{
+      sysctl_net_ipv4_icmp_ignore_bogus_error_responses_value }}$''
+
+      '
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -18602,7 +19037,11 @@
 
 - name: Enable Kernel Parameter to Use TCP Syncookies on Network Interfaces - Find all files that contain net.ipv4.tcp_syncookies
   ansible.builtin.shell:
-    cmd: find -L {{ sysctl_paths | join(" ") }} -type f -name '*.conf' | xargs grep -HP '^\s*net.ipv4.tcp_syncookies\s*=\s*.*$'
+    cmd: 'set -o pipefail
+
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.tcp_syncookies\s*=\s*.*$''
+
+      '
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -18640,8 +19079,12 @@
 - name: Enable Kernel Parameter to Use TCP Syncookies on Network Interfaces - Find all files that set net.ipv4.tcp_syncookies
     to correct value
   ansible.builtin.shell:
-    cmd: find -L {{ sysctl_paths | join(" ") }} -type f -name '*.conf' | xargs grep -HP '^\s*net.ipv4.tcp_syncookies\s*=\s*{{
-      sysctl_net_ipv4_tcp_syncookies_value }}$'
+    cmd: 'set -o pipefail
+
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.tcp_syncookies\s*=\s*{{
+      sysctl_net_ipv4_tcp_syncookies_value }}$''
+
+      '
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -18826,7 +19269,11 @@
 
 - name: Disable Kernel Parameter for Sending ICMP Redirects on all IPv4 Interfaces - Find all files that contain net.ipv4.conf.all.send_redirects
   ansible.builtin.shell:
-    cmd: find -L {{ sysctl_paths | join(" ") }} -type f -name '*.conf' | xargs grep -HP '^\s*net.ipv4.conf.all.send_redirects\s*=\s*.*$'
+    cmd: 'set -o pipefail
+
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.all.send_redirects\s*=\s*.*$''
+
+      '
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -18862,7 +19309,11 @@
 - name: Disable Kernel Parameter for Sending ICMP Redirects on all IPv4 Interfaces - Find all files that set net.ipv4.conf.all.send_redirects
     to correct value
   ansible.builtin.shell:
-    cmd: find -L {{ sysctl_paths | join(" ") }} -type f -name '*.conf' | xargs grep -HP '^\s*net.ipv4.conf.all.send_redirects\s*=\s*0$'
+    cmd: 'set -o pipefail
+
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.all.send_redirects\s*=\s*0$''
+
+      '
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -19041,7 +19492,11 @@
 - name: Disable Kernel Parameter for Sending ICMP Redirects on all IPv4 Interfaces by Default - Find all files that contain
     net.ipv4.conf.default.send_redirects
   ansible.builtin.shell:
-    cmd: find -L {{ sysctl_paths | join(" ") }} -type f -name '*.conf' | xargs grep -HP '^\s*net.ipv4.conf.default.send_redirects\s*=\s*.*$'
+    cmd: 'set -o pipefail
+
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.default.send_redirects\s*=\s*.*$''
+
+      '
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -19077,7 +19532,11 @@
 - name: Disable Kernel Parameter for Sending ICMP Redirects on all IPv4 Interfaces by Default - Find all files that set net.ipv4.conf.default.send_redirects
     to correct value
   ansible.builtin.shell:
-    cmd: find -L {{ sysctl_paths | join(" ") }} -type f -name '*.conf' | xargs grep -HP '^\s*net.ipv4.conf.default.send_redirects\s*=\s*0$'
+    cmd: 'set -o pipefail
+
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.default.send_redirects\s*=\s*0$''
+
+      '
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -19617,6 +20076,7 @@
 
 - name: Deactivate Wireless Network Interfaces - NetworkManager Deactivate Wireless Network Interfaces
   ansible.builtin.command: nmcli radio wifi off
+  changed_when: true
   when:
   - DISA_STIG_RHEL_10_700870 | bool
   - low_complexity | bool
@@ -19952,7 +20412,11 @@
 
 - name: Enable Kernel Parameter to Enforce DAC on Hardlinks - Find all files that contain fs.protected_hardlinks
   ansible.builtin.shell:
-    cmd: find -L {{ sysctl_paths | join(" ") }} -type f -name '*.conf' | xargs grep -HP '^\s*fs.protected_hardlinks\s*=\s*.*$'
+    cmd: 'set -o pipefail
+
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*fs.protected_hardlinks\s*=\s*.*$''
+
+      '
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -19980,7 +20444,11 @@
 
 - name: Enable Kernel Parameter to Enforce DAC on Hardlinks - Find all files that set fs.protected_hardlinks to correct value
   ansible.builtin.shell:
-    cmd: find -L {{ sysctl_paths | join(" ") }} -type f -name '*.conf' | xargs grep -HP '^\s*fs.protected_hardlinks\s*=\s*1$'
+    cmd: 'set -o pipefail
+
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*fs.protected_hardlinks\s*=\s*1$''
+
+      '
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -26067,7 +26535,11 @@
 
 - name: Restrict Access to Kernel Message Buffer - Find all files that contain kernel.dmesg_restrict
   ansible.builtin.shell:
-    cmd: find -L {{ sysctl_paths | join(" ") }} -type f -name '*.conf' | xargs grep -HP '^\s*kernel.dmesg_restrict\s*=\s*.*$'
+    cmd: 'set -o pipefail
+
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*kernel.dmesg_restrict\s*=\s*.*$''
+
+      '
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -26096,7 +26568,11 @@
 
 - name: Restrict Access to Kernel Message Buffer - Find all files that set kernel.dmesg_restrict to correct value
   ansible.builtin.shell:
-    cmd: find -L {{ sysctl_paths | join(" ") }} -type f -name '*.conf' | xargs grep -HP '^\s*kernel.dmesg_restrict\s*=\s*1$'
+    cmd: 'set -o pipefail
+
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*kernel.dmesg_restrict\s*=\s*1$''
+
+      '
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -26239,7 +26715,11 @@
 
 - name: Restrict usage of ptrace to descendant processes - Find all files that contain kernel.yama.ptrace_scope
   ansible.builtin.shell:
-    cmd: find -L {{ sysctl_paths | join(" ") }} -type f -name '*.conf' | xargs grep -HP '^\s*kernel.yama.ptrace_scope\s*=\s*.*$'
+    cmd: 'set -o pipefail
+
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*kernel.yama.ptrace_scope\s*=\s*.*$''
+
+      '
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -26266,7 +26746,11 @@
 
 - name: Restrict usage of ptrace to descendant processes - Find all files that set kernel.yama.ptrace_scope to correct value
   ansible.builtin.shell:
-    cmd: find -L {{ sysctl_paths | join(" ") }} -type f -name '*.conf' | xargs grep -HP '^\s*kernel.yama.ptrace_scope\s*=\s*1$'
+    cmd: 'set -o pipefail
+
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*kernel.yama.ptrace_scope\s*=\s*1$''
+
+      '
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -26449,6 +26933,7 @@
     value: '0'
     state: present
     no_extra_spaces: true
+    mode: 420
   when:
   - DISA_STIG_RHEL_10_701150 | bool
   - coredump_disable_backtraces | bool
@@ -26588,6 +27073,7 @@
     value: none
     state: present
     no_extra_spaces: true
+    mode: 420
   when:
   - DISA_STIG_RHEL_10_701160 | bool
   - coredump_disable_storage | bool
@@ -26966,7 +27452,11 @@
 
 - name: Disable Core Dumps for SUID programs - Find all files that contain fs.suid_dumpable
   ansible.builtin.shell:
-    cmd: find -L {{ sysctl_paths | join(" ") }} -type f -name '*.conf' | xargs grep -HP '^\s*fs.suid_dumpable\s*=\s*.*$'
+    cmd: 'set -o pipefail
+
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*fs.suid_dumpable\s*=\s*.*$''
+
+      '
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -26995,7 +27485,11 @@
 
 - name: Disable Core Dumps for SUID programs - Find all files that set fs.suid_dumpable to correct value
   ansible.builtin.shell:
-    cmd: find -L {{ sysctl_paths | join(" ") }} -type f -name '*.conf' | xargs grep -HP '^\s*fs.suid_dumpable\s*=\s*0$'
+    cmd: 'set -o pipefail
+
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*fs.suid_dumpable\s*=\s*0$''
+
+      '
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -27141,7 +27635,11 @@
 
 - name: Restrict Exposed Kernel Pointer Addresses Access - Find all files that contain kernel.kptr_restrict
   ansible.builtin.shell:
-    cmd: find -L {{ sysctl_paths | join(" ") }} -type f -name '*.conf' | xargs grep -HP '^\s*kernel.kptr_restrict\s*=\s*.*$'
+    cmd: 'set -o pipefail
+
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*kernel.kptr_restrict\s*=\s*.*$''
+
+      '
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -27171,8 +27669,12 @@
 
 - name: Restrict Exposed Kernel Pointer Addresses Access - Find all files that set kernel.kptr_restrict to correct value
   ansible.builtin.shell:
-    cmd: find -L {{ sysctl_paths | join(" ") }} -type f -name '*.conf' | xargs grep -HP '^\s*kernel.kptr_restrict\s*=\s*{{
-      sysctl_kernel_kptr_restrict_value }}$'
+    cmd: 'set -o pipefail
+
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*kernel.kptr_restrict\s*=\s*{{
+      sysctl_kernel_kptr_restrict_value }}$''
+
+      '
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -27327,7 +27829,11 @@
 
 - name: Enable Randomized Layout of Virtual Address Space - Find all files that contain kernel.randomize_va_space
   ansible.builtin.shell:
-    cmd: find -L {{ sysctl_paths | join(" ") }} -type f -name '*.conf' | xargs grep -HP '^\s*kernel.randomize_va_space\s*=\s*.*$'
+    cmd: 'set -o pipefail
+
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*kernel.randomize_va_space\s*=\s*.*$''
+
+      '
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -27361,7 +27867,11 @@
 
 - name: Enable Randomized Layout of Virtual Address Space - Find all files that set kernel.randomize_va_space to correct value
   ansible.builtin.shell:
-    cmd: find -L {{ sysctl_paths | join(" ") }} -type f -name '*.conf' | xargs grep -HP '^\s*kernel.randomize_va_space\s*=\s*2$'
+    cmd: 'set -o pipefail
+
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*kernel.randomize_va_space\s*=\s*2$''
+
+      '
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -27705,6 +28215,7 @@
         path: /etc/selinux/config
         create: true
         regexp: (?i)^SELINUX=
+        mode: '0644'
         state: absent
       check_mode: true
       changed_when: false
@@ -27714,6 +28225,7 @@
         path: /etc/selinux/config
         create: true
         regexp: (?i)^SELINUX=
+        mode: '0644'
         state: absent
       when: dupes.found is defined and dupes.found > 1
     - name: Insert correct line to /etc/selinux/config
@@ -27721,6 +28233,7 @@
         path: /etc/selinux/config
         create: true
         regexp: (?i)^SELINUX=
+        mode: '0644'
         line: SELINUX=permissive
         state: present
   - name: Ensure SELinux is Not Disabled - Mark system to relabel SELinux on next boot
@@ -27755,6 +28268,7 @@
       path: /etc/selinux/config
       create: true
       regexp: (?i)^SELINUXTYPE=
+      mode: '0644'
       state: absent
     check_mode: true
     changed_when: false
@@ -27764,6 +28278,7 @@
       path: /etc/selinux/config
       create: true
       regexp: (?i)^SELINUXTYPE=
+      mode: '0644'
       state: absent
     when: dupes.found is defined and dupes.found > 1
   - name: Insert correct line to /etc/selinux/config
@@ -27771,6 +28286,7 @@
       path: /etc/selinux/config
       create: true
       regexp: (?i)^SELINUXTYPE=
+      mode: '0644'
       line: SELINUXTYPE={{ var_selinux_policy_name }}
       state: present
   when:
@@ -27832,6 +28348,7 @@
     follow: false
     state: directory
     group: '{{ file_groupowner_cron_d_newgroup }}'
+    mode: '0700'
   when:
   - DISA_STIG_RHEL_10_400135 | bool
   - configure_strategy | bool
@@ -27887,6 +28404,7 @@
     follow: false
     state: directory
     group: '{{ file_groupowner_cron_daily_newgroup }}'
+    mode: '0700'
   when:
   - DISA_STIG_RHEL_10_400135 | bool
   - configure_strategy | bool
@@ -27942,6 +28460,7 @@
     follow: false
     state: directory
     group: '{{ file_groupowner_cron_hourly_newgroup }}'
+    mode: '0700'
   when:
   - DISA_STIG_RHEL_10_400135 | bool
   - configure_strategy | bool
@@ -27997,6 +28516,7 @@
     follow: false
     state: directory
     group: '{{ file_groupowner_cron_monthly_newgroup }}'
+    mode: '0700'
   when:
   - DISA_STIG_RHEL_10_400135 | bool
   - configure_strategy | bool
@@ -28052,6 +28572,7 @@
     follow: false
     state: directory
     group: '{{ file_groupowner_cron_weekly_newgroup }}'
+    mode: '0700'
   when:
   - DISA_STIG_RHEL_10_400135 | bool
   - configure_strategy | bool
@@ -28236,6 +28757,7 @@
     follow: false
     state: directory
     owner: '{{ file_owner_cron_d_newown }}'
+    mode: '0700'
   when:
   - DISA_STIG_RHEL_10_400130 | bool
   - configure_strategy | bool
@@ -28291,6 +28813,7 @@
     follow: false
     state: directory
     owner: '{{ file_owner_cron_daily_newown }}'
+    mode: '0700'
   when:
   - DISA_STIG_RHEL_10_400130 | bool
   - configure_strategy | bool
@@ -28346,6 +28869,7 @@
     follow: false
     state: directory
     owner: '{{ file_owner_cron_hourly_newown }}'
+    mode: '0700'
   when:
   - DISA_STIG_RHEL_10_400130 | bool
   - configure_strategy | bool
@@ -28401,6 +28925,7 @@
     follow: false
     state: directory
     owner: '{{ file_owner_cron_monthly_newown }}'
+    mode: '0700'
   when:
   - DISA_STIG_RHEL_10_400130 | bool
   - configure_strategy | bool
@@ -28456,6 +28981,7 @@
     follow: false
     state: directory
     owner: '{{ file_owner_cron_weekly_newown }}'
+    mode: '0700'
   when:
   - DISA_STIG_RHEL_10_400130 | bool
   - configure_strategy | bool
@@ -29548,7 +30074,9 @@
 
 - name: Extract sourcedir paths from chrony configuration
   ansible.builtin.shell:
-    cmd: grep '^[[:space:]]*sourcedir[[:space:]]\+' /etc/chrony.conf | awk '{print $2}'
+    cmd: 'set -o pipefail
+
+      grep ''^[[:space:]]*sourcedir[[:space:]]\+'' /etc/chrony.conf | awk ''{print $2}'''
   register: chrony_sourcedir_paths
   changed_when: false
   failed_when: false
@@ -29580,8 +30108,9 @@
 
 - name: Check for server/pool entries in sourcedir .sources files
   ansible.builtin.shell:
-    cmd: "for dir in {{ chrony_sourcedir_paths.stdout_lines | join(' ') }}; do\n  if [ -d \"$dir\" ]; then\n    grep -q '^[[:space:]]*\\\
-      (server\\|pool\\)[[:space:]]\\+[[:graph:]]\\+' \"$dir\"/*.sources 2>/dev/null && exit 0\n  fi\ndone\nexit 1\n"
+    cmd: "for dir in {{ chrony_sourcedir_paths.stdout_lines | join(' ') }}; do\n  if [ -d \"$dir\" ]; then\n    grep -q -e\
+      \ '^[[:space:]]*server[[:space:]]\\+[[:graph:]]\\+' -e '^[[:space:]]*pool[[:space:]]\\+[[:graph:]]\\+' \"$dir\"/*.sources\
+      \ 2>/dev/null && exit 0\n  fi\ndone\nexit 1\n"
   register: chrony_sourcedir_has_servers
   changed_when: false
   failed_when: false
@@ -29614,7 +30143,9 @@
 
 - name: Extract confdir paths from chrony configuration
   ansible.builtin.shell:
-    cmd: grep '^[[:space:]]*confdir[[:space:]]\+' /etc/chrony.conf | awk '{print $2}'
+    cmd: 'set -o pipefail
+
+      grep ''^[[:space:]]*confdir[[:space:]]\+'' /etc/chrony.conf | awk ''{print $2}'''
   register: chrony_confdir_paths
   changed_when: false
   failed_when: false
@@ -29647,8 +30178,9 @@
 
 - name: Check for server/pool entries in confdir .conf files
   ansible.builtin.shell:
-    cmd: "for dir in {{ chrony_confdir_paths.stdout_lines | join(' ') }}; do\n  if [ -d \"$dir\" ]; then\n    grep -q '^[[:space:]]*\\\
-      (server\\|pool\\)[[:space:]]\\+[[:graph:]]\\+' \"$dir\"/*.conf 2>/dev/null && exit 0\n  fi\ndone\nexit 1\n"
+    cmd: "for dir in {{ chrony_confdir_paths.stdout_lines | join(' ') }}; do\n  if [ -d \"$dir\" ]; then\n    grep -q -e '^[[:space:]]*server[[:space:]]\\\
+      +[[:graph:]]\\+' -e '^[[:space:]]*pool[[:space:]]\\+[[:graph:]]\\+' \"$dir\"/*.conf 2>/dev/null && exit 0\n  fi\ndone\n\
+      exit 1\n"
   register: chrony_confdir_has_servers
   changed_when: false
   failed_when: false
@@ -29939,6 +30471,7 @@
     follow: false
     state: directory
     group: '{{ directory_groupowner_sshd_config_d_newgroup }}'
+    mode: '0700'
   when:
   - DISA_STIG_RHEL_10_400150 | bool
   - configure_strategy | bool
@@ -29992,6 +30525,7 @@
     follow: false
     state: directory
     owner: '{{ directory_owner_sshd_config_d_newown }}'
+    mode: '0700'
   when:
   - DISA_STIG_RHEL_10_400155 | bool
   - configure_strategy | bool
@@ -31092,6 +31626,7 @@
       path: /etc/ssh/sshd_config
       create: false
       regexp: (?i)(?i)^\s*{{ "ClientAliveCountMax"| regex_escape }}\s+
+      mode: '0600'
       state: absent
   - name: Check if /etc/ssh/sshd_config.d exists
     ansible.builtin.stat:
@@ -31110,6 +31645,7 @@
       path: '{{ item.path }}'
       create: false
       regexp: (?i)(?i)^\s*{{ "ClientAliveCountMax"| regex_escape }}\s+
+      mode: '0600'
       state: absent
     with_items: '{{ _etc_ssh_sshd_config_d_has_parameter.files | default([]) }}'
     when: _etc_ssh_sshd_config_d_has_parameter.matched > 0
@@ -31118,6 +31654,7 @@
       path: /etc/ssh/sshd_config.d/00-complianceascode-hardening.conf
       create: true
       regexp: (?i)(?i)^\s*{{ "ClientAliveCountMax"| regex_escape }}\s+
+      mode: '0600'
       line: ClientAliveCountMax {{ var_sshd_set_keepalive }}
       state: present
       insertbefore: BOF
@@ -31385,6 +31922,7 @@
       path: /etc/ssh/sshd_config
       create: false
       regexp: (?i)(?i)^\s*{{ "ClientAliveInterval"| regex_escape }}\s+
+      mode: '0600'
       state: absent
   - name: Check if /etc/ssh/sshd_config.d exists
     ansible.builtin.stat:
@@ -31403,6 +31941,7 @@
       path: '{{ item.path }}'
       create: false
       regexp: (?i)(?i)^\s*{{ "ClientAliveInterval"| regex_escape }}\s+
+      mode: '0600'
       state: absent
     with_items: '{{ _etc_ssh_sshd_config_d_has_parameter.files | default([]) }}'
     when: _etc_ssh_sshd_config_d_has_parameter.matched > 0
@@ -31411,6 +31950,7 @@
       path: /etc/ssh/sshd_config.d/00-complianceascode-hardening.conf
       create: true
       regexp: (?i)(?i)^\s*{{ "ClientAliveInterval"| regex_escape }}\s+
+      mode: '0600'
       line: ClientAliveInterval {{ sshd_idle_timeout_value }}
       state: present
       insertbefore: BOF
@@ -31667,6 +32207,7 @@
       path: /etc/ssh/sshd_config
       create: false
       regexp: (?i)(?i)^\s*{{ "HostbasedAuthentication"| regex_escape }}\s+
+      mode: '0600'
       state: absent
   - name: Check if /etc/ssh/sshd_config.d exists
     ansible.builtin.stat:
@@ -31685,6 +32226,7 @@
       path: '{{ item.path }}'
       create: false
       regexp: (?i)(?i)^\s*{{ "HostbasedAuthentication"| regex_escape }}\s+
+      mode: '0600'
       state: absent
     with_items: '{{ _etc_ssh_sshd_config_d_has_parameter.files | default([]) }}'
     when: _etc_ssh_sshd_config_d_has_parameter.matched > 0
@@ -31693,6 +32235,7 @@
       path: /etc/ssh/sshd_config.d/01-complianceascode-reinforce-os-defaults.conf
       create: true
       regexp: (?i)(?i)^\s*{{ "HostbasedAuthentication"| regex_escape }}\s+
+      mode: '0600'
       line: HostbasedAuthentication no
       state: present
       insertbefore: BOF
@@ -31948,6 +32491,7 @@
       path: /etc/ssh/sshd_config
       create: false
       regexp: (?i)(?i)^\s*{{ "PermitEmptyPasswords"| regex_escape }}\s+
+      mode: '0600'
       state: absent
   - name: Check if /etc/ssh/sshd_config.d exists
     ansible.builtin.stat:
@@ -31966,6 +32510,7 @@
       path: '{{ item.path }}'
       create: false
       regexp: (?i)(?i)^\s*{{ "PermitEmptyPasswords"| regex_escape }}\s+
+      mode: '0600'
       state: absent
     with_items: '{{ _etc_ssh_sshd_config_d_has_parameter.files | default([]) }}'
     when: _etc_ssh_sshd_config_d_has_parameter.matched > 0
@@ -31974,6 +32519,7 @@
       path: /etc/ssh/sshd_config.d/01-complianceascode-reinforce-os-defaults.conf
       create: true
       regexp: (?i)(?i)^\s*{{ "PermitEmptyPasswords"| regex_escape }}\s+
+      mode: '0600'
       line: PermitEmptyPasswords no
       state: present
       insertbefore: BOF
@@ -32221,6 +32767,7 @@
       path: /etc/ssh/sshd_config
       create: false
       regexp: (?i)(?i)^\s*{{ "IgnoreRhosts"| regex_escape }}\s+
+      mode: '0600'
       state: absent
   - name: Check if /etc/ssh/sshd_config.d exists
     ansible.builtin.stat:
@@ -32239,6 +32786,7 @@
       path: '{{ item.path }}'
       create: false
       regexp: (?i)(?i)^\s*{{ "IgnoreRhosts"| regex_escape }}\s+
+      mode: '0600'
       state: absent
     with_items: '{{ _etc_ssh_sshd_config_d_has_parameter.files | default([]) }}'
     when: _etc_ssh_sshd_config_d_has_parameter.matched > 0
@@ -32247,6 +32795,7 @@
       path: /etc/ssh/sshd_config.d/01-complianceascode-reinforce-os-defaults.conf
       create: true
       regexp: (?i)(?i)^\s*{{ "IgnoreRhosts"| regex_escape }}\s+
+      mode: '0600'
       line: IgnoreRhosts yes
       state: present
       insertbefore: BOF
@@ -32515,6 +33064,7 @@
       path: /etc/ssh/sshd_config
       create: false
       regexp: (?i)(?i)^\s*{{ "PermitRootLogin"| regex_escape }}\s+
+      mode: '0600'
       state: absent
   - name: Check if /etc/ssh/sshd_config.d exists
     ansible.builtin.stat:
@@ -32533,6 +33083,7 @@
       path: '{{ item.path }}'
       create: false
       regexp: (?i)(?i)^\s*{{ "PermitRootLogin"| regex_escape }}\s+
+      mode: '0600'
       state: absent
     with_items: '{{ _etc_ssh_sshd_config_d_has_parameter.files | default([]) }}'
     when: _etc_ssh_sshd_config_d_has_parameter.matched > 0
@@ -32541,6 +33092,7 @@
       path: /etc/ssh/sshd_config.d/00-complianceascode-hardening.conf
       create: true
       regexp: (?i)(?i)^\s*{{ "PermitRootLogin"| regex_escape }}\s+
+      mode: '0600'
       line: PermitRootLogin no
       state: present
       insertbefore: BOF
@@ -32799,6 +33351,7 @@
       path: /etc/ssh/sshd_config
       create: false
       regexp: (?i)(?i)^\s*{{ "PermitUserEnvironment"| regex_escape }}\s+
+      mode: '0600'
       state: absent
   - name: Check if /etc/ssh/sshd_config.d exists
     ansible.builtin.stat:
@@ -32817,6 +33370,7 @@
       path: '{{ item.path }}'
       create: false
       regexp: (?i)(?i)^\s*{{ "PermitUserEnvironment"| regex_escape }}\s+
+      mode: '0600'
       state: absent
     with_items: '{{ _etc_ssh_sshd_config_d_has_parameter.files | default([]) }}'
     when: _etc_ssh_sshd_config_d_has_parameter.matched > 0
@@ -32825,6 +33379,7 @@
       path: /etc/ssh/sshd_config.d/01-complianceascode-reinforce-os-defaults.conf
       create: true
       regexp: (?i)(?i)^\s*{{ "PermitUserEnvironment"| regex_escape }}\s+
+      mode: '0600'
       line: PermitUserEnvironment no
       state: present
       insertbefore: BOF
@@ -33040,6 +33595,7 @@
       path: /etc/ssh/sshd_config
       create: false
       regexp: (?i)(?i)^\s*{{ "UsePAM"| regex_escape }}\s+
+      mode: '0600'
       state: absent
   - name: Check if /etc/ssh/sshd_config.d exists
     ansible.builtin.stat:
@@ -33058,6 +33614,7 @@
       path: '{{ item.path }}'
       create: false
       regexp: (?i)(?i)^\s*{{ "UsePAM"| regex_escape }}\s+
+      mode: '0600'
       state: absent
     with_items: '{{ _etc_ssh_sshd_config_d_has_parameter.files | default([]) }}'
     when: _etc_ssh_sshd_config_d_has_parameter.matched > 0
@@ -33066,6 +33623,7 @@
       path: /etc/ssh/sshd_config.d/00-complianceascode-hardening.conf
       create: true
       regexp: (?i)(?i)^\s*{{ "UsePAM"| regex_escape }}\s+
+      mode: '0600'
       line: UsePAM yes
       state: present
       insertbefore: BOF
@@ -33277,6 +33835,7 @@
       path: /etc/ssh/sshd_config
       create: false
       regexp: (?i)(?i)^\s*{{ "Banner"| regex_escape }}\s+
+      mode: '0600'
       state: absent
   - name: Check if /etc/ssh/sshd_config.d exists
     ansible.builtin.stat:
@@ -33295,6 +33854,7 @@
       path: '{{ item.path }}'
       create: false
       regexp: (?i)(?i)^\s*{{ "Banner"| regex_escape }}\s+
+      mode: '0600'
       state: absent
     with_items: '{{ _etc_ssh_sshd_config_d_has_parameter.files | default([]) }}'
     when: _etc_ssh_sshd_config_d_has_parameter.matched > 0
@@ -33303,6 +33863,7 @@
       path: /etc/ssh/sshd_config.d/00-complianceascode-hardening.conf
       create: true
       regexp: (?i)(?i)^\s*{{ "Banner"| regex_escape }}\s+
+      mode: '0600'
       line: Banner /etc/issue.net
       state: present
       insertbefore: BOF
@@ -33498,6 +34059,7 @@
       path: /etc/ssh/sshd_config
       create: false
       regexp: (?i)(?i)^\s*{{ "LoginGraceTime"| regex_escape }}\s+
+      mode: '0600'
       state: absent
   - name: Check if /etc/ssh/sshd_config.d exists
     ansible.builtin.stat:
@@ -33516,6 +34078,7 @@
       path: '{{ item.path }}'
       create: false
       regexp: (?i)(?i)^\s*{{ "LoginGraceTime"| regex_escape }}\s+
+      mode: '0600'
       state: absent
     with_items: '{{ _etc_ssh_sshd_config_d_has_parameter.files | default([]) }}'
     when: _etc_ssh_sshd_config_d_has_parameter.matched > 0
@@ -33524,6 +34087,7 @@
       path: /etc/ssh/sshd_config.d/00-complianceascode-hardening.conf
       create: true
       regexp: (?i)(?i)^\s*{{ "LoginGraceTime"| regex_escape }}\s+
+      mode: '0600'
       line: LoginGraceTime {{ var_sshd_set_login_grace_time }}
       state: present
       insertbefore: BOF
@@ -33741,6 +34305,7 @@
       path: /etc/ssh/sshd_config
       create: false
       regexp: (?i)(?i)^\s*{{ "LogLevel"| regex_escape }}\s+
+      mode: '0600'
       state: absent
   - name: Check if /etc/ssh/sshd_config.d exists
     ansible.builtin.stat:
@@ -33759,6 +34324,7 @@
       path: '{{ item.path }}'
       create: false
       regexp: (?i)(?i)^\s*{{ "LogLevel"| regex_escape }}\s+
+      mode: '0600'
       state: absent
     with_items: '{{ _etc_ssh_sshd_config_d_has_parameter.files | default([]) }}'
     when: _etc_ssh_sshd_config_d_has_parameter.matched > 0
@@ -33767,6 +34333,7 @@
       path: /etc/ssh/sshd_config.d/00-complianceascode-hardening.conf
       create: true
       regexp: (?i)(?i)^\s*{{ "LogLevel"| regex_escape }}\s+
+      mode: '0600'
       line: LogLevel VERBOSE
       state: present
       insertbefore: BOF
@@ -33966,6 +34533,7 @@
       path: /etc/ssh/sshd_config
       create: false
       regexp: (?i)(?i)^\s*{{ "MaxAuthTries"| regex_escape }}\s+
+      mode: '0600'
       state: absent
   - name: Check if /etc/ssh/sshd_config.d exists
     ansible.builtin.stat:
@@ -33984,6 +34552,7 @@
       path: '{{ item.path }}'
       create: false
       regexp: (?i)(?i)^\s*{{ "MaxAuthTries"| regex_escape }}\s+
+      mode: '0600'
       state: absent
     with_items: '{{ _etc_ssh_sshd_config_d_has_parameter.files | default([]) }}'
     when: _etc_ssh_sshd_config_d_has_parameter.matched > 0
@@ -33992,6 +34561,7 @@
       path: /etc/ssh/sshd_config.d/00-complianceascode-hardening.conf
       create: true
       regexp: (?i)(?i)^\s*{{ "MaxAuthTries"| regex_escape }}\s+
+      mode: '0600'
       line: MaxAuthTries {{ sshd_max_auth_tries_value }}
       state: present
       insertbefore: BOF
@@ -34179,6 +34749,7 @@
       path: /etc/ssh/sshd_config
       create: false
       regexp: (?i)(?i)^\s*{{ "MaxSessions"| regex_escape }}\s+
+      mode: '0600'
       state: absent
   - name: Check if /etc/ssh/sshd_config.d exists
     ansible.builtin.stat:
@@ -34197,6 +34768,7 @@
       path: '{{ item.path }}'
       create: false
       regexp: (?i)(?i)^\s*{{ "MaxSessions"| regex_escape }}\s+
+      mode: '0600'
       state: absent
     with_items: '{{ _etc_ssh_sshd_config_d_has_parameter.files | default([]) }}'
     when: _etc_ssh_sshd_config_d_has_parameter.matched > 0
@@ -34205,6 +34777,7 @@
       path: /etc/ssh/sshd_config.d/00-complianceascode-hardening.conf
       create: true
       regexp: (?i)(?i)^\s*{{ "MaxSessions"| regex_escape }}\s+
+      mode: '0600'
       line: MaxSessions {{ var_sshd_max_sessions }}
       state: present
       insertbefore: BOF
@@ -34392,6 +34965,7 @@
       path: /etc/ssh/sshd_config
       create: false
       regexp: (?i)(?i)^\s*{{ "MaxStartups"| regex_escape }}\s+
+      mode: '0600'
       state: absent
   - name: Check if /etc/ssh/sshd_config.d exists
     ansible.builtin.stat:
@@ -34410,6 +34984,7 @@
       path: '{{ item.path }}'
       create: false
       regexp: (?i)(?i)^\s*{{ "MaxStartups"| regex_escape }}\s+
+      mode: '0600'
       state: absent
     with_items: '{{ _etc_ssh_sshd_config_d_has_parameter.files | default([]) }}'
     when: _etc_ssh_sshd_config_d_has_parameter.matched > 0
@@ -34418,6 +34993,7 @@
       path: /etc/ssh/sshd_config.d/00-complianceascode-hardening.conf
       create: true
       regexp: (?i)(?i)^\s*{{ "MaxStartups"| regex_escape }}\s+
+      mode: '0600'
       line: MaxStartups {{ var_sshd_set_maxstartups }}
       state: present
       insertbefore: BOF

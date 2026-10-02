@@ -3,7 +3,6 @@
     manager: auto
   tags:
   - always
-
 - name: Ensure dnf-automatic is installed
   ansible.builtin.package:
     name: dnf-automatic
@@ -15,9 +14,7 @@
   - medium_severity | bool
   - no_reboot_needed | bool
   - package_dnf_automatic_installed | bool
-  - ( not ( "kernel-core" in ansible_facts.packages and "bootc" in ansible_facts.packages and not "openshift-kubelet" in ansible_facts.packages
-    and "ostree" in ansible_proc_cmdline ) and not ( ansible_virtualization_type in ["docker", "lxc", "openvz", "podman",
-    "container"] ) )
+  - ( not ( "kernel-core" in ansible_facts.packages and "bootc" in ansible_facts.packages and not "openshift-kubelet" in ansible_facts.packages and "ostree" in ansible_proc_cmdline ) and not ( ansible_virtualization_type in ["docker", "lxc", "openvz", "podman", "container"] ) )
   tags:
   - CCE-83454-9
   - enable_strategy
@@ -26,7 +23,6 @@
   - medium_severity
   - no_reboot_needed
   - package_dnf-automatic_installed
-
 - name: 'Uninstall DHCP Server Package: Ensure dhcp-server is removed'
   ansible.builtin.package:
     name: dhcp-server
@@ -51,7 +47,6 @@
   - medium_severity | bool
   - no_reboot_needed | bool
   - package_dhcp_removed | bool
-
 - name: 'Uninstall Sendmail Package: Ensure sendmail is removed'
   ansible.builtin.package:
     name: sendmail
@@ -77,7 +72,6 @@
   - medium_severity
   - no_reboot_needed
   - package_sendmail_removed
-
 - name: 'Uninstall telnet-server Package: Ensure telnet-server is removed'
   ansible.builtin.package:
     name: telnet-server
@@ -105,7 +99,6 @@
   - low_disruption | bool
   - no_reboot_needed | bool
   - package_telnet_server_removed | bool
-
 - name: 'Remove telnet Clients: Ensure telnet is removed'
   ansible.builtin.package:
     name: telnet
@@ -128,7 +121,6 @@
   - low_severity | bool
   - no_reboot_needed | bool
   - package_telnet_removed | bool
-
 - name: 'Uninstall tftp-server Package: Ensure tftp-server is removed'
   ansible.builtin.package:
     name: tftp-server
@@ -155,7 +147,6 @@
   - low_disruption | bool
   - no_reboot_needed | bool
   - package_tftp_server_removed | bool
-
 - name: 'Remove tftp Daemon: Ensure tftp is removed'
   ansible.builtin.package:
     name: tftp
@@ -177,18 +168,15 @@
   - low_severity | bool
   - no_reboot_needed | bool
   - package_tftp_removed | bool
-
 - name: Gather the package facts
   ansible.builtin.package_facts:
     manager: auto
   tags:
   - always
-
 - name: Gather the service facts
   ansible.builtin.service_facts: null
   tags:
   - always
-
 - name: Configure dnf-automatic to Install Available Updates Automatically
   redhat.rhel_hardening_roles.ini_file:
     dest: /etc/dnf/automatic.conf
@@ -203,9 +191,7 @@
   - medium_severity | bool
   - no_reboot_needed | bool
   - unknown_strategy | bool
-  - ( not ( "kernel-core" in ansible_facts.packages and "bootc" in ansible_facts.packages and not "openshift-kubelet" in ansible_facts.packages
-    and "ostree" in ansible_proc_cmdline ) and not ( ansible_virtualization_type in ["docker", "lxc", "openvz", "podman",
-    "container"] ) )
+  - ( not ( "kernel-core" in ansible_facts.packages and "bootc" in ansible_facts.packages and not "openshift-kubelet" in ansible_facts.packages and "ostree" in ansible_proc_cmdline ) and not ( ansible_virtualization_type in ["docker", "lxc", "openvz", "podman", "container"] ) )
   tags:
   - CCE-83456-4
   - NIST-800-53-CM-6(a)
@@ -217,7 +203,6 @@
   - medium_severity
   - no_reboot_needed
   - unknown_strategy
-
 - name: Configure dnf-automatic to Install Only Security Updates
   redhat.rhel_hardening_roles.ini_file:
     dest: /etc/dnf/automatic.conf
@@ -232,9 +217,7 @@
   - medium_disruption | bool
   - no_reboot_needed | bool
   - unknown_strategy | bool
-  - ( not ( "kernel-core" in ansible_facts.packages and "bootc" in ansible_facts.packages and not "openshift-kubelet" in ansible_facts.packages
-    and "ostree" in ansible_proc_cmdline ) and not ( ansible_virtualization_type in ["docker", "lxc", "openvz", "podman",
-    "container"] ) )
+  - ( not ( "kernel-core" in ansible_facts.packages and "bootc" in ansible_facts.packages and not "openshift-kubelet" in ansible_facts.packages and "ostree" in ansible_proc_cmdline ) and not ( ansible_virtualization_type in ["docker", "lxc", "openvz", "podman", "container"] ) )
   tags:
   - CCE-83461-4
   - NIST-800-53-CM-6(a)
@@ -246,7 +229,6 @@
   - medium_disruption
   - no_reboot_needed
   - unknown_strategy
-
 - name: Ensure GPG check is globally activated
   redhat.rhel_hardening_roles.ini_file:
     dest: /etc/dnf/dnf.conf
@@ -287,7 +269,6 @@
   - low_complexity
   - medium_disruption
   - no_reboot_needed
-
 - name: Ensure GPG check Enabled for Local Packages (dnf)
   block:
   - name: Check stats of dnf
@@ -296,8 +277,7 @@
     register: pkg
   - name: Check if config file of dnf is a symlink
     ansible.builtin.set_fact:
-      pkg_config_file_symlink: '{{ pkg.stat.lnk_target if pkg.stat.lnk_target is match("^/.*") else "/etc/dnf/dnf.conf" |
-        dirname ~ "/" ~ pkg.stat.lnk_target }}'
+      pkg_config_file_symlink: '{{ pkg.stat.lnk_target if pkg.stat.lnk_target is match("^/.*") else "/etc/dnf/dnf.conf" | dirname ~ "/" ~ pkg.stat.lnk_target }}'
     when: pkg.stat.lnk_target is defined
   - name: Ensure GPG check Enabled for Local Packages (dnf)
     redhat.rhel_hardening_roles.ini_file:
@@ -333,7 +313,6 @@
   - medium_disruption
   - no_reboot_needed
   - unknown_strategy
-
 - name: Grep for dnf repo section names
   ansible.builtin.shell: 'set -o pipefail
 
@@ -374,7 +353,6 @@
   - low_complexity | bool
   - medium_disruption | bool
   - no_reboot_needed | bool
-
 - name: Set gpgcheck=1 for each dnf repo
   redhat.rhel_hardening_roles.ini_file:
     path: '{{ item[0] }}'
@@ -382,8 +360,8 @@
     option: gpgcheck
     value: '1'
     no_extra_spaces: true
-  loop: '{{ repo_grep_results.stdout |regex_findall( ''(.+\.repo):\[(.+)\]\n?'' ) if repo_grep_results is not skipped else
-    [] }}'
+    mode: '0644'
+  loop: '{{ repo_grep_results.stdout |regex_findall( ''(.+\.repo):\[(.+)\]\n?'' ) if repo_grep_results is not skipped else [] }}'
   when:
   - DISA_STIG_RHEL_09_214025 | bool
   - enable_strategy | bool
@@ -416,7 +394,6 @@
   - low_complexity
   - medium_disruption
   - no_reboot_needed
-
 - name: 'Ensure Red Hat GPG Key Installed: Read permission of GPG key directory'
   ansible.builtin.stat:
     path: /etc/pki/rpm-gpg/
@@ -449,7 +426,6 @@
   - medium_disruption | bool
   - no_reboot_needed | bool
   - restrict_strategy | bool
-
 - name: 'Ensure Red Hat GPG Key Installed: Read signatures in GPG key'
   ansible.builtin.command: gpg --show-keys --with-fingerprint --with-colons "/etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release"
   changed_when: false
@@ -483,11 +459,9 @@
   - medium_disruption | bool
   - no_reboot_needed | bool
   - restrict_strategy | bool
-
 - name: 'Ensure Red Hat GPG Key Installed: Set Fact - Installed GPG Fingerprints'
   ansible.builtin.set_fact:
-    gpg_installed_fingerprints: '{{ gpg_fingerprints.stdout | regex_findall(''^pub.*\n(?:^fpr[:]*)([0-9A-Fa-f]*)'', ''\1'')
-      | list }}'
+    gpg_installed_fingerprints: '{{ gpg_fingerprints.stdout | regex_findall(''^pub.*\n(?:^fpr[:]*)([0-9A-Fa-f]*)'', ''\1'') | list }}'
   tags:
   - CCE-84180-9
   - CJIS-5.10.4.1
@@ -515,7 +489,6 @@
   - medium_disruption | bool
   - no_reboot_needed | bool
   - restrict_strategy | bool
-
 - name: 'Ensure Red Hat GPG Key Installed: Set Fact - Valid fingerprints'
   ansible.builtin.set_fact:
     gpg_valid_fingerprints:
@@ -548,9 +521,10 @@
   - medium_disruption | bool
   - no_reboot_needed | bool
   - restrict_strategy | bool
-
 - name: 'Ensure Red Hat GPG Key Installed: Import RedHat GPG key'
-  ansible.builtin.command: rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
+  ansible.builtin.rpm_key:
+    state: present
+    key: /etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
   when:
   - DISA_STIG_RHEL_09_214010 | bool
   - ensure_redhat_gpgkey_installed | bool
@@ -582,7 +556,6 @@
   - medium_disruption
   - no_reboot_needed
   - restrict_strategy
-
 - name: Enable timer dnf-automatic
   block:
   - name: Enable timer dnf-automatic
@@ -598,9 +571,7 @@
   - low_disruption | bool
   - medium_severity | bool
   - no_reboot_needed | bool
-  - ( not ( "kernel-core" in ansible_facts.packages and "bootc" in ansible_facts.packages and not "openshift-kubelet" in ansible_facts.packages
-    and "ostree" in ansible_proc_cmdline ) and not ( ansible_virtualization_type in ["docker", "lxc", "openvz", "podman",
-    "container"] ) )
+  - ( not ( "kernel-core" in ansible_facts.packages and "bootc" in ansible_facts.packages and not "openshift-kubelet" in ansible_facts.packages and "ostree" in ansible_proc_cmdline ) and not ( ansible_virtualization_type in ["docker", "lxc", "openvz", "podman", "container"] ) )
   tags:
   - CCE-83459-8
   - NIST-800-53-CM-6(a)
@@ -612,7 +583,6 @@
   - medium_severity
   - no_reboot_needed
   - timer_dnf-automatic_enabled
-
 - name: Enable authselect - Check Current authselect Profile
   ansible.builtin.command:
     cmd: authselect current
@@ -640,7 +610,6 @@
   - medium_disruption
   - medium_severity
   - no_reboot_needed
-
 - name: Enable authselect - Try to Select an authselect Profile
   ansible.builtin.command:
     cmd: authselect select "{{ var_authselect_profile }}"
@@ -669,10 +638,10 @@
   - medium_disruption
   - medium_severity
   - no_reboot_needed
-
 - name: Enable authselect - Verify If pam Has Been Altered
-  ansible.builtin.command:
-    cmd: rpm -qV pam
+  redhat.rhel_hardening_roles.ssg_hardening:
+    operation: rpm_verify_package
+    name: pam
   register: result_altered_authselect
   changed_when: false
   failed_when: false
@@ -699,14 +668,12 @@
   - medium_disruption
   - medium_severity
   - no_reboot_needed
-
 - name: Enable authselect - Informative Message Based on authselect Integrity Check
   ansible.builtin.assert:
     that:
     - result_authselect_current.rc == 0 or result_altered_authselect is skipped or result_altered_authselect.rc == 0
     fail_msg:
-    - authselect is not used but files from the 'pam' package have been altered, so the authselect configuration won't be
-      forced.
+    - authselect is not used but files from the 'pam' package have been altered, so the authselect configuration won't be forced.
   when:
   - DISA_STIG_needed_rules | bool
   - configure_strategy | bool
@@ -728,10 +695,10 @@
   - medium_disruption
   - medium_severity
   - no_reboot_needed
-
 - name: Enable authselect - Force authselect Profile Selection
   ansible.builtin.command:
     cmd: authselect select --force "{{ var_authselect_profile }}"
+  changed_when: true
   when:
   - DISA_STIG_needed_rules | bool
   - configure_strategy | bool
@@ -756,7 +723,6 @@
   - medium_disruption
   - medium_severity
   - no_reboot_needed
-
 - name: Limit Password Reuse - Check if system relies on authselect tool
   ansible.builtin.stat:
     path: /usr/bin/authselect
@@ -785,7 +751,6 @@
   - medium_disruption
   - medium_severity
   - no_reboot_needed
-
 - name: Limit Password Reuse - Collect the available authselect features
   ansible.builtin.command:
     cmd: authselect list-features sssd
@@ -817,7 +782,6 @@
   - medium_disruption
   - medium_severity
   - no_reboot_needed
-
 - name: Limit Password Reuse - Enable pam_pwhistory.so using authselect feature
   block:
   - name: Limit Password Reuse - Check integrity of authselect current profile
@@ -833,15 +797,16 @@
       - ansible_check_mode or result_authselect_check_cmd.rc == 0
       fail_msg:
       - authselect integrity check failed. Remediation aborted!
-      - This remediation could not be applied because an authselect profile was not selected or the selected profile is not
-        intact.
+      - This remediation could not be applied because an authselect profile was not selected or the selected profile is not intact.
       - It is not recommended to manually edit the PAM files when authselect tool is available.
       - In cases where the default authselect profile does not cover a specific demand, a custom authselect profile is recommended.
       success_msg:
       - authselect integrity check passed
   - name: Limit Password Reuse - Get authselect current features
     ansible.builtin.shell:
-      cmd: authselect current | tail -n+3 | awk '{ print $2 }'
+      cmd: 'set -o pipefail
+
+        authselect current | tail -n+3 | awk ''{ print $2 }'''
     register: result_authselect_features
     changed_when: false
     check_mode: false
@@ -851,12 +816,14 @@
     ansible.builtin.command:
       cmd: authselect enable-feature with-pwhistory
     register: result_authselect_enable_feature_cmd
+    changed_when: true
     when:
     - result_authselect_check_cmd is success
     - result_authselect_features.stdout is not search("with-pwhistory")
   - name: Limit Password Reuse - Ensure authselect changes are applied
     ansible.builtin.command:
       cmd: authselect apply-changes -b
+    changed_when: true
     when:
     - result_authselect_enable_feature_cmd is not skipped
     - result_authselect_enable_feature_cmd is success
@@ -886,7 +853,6 @@
   - medium_disruption
   - medium_severity
   - no_reboot_needed
-
 - name: Limit Password Reuse - Enable pam_pwhistory.so in appropriate PAM files
   block:
   - name: Limit Password Reuse - Define the PAM file to be edited as a local fact
@@ -911,15 +877,16 @@
         - ansible_check_mode or result_authselect_check_cmd.rc == 0
         fail_msg:
         - authselect integrity check failed. Remediation aborted!
-        - This remediation could not be applied because an authselect profile was not selected or the selected profile is
-          not intact.
+        - This remediation could not be applied because an authselect profile was not selected or the selected profile is not intact.
         - It is not recommended to manually edit the PAM files when authselect tool is available.
         - In cases where the default authselect profile does not cover a specific demand, a custom authselect profile is recommended.
         success_msg:
         - authselect integrity check passed
     - name: Limit Password Reuse - Get authselect current profile
       ansible.builtin.shell:
-        cmd: authselect current -r | awk '{ print $1 }'
+        cmd: 'set -o pipefail
+
+          authselect current -r | awk ''{ print $1 }'''
       register: result_authselect_profile
       changed_when: false
       when:
@@ -940,7 +907,9 @@
       - result_authselect_profile.stdout is not match("custom/")
     - name: Limit Password Reuse - Get authselect current features to also enable them in the custom profile
       ansible.builtin.shell:
-        cmd: authselect current | tail -n+3 | awk '{ print $2 }'
+        cmd: 'set -o pipefail
+
+          authselect current | tail -n+3 | awk ''{ print $2 }'''
       register: result_authselect_features
       changed_when: false
       check_mode: false
@@ -958,6 +927,7 @@
     - name: Limit Password Reuse - Create an authselect custom profile based on the current profile
       ansible.builtin.command:
         cmd: authselect create-profile hardening -b {{ authselect_current_profile }}
+      changed_when: true
       when:
       - result_authselect_profile is not skipped
       - result_authselect_check_cmd is success
@@ -966,6 +936,7 @@
     - name: Limit Password Reuse - Create an authselect custom profile based on sssd profile
       ansible.builtin.command:
         cmd: authselect create-profile hardening -b sssd
+      changed_when: true
       when:
       - result_authselect_profile is not skipped
       - result_authselect_check_cmd is success
@@ -974,6 +945,7 @@
     - name: Limit Password Reuse - Ensure authselect changes are applied
       ansible.builtin.command:
         cmd: authselect apply-changes -b --backup=before-hardening-custom-profile
+      changed_when: true
       when:
       - result_authselect_check_cmd is success
       - result_authselect_profile is not skipped
@@ -983,6 +955,7 @@
       ansible.builtin.command:
         cmd: authselect select {{ authselect_custom_profile }}
       register: result_pam_authselect_select_profile
+      changed_when: true
       when:
       - result_authselect_check_cmd is success
       - result_authselect_profile is not skipped
@@ -1000,6 +973,7 @@
     - name: Limit Password Reuse - Ensure authselect changes are applied
       ansible.builtin.command:
         cmd: authselect apply-changes -b --backup=after-hardening-custom-profile
+      changed_when: true
       when:
       - result_authselect_check_cmd is success
       - result_authselect_profile is not skipped
@@ -1051,11 +1025,11 @@
     - name: Limit Password Reuse - Ensure authselect changes are applied
       ansible.builtin.command:
         cmd: authselect apply-changes -b
+      changed_when: true
       when:
       - result_authselect_present is defined
       - result_authselect_present.stat.exists
-      - "(result_pam_module_add is defined and result_pam_module_add.changed)\n or (result_pam_module_edit is defined and\
-        \ result_pam_module_edit.changed)"
+      - "(result_pam_module_add is defined and result_pam_module_add.changed)\n or (result_pam_module_edit is defined and result_pam_module_edit.changed)"
     when:
     - result_pam_line_present.found is defined
     - result_pam_line_present.found == 0
@@ -1068,8 +1042,7 @@
   - no_reboot_needed | bool
   - '"kernel-core" in ansible_facts.packages'
   - '"libpwquality" in ansible_facts.packages'
-  - '(result_authselect_available_features.stdout is defined and result_authselect_available_features.stdout is not search("with-pwhistory"))
-    or result_authselect_available_features is not defined
+  - '(result_authselect_available_features.stdout is defined and result_authselect_available_features.stdout is not search("with-pwhistory")) or result_authselect_available_features is not defined
 
     '
   tags:
@@ -1087,7 +1060,6 @@
   - medium_disruption
   - medium_severity
   - no_reboot_needed
-
 - name: Limit Password Reuse - Check the presence of /etc/security/pwhistory.conf file
   ansible.builtin.stat:
     path: /etc/security/pwhistory.conf
@@ -1116,7 +1088,6 @@
   - medium_disruption
   - medium_severity
   - no_reboot_needed
-
 - name: Limit Password Reuse - pam_pwhistory.so parameters are configured in /etc/security/pwhistory.conf file
   block:
   - name: Limit Password Reuse - Ensure the pam_pwhistory.so remember parameter in /etc/security/pwhistory.conf
@@ -1155,16 +1126,16 @@
             - ansible_check_mode or result_authselect_check_cmd.rc == 0
             fail_msg:
             - authselect integrity check failed. Remediation aborted!
-            - This remediation could not be applied because an authselect profile was not selected or the selected profile
-              is not intact.
+            - This remediation could not be applied because an authselect profile was not selected or the selected profile is not intact.
             - It is not recommended to manually edit the PAM files when authselect tool is available.
-            - In cases where the default authselect profile does not cover a specific demand, a custom authselect profile
-              is recommended.
+            - In cases where the default authselect profile does not cover a specific demand, a custom authselect profile is recommended.
             success_msg:
             - authselect integrity check passed
         - name: Limit Password Reuse - Get authselect current profile
           ansible.builtin.shell:
-            cmd: authselect current -r | awk '{ print $1 }'
+            cmd: 'set -o pipefail
+
+              authselect current -r | awk ''{ print $1 }'''
           register: result_authselect_profile
           changed_when: false
           when:
@@ -1185,7 +1156,9 @@
           - result_authselect_profile.stdout is not match("custom/")
         - name: Limit Password Reuse - Get authselect current features to also enable them in the custom profile
           ansible.builtin.shell:
-            cmd: authselect current | tail -n+3 | awk '{ print $2 }'
+            cmd: 'set -o pipefail
+
+              authselect current | tail -n+3 | awk ''{ print $2 }'''
           register: result_authselect_features
           changed_when: false
           check_mode: false
@@ -1203,6 +1176,7 @@
         - name: Limit Password Reuse - Create an authselect custom profile based on the current profile
           ansible.builtin.command:
             cmd: authselect create-profile hardening -b {{ authselect_current_profile }}
+          changed_when: true
           when:
           - result_authselect_profile is not skipped
           - result_authselect_check_cmd is success
@@ -1211,6 +1185,7 @@
         - name: Limit Password Reuse - Create an authselect custom profile based on sssd profile
           ansible.builtin.command:
             cmd: authselect create-profile hardening -b sssd
+          changed_when: true
           when:
           - result_authselect_profile is not skipped
           - result_authselect_check_cmd is success
@@ -1219,6 +1194,7 @@
         - name: Limit Password Reuse - Ensure authselect changes are applied
           ansible.builtin.command:
             cmd: authselect apply-changes -b --backup=before-hardening-custom-profile
+          changed_when: true
           when:
           - result_authselect_check_cmd is success
           - result_authselect_profile is not skipped
@@ -1228,6 +1204,7 @@
           ansible.builtin.command:
             cmd: authselect select {{ authselect_custom_profile }}
           register: result_pam_authselect_select_profile
+          changed_when: true
           when:
           - result_authselect_check_cmd is success
           - result_authselect_profile is not skipped
@@ -1245,6 +1222,7 @@
         - name: Limit Password Reuse - Ensure authselect changes are applied
           ansible.builtin.command:
             cmd: authselect apply-changes -b --backup=after-hardening-custom-profile
+          changed_when: true
           when:
           - result_authselect_check_cmd is success
           - result_authselect_profile is not skipped
@@ -1263,8 +1241,7 @@
         ansible.builtin.stat:
           path: '{{ pam_file_path }}'
         register: result_pam_file_present
-      - name: Limit Password Reuse - Ensure the "remember" option from "pam_pwhistory.so" is not present in {{ pam_file_path
-          }}
+      - name: Limit Password Reuse - Ensure the "remember" option from "pam_pwhistory.so" is not present in {{ pam_file_path }}
         ansible.builtin.replace:
           dest: '{{ pam_file_path }}'
           regexp: (.*password.*pam_pwhistory.so.*)\bremember\b=?[0-9a-zA-Z]*(.*)
@@ -1275,6 +1252,7 @@
       - name: Limit Password Reuse - Ensure authselect changes are applied
         ansible.builtin.command:
           cmd: authselect apply-changes -b
+        changed_when: true
         when:
         - result_authselect_present.stat.exists
         - result_pam_option_removal is changed
@@ -1305,7 +1283,6 @@
   - medium_disruption
   - medium_severity
   - no_reboot_needed
-
 - name: Limit Password Reuse - pam_pwhistory.so parameters are configured in PAM files
   block:
   - name: Limit Password Reuse - Define the PAM file to be edited as a local fact
@@ -1330,15 +1307,16 @@
         - ansible_check_mode or result_authselect_check_cmd.rc == 0
         fail_msg:
         - authselect integrity check failed. Remediation aborted!
-        - This remediation could not be applied because an authselect profile was not selected or the selected profile is
-          not intact.
+        - This remediation could not be applied because an authselect profile was not selected or the selected profile is not intact.
         - It is not recommended to manually edit the PAM files when authselect tool is available.
         - In cases where the default authselect profile does not cover a specific demand, a custom authselect profile is recommended.
         success_msg:
         - authselect integrity check passed
     - name: Limit Password Reuse - Get authselect current profile
       ansible.builtin.shell:
-        cmd: authselect current -r | awk '{ print $1 }'
+        cmd: 'set -o pipefail
+
+          authselect current -r | awk ''{ print $1 }'''
       register: result_authselect_profile
       changed_when: false
       when:
@@ -1359,7 +1337,9 @@
       - result_authselect_profile.stdout is not match("custom/")
     - name: Limit Password Reuse - Get authselect current features to also enable them in the custom profile
       ansible.builtin.shell:
-        cmd: authselect current | tail -n+3 | awk '{ print $2 }'
+        cmd: 'set -o pipefail
+
+          authselect current | tail -n+3 | awk ''{ print $2 }'''
       register: result_authselect_features
       changed_when: false
       check_mode: false
@@ -1377,6 +1357,7 @@
     - name: Limit Password Reuse - Create an authselect custom profile based on the current profile
       ansible.builtin.command:
         cmd: authselect create-profile hardening -b {{ authselect_current_profile }}
+      changed_when: true
       when:
       - result_authselect_profile is not skipped
       - result_authselect_check_cmd is success
@@ -1385,6 +1366,7 @@
     - name: Limit Password Reuse - Create an authselect custom profile based on sssd profile
       ansible.builtin.command:
         cmd: authselect create-profile hardening -b sssd
+      changed_when: true
       when:
       - result_authselect_profile is not skipped
       - result_authselect_check_cmd is success
@@ -1393,6 +1375,7 @@
     - name: Limit Password Reuse - Ensure authselect changes are applied
       ansible.builtin.command:
         cmd: authselect apply-changes -b --backup=before-hardening-custom-profile
+      changed_when: true
       when:
       - result_authselect_check_cmd is success
       - result_authselect_profile is not skipped
@@ -1402,6 +1385,7 @@
       ansible.builtin.command:
         cmd: authselect select {{ authselect_custom_profile }}
       register: result_pam_authselect_select_profile
+      changed_when: true
       when:
       - result_authselect_check_cmd is success
       - result_authselect_profile is not skipped
@@ -1419,6 +1403,7 @@
     - name: Limit Password Reuse - Ensure authselect changes are applied
       ansible.builtin.command:
         cmd: authselect apply-changes -b --backup=after-hardening-custom-profile
+      changed_when: true
       when:
       - result_authselect_check_cmd is success
       - result_authselect_profile is not skipped
@@ -1469,11 +1454,11 @@
     - name: Limit Password Reuse - Ensure authselect changes are applied
       ansible.builtin.command:
         cmd: authselect apply-changes -b
+      changed_when: true
       when:
       - result_authselect_present is defined
       - result_authselect_present.stat.exists
-      - "(result_pam_module_add is defined and result_pam_module_add.changed)\n or (result_pam_module_edit is defined and\
-        \ result_pam_module_edit.changed)"
+      - "(result_pam_module_add is defined and result_pam_module_add.changed)\n or (result_pam_module_edit is defined and result_pam_module_edit.changed)"
     when:
     - result_pam_line_present.found is defined
     - result_pam_line_present.found == 0
@@ -1499,8 +1484,7 @@
     when:
     - result_pam_module_accounts_password_pam_unix_remember_option_present.found is defined
     - result_pam_module_accounts_password_pam_unix_remember_option_present.found == 0
-  - name: Limit Password Reuse - Ensure the required value for "remember" PAM option from "pam_pwhistory.so" in {{ pam_file_path
-      }}
+  - name: Limit Password Reuse - Ensure the required value for "remember" PAM option from "pam_pwhistory.so" in {{ pam_file_path }}
     ansible.builtin.lineinfile:
       path: '{{ pam_file_path }}'
       backrefs: true
@@ -1512,10 +1496,10 @@
   - name: Limit Password Reuse - Ensure authselect changes are applied
     ansible.builtin.command:
       cmd: authselect apply-changes -b
+    changed_when: true
     when:
     - result_authselect_present.stat.exists
-    - (result_pam_remember_add is defined and result_pam_remember_add.changed) or (result_pam_remember_edit is defined and
-      result_pam_remember_edit.changed)
+    - (result_pam_remember_add is defined and result_pam_remember_add.changed) or (result_pam_remember_edit is defined and result_pam_remember_edit.changed)
   when:
   - accounts_password_pam_unix_remember | bool
   - configure_strategy | bool
@@ -1541,7 +1525,6 @@
   - medium_disruption
   - medium_severity
   - no_reboot_needed
-
 - name: Lock Accounts After Failed Password Attempts - Check if system relies on authselect tool
   ansible.builtin.stat:
     path: /usr/bin/authselect
@@ -1572,7 +1555,6 @@
   - medium_severity
   - no_reboot_needed
   - restrict_strategy
-
 - name: Lock Accounts After Failed Password Attempts - Remediation where authselect tool is present
   block:
   - name: Lock Accounts After Failed Password Attempts - Check integrity of authselect current profile
@@ -1588,15 +1570,16 @@
       - ansible_check_mode or result_authselect_check_cmd.rc == 0
       fail_msg:
       - authselect integrity check failed. Remediation aborted!
-      - This remediation could not be applied because an authselect profile was not selected or the selected profile is not
-        intact.
+      - This remediation could not be applied because an authselect profile was not selected or the selected profile is not intact.
       - It is not recommended to manually edit the PAM files when authselect tool is available.
       - In cases where the default authselect profile does not cover a specific demand, a custom authselect profile is recommended.
       success_msg:
       - authselect integrity check passed
   - name: Lock Accounts After Failed Password Attempts - Get authselect current features
     ansible.builtin.shell:
-      cmd: authselect current | tail -n+3 | awk '{ print $2 }'
+      cmd: 'set -o pipefail
+
+        authselect current | tail -n+3 | awk ''{ print $2 }'''
     register: result_authselect_features
     changed_when: false
     check_mode: false
@@ -1606,12 +1589,14 @@
     ansible.builtin.command:
       cmd: authselect enable-feature with-faillock
     register: result_authselect_enable_feature_cmd
+    changed_when: true
     when:
     - result_authselect_check_cmd is success
     - result_authselect_features.stdout is not search("with-faillock")
   - name: Lock Accounts After Failed Password Attempts - Ensure authselect changes are applied
     ansible.builtin.command:
       cmd: authselect apply-changes -b
+    changed_when: true
     when:
     - result_authselect_enable_feature_cmd is not skipped
     - result_authselect_enable_feature_cmd is success
@@ -1642,7 +1627,6 @@
   - medium_severity
   - no_reboot_needed
   - restrict_strategy
-
 - name: Lock Accounts After Failed Password Attempts - Remediation where authselect tool is not present
   block:
   - name: Lock Accounts After Failed Password Attempts - Check if pam_faillock.so is already enabled
@@ -1713,7 +1697,6 @@
   - medium_severity
   - no_reboot_needed
   - restrict_strategy
-
 - name: Lock Accounts After Failed Password Attempts - Check the presence of /etc/security/faillock.conf file
   ansible.builtin.stat:
     path: /etc/security/faillock.conf
@@ -1744,7 +1727,6 @@
   - medium_severity
   - no_reboot_needed
   - restrict_strategy
-
 - name: Lock Accounts After Failed Password Attempts - Ensure the pam_faillock.so deny parameter in /etc/security/faillock.conf
   ansible.builtin.lineinfile:
     path: /etc/security/faillock.conf
@@ -1778,7 +1760,6 @@
   - medium_severity
   - no_reboot_needed
   - restrict_strategy
-
 - name: Lock Accounts After Failed Password Attempts - Ensure the pam_faillock.so deny parameter not in PAM files
   block:
   - name: Lock Accounts After Failed Password Attempts - Check if /etc/pam.d/system-auth file is present
@@ -1809,16 +1790,16 @@
           - ansible_check_mode or result_authselect_check_cmd.rc == 0
           fail_msg:
           - authselect integrity check failed. Remediation aborted!
-          - This remediation could not be applied because an authselect profile was not selected or the selected profile is
-            not intact.
+          - This remediation could not be applied because an authselect profile was not selected or the selected profile is not intact.
           - It is not recommended to manually edit the PAM files when authselect tool is available.
-          - In cases where the default authselect profile does not cover a specific demand, a custom authselect profile is
-            recommended.
+          - In cases where the default authselect profile does not cover a specific demand, a custom authselect profile is recommended.
           success_msg:
           - authselect integrity check passed
       - name: Lock Accounts After Failed Password Attempts - Get authselect current profile
         ansible.builtin.shell:
-          cmd: authselect current -r | awk '{ print $1 }'
+          cmd: 'set -o pipefail
+
+            authselect current -r | awk ''{ print $1 }'''
         register: result_authselect_profile
         changed_when: false
         when:
@@ -1837,10 +1818,11 @@
         when:
         - result_authselect_profile is not skipped
         - result_authselect_profile.stdout is not match("custom/")
-      - name: Lock Accounts After Failed Password Attempts - Get authselect current features to also enable them in the custom
-          profile
+      - name: Lock Accounts After Failed Password Attempts - Get authselect current features to also enable them in the custom profile
         ansible.builtin.shell:
-          cmd: authselect current | tail -n+3 | awk '{ print $2 }'
+          cmd: 'set -o pipefail
+
+            authselect current | tail -n+3 | awk ''{ print $2 }'''
         register: result_authselect_features
         changed_when: false
         check_mode: false
@@ -1858,6 +1840,7 @@
       - name: Lock Accounts After Failed Password Attempts - Create an authselect custom profile based on the current profile
         ansible.builtin.command:
           cmd: authselect create-profile hardening -b {{ authselect_current_profile }}
+        changed_when: true
         when:
         - result_authselect_profile is not skipped
         - result_authselect_check_cmd is success
@@ -1866,6 +1849,7 @@
       - name: Lock Accounts After Failed Password Attempts - Create an authselect custom profile based on sssd profile
         ansible.builtin.command:
           cmd: authselect create-profile hardening -b sssd
+        changed_when: true
         when:
         - result_authselect_profile is not skipped
         - result_authselect_check_cmd is success
@@ -1874,6 +1858,7 @@
       - name: Lock Accounts After Failed Password Attempts - Ensure authselect changes are applied
         ansible.builtin.command:
           cmd: authselect apply-changes -b --backup=before-hardening-custom-profile
+        changed_when: true
         when:
         - result_authselect_check_cmd is success
         - result_authselect_profile is not skipped
@@ -1883,6 +1868,7 @@
         ansible.builtin.command:
           cmd: authselect select {{ authselect_custom_profile }}
         register: result_pam_authselect_select_profile
+        changed_when: true
         when:
         - result_authselect_check_cmd is success
         - result_authselect_profile is not skipped
@@ -1900,28 +1886,26 @@
       - name: Lock Accounts After Failed Password Attempts - Ensure authselect changes are applied
         ansible.builtin.command:
           cmd: authselect apply-changes -b --backup=after-hardening-custom-profile
+        changed_when: true
         when:
         - result_authselect_check_cmd is success
         - result_authselect_profile is not skipped
         - result_pam_authselect_restore_features is not skipped
-      - name: Lock Accounts After Failed Password Attempts - Change the PAM file to be edited according to the custom authselect
-          profile
+      - name: Lock Accounts After Failed Password Attempts - Change the PAM file to be edited according to the custom authselect profile
         ansible.builtin.set_fact:
           pam_file_path: /etc/authselect/{{ authselect_custom_profile }}/{{ pam_file_path | basename }}
         when:
         - authselect_custom_profile is defined
       when:
       - result_authselect_present.stat.exists
-    - name: Lock Accounts After Failed Password Attempts - Define a fact for control already filtered in case filters are
-        used
+    - name: Lock Accounts After Failed Password Attempts - Define a fact for control already filtered in case filters are used
       ansible.builtin.set_fact:
         pam_module_control: ''
     - name: Lock Accounts After Failed Password Attempts - Check if {{ pam_file_path }} file is present
       ansible.builtin.stat:
         path: '{{ pam_file_path }}'
       register: result_pam_file_present
-    - name: Lock Accounts After Failed Password Attempts - Ensure the "deny" option from "pam_faillock.so" is not present
-        in {{ pam_file_path }}
+    - name: Lock Accounts After Failed Password Attempts - Ensure the "deny" option from "pam_faillock.so" is not present in {{ pam_file_path }}
       ansible.builtin.replace:
         dest: '{{ pam_file_path }}'
         regexp: (.*auth.*pam_faillock.so.*)\bdeny\b=?[0-9a-zA-Z]*(.*)
@@ -1932,6 +1916,7 @@
     - name: Lock Accounts After Failed Password Attempts - Ensure authselect changes are applied
       ansible.builtin.command:
         cmd: authselect apply-changes -b
+      changed_when: true
       when:
       - result_authselect_present.stat.exists
       - result_pam_option_removal is changed
@@ -1965,16 +1950,16 @@
           - ansible_check_mode or result_authselect_check_cmd.rc == 0
           fail_msg:
           - authselect integrity check failed. Remediation aborted!
-          - This remediation could not be applied because an authselect profile was not selected or the selected profile is
-            not intact.
+          - This remediation could not be applied because an authselect profile was not selected or the selected profile is not intact.
           - It is not recommended to manually edit the PAM files when authselect tool is available.
-          - In cases where the default authselect profile does not cover a specific demand, a custom authselect profile is
-            recommended.
+          - In cases where the default authselect profile does not cover a specific demand, a custom authselect profile is recommended.
           success_msg:
           - authselect integrity check passed
       - name: Lock Accounts After Failed Password Attempts - Get authselect current profile
         ansible.builtin.shell:
-          cmd: authselect current -r | awk '{ print $1 }'
+          cmd: 'set -o pipefail
+
+            authselect current -r | awk ''{ print $1 }'''
         register: result_authselect_profile
         changed_when: false
         when:
@@ -1993,10 +1978,11 @@
         when:
         - result_authselect_profile is not skipped
         - result_authselect_profile.stdout is not match("custom/")
-      - name: Lock Accounts After Failed Password Attempts - Get authselect current features to also enable them in the custom
-          profile
+      - name: Lock Accounts After Failed Password Attempts - Get authselect current features to also enable them in the custom profile
         ansible.builtin.shell:
-          cmd: authselect current | tail -n+3 | awk '{ print $2 }'
+          cmd: 'set -o pipefail
+
+            authselect current | tail -n+3 | awk ''{ print $2 }'''
         register: result_authselect_features
         changed_when: false
         check_mode: false
@@ -2014,6 +2000,7 @@
       - name: Lock Accounts After Failed Password Attempts - Create an authselect custom profile based on the current profile
         ansible.builtin.command:
           cmd: authselect create-profile hardening -b {{ authselect_current_profile }}
+        changed_when: true
         when:
         - result_authselect_profile is not skipped
         - result_authselect_check_cmd is success
@@ -2022,6 +2009,7 @@
       - name: Lock Accounts After Failed Password Attempts - Create an authselect custom profile based on sssd profile
         ansible.builtin.command:
           cmd: authselect create-profile hardening -b sssd
+        changed_when: true
         when:
         - result_authselect_profile is not skipped
         - result_authselect_check_cmd is success
@@ -2030,6 +2018,7 @@
       - name: Lock Accounts After Failed Password Attempts - Ensure authselect changes are applied
         ansible.builtin.command:
           cmd: authselect apply-changes -b --backup=before-hardening-custom-profile
+        changed_when: true
         when:
         - result_authselect_check_cmd is success
         - result_authselect_profile is not skipped
@@ -2039,6 +2028,7 @@
         ansible.builtin.command:
           cmd: authselect select {{ authselect_custom_profile }}
         register: result_pam_authselect_select_profile
+        changed_when: true
         when:
         - result_authselect_check_cmd is success
         - result_authselect_profile is not skipped
@@ -2056,28 +2046,26 @@
       - name: Lock Accounts After Failed Password Attempts - Ensure authselect changes are applied
         ansible.builtin.command:
           cmd: authselect apply-changes -b --backup=after-hardening-custom-profile
+        changed_when: true
         when:
         - result_authselect_check_cmd is success
         - result_authselect_profile is not skipped
         - result_pam_authselect_restore_features is not skipped
-      - name: Lock Accounts After Failed Password Attempts - Change the PAM file to be edited according to the custom authselect
-          profile
+      - name: Lock Accounts After Failed Password Attempts - Change the PAM file to be edited according to the custom authselect profile
         ansible.builtin.set_fact:
           pam_file_path: /etc/authselect/{{ authselect_custom_profile }}/{{ pam_file_path | basename }}
         when:
         - authselect_custom_profile is defined
       when:
       - result_authselect_present.stat.exists
-    - name: Lock Accounts After Failed Password Attempts - Define a fact for control already filtered in case filters are
-        used
+    - name: Lock Accounts After Failed Password Attempts - Define a fact for control already filtered in case filters are used
       ansible.builtin.set_fact:
         pam_module_control: ''
     - name: Lock Accounts After Failed Password Attempts - Check if {{ pam_file_path }} file is present
       ansible.builtin.stat:
         path: '{{ pam_file_path }}'
       register: result_pam_file_present
-    - name: Lock Accounts After Failed Password Attempts - Ensure the "deny" option from "pam_faillock.so" is not present
-        in {{ pam_file_path }}
+    - name: Lock Accounts After Failed Password Attempts - Ensure the "deny" option from "pam_faillock.so" is not present in {{ pam_file_path }}
       ansible.builtin.replace:
         dest: '{{ pam_file_path }}'
         regexp: (.*auth.*pam_faillock.so.*)\bdeny\b=?[0-9a-zA-Z]*(.*)
@@ -2088,6 +2076,7 @@
     - name: Lock Accounts After Failed Password Attempts - Ensure authselect changes are applied
       ansible.builtin.command:
         cmd: authselect apply-changes -b
+      changed_when: true
       when:
       - result_authselect_present.stat.exists
       - result_pam_option_removal is changed
@@ -2120,11 +2109,9 @@
   - medium_severity
   - no_reboot_needed
   - restrict_strategy
-
 - name: Lock Accounts After Failed Password Attempts - Ensure the pam_faillock.so deny parameter in PAM files
   block:
-  - name: Lock Accounts After Failed Password Attempts - Check if pam_faillock.so deny parameter is already enabled in pam
-      files
+  - name: Lock Accounts After Failed Password Attempts - Check if pam_faillock.so deny parameter is already enabled in pam files
     ansible.builtin.lineinfile:
       path: /etc/pam.d/system-auth
       regexp: .*auth.*pam_faillock\.so (preauth|authfail).*deny
@@ -2132,8 +2119,7 @@
     check_mode: true
     changed_when: false
     register: result_pam_faillock_deny_parameter_is_present
-  - name: Lock Accounts After Failed Password Attempts - Ensure the inclusion of pam_faillock.so preauth deny parameter in
-      auth section
+  - name: Lock Accounts After Failed Password Attempts - Ensure the inclusion of pam_faillock.so preauth deny parameter in auth section
     ansible.builtin.lineinfile:
       path: '{{ item }}'
       backrefs: true
@@ -2145,8 +2131,7 @@
     - /etc/pam.d/password-auth
     when:
     - result_pam_faillock_deny_parameter_is_present.found == 0
-  - name: Lock Accounts After Failed Password Attempts - Ensure the inclusion of pam_faillock.so authfail deny parameter in
-      auth section
+  - name: Lock Accounts After Failed Password Attempts - Ensure the inclusion of pam_faillock.so authfail deny parameter in auth section
     ansible.builtin.lineinfile:
       path: '{{ item }}'
       backrefs: true
@@ -2158,8 +2143,7 @@
     - /etc/pam.d/password-auth
     when:
     - result_pam_faillock_deny_parameter_is_present.found == 0
-  - name: Lock Accounts After Failed Password Attempts - Ensure the desired value for pam_faillock.so preauth deny parameter
-      in auth section
+  - name: Lock Accounts After Failed Password Attempts - Ensure the desired value for pam_faillock.so preauth deny parameter in auth section
     ansible.builtin.lineinfile:
       path: '{{ item }}'
       backrefs: true
@@ -2171,8 +2155,7 @@
     - /etc/pam.d/password-auth
     when:
     - result_pam_faillock_deny_parameter_is_present.found > 0
-  - name: Lock Accounts After Failed Password Attempts - Ensure the desired value for pam_faillock.so authfail deny parameter
-      in auth section
+  - name: Lock Accounts After Failed Password Attempts - Ensure the desired value for pam_faillock.so authfail deny parameter in auth section
     ansible.builtin.lineinfile:
       path: '{{ item }}'
       backrefs: true
@@ -2211,7 +2194,6 @@
   - medium_severity
   - no_reboot_needed
   - restrict_strategy
-
 - name: Configure the root Account for Failed Password Attempts - Check if system relies on authselect tool
   ansible.builtin.stat:
     path: /usr/bin/authselect
@@ -2238,7 +2220,6 @@
   - medium_severity
   - no_reboot_needed
   - restrict_strategy
-
 - name: Configure the root Account for Failed Password Attempts - Remediation where authselect tool is present
   block:
   - name: Configure the root Account for Failed Password Attempts - Check integrity of authselect current profile
@@ -2248,38 +2229,39 @@
     changed_when: false
     check_mode: false
     failed_when: false
-  - name: Configure the root Account for Failed Password Attempts - Informative message based on the authselect integrity
-      check result
+  - name: Configure the root Account for Failed Password Attempts - Informative message based on the authselect integrity check result
     ansible.builtin.assert:
       that:
       - ansible_check_mode or result_authselect_check_cmd.rc == 0
       fail_msg:
       - authselect integrity check failed. Remediation aborted!
-      - This remediation could not be applied because an authselect profile was not selected or the selected profile is not
-        intact.
+      - This remediation could not be applied because an authselect profile was not selected or the selected profile is not intact.
       - It is not recommended to manually edit the PAM files when authselect tool is available.
       - In cases where the default authselect profile does not cover a specific demand, a custom authselect profile is recommended.
       success_msg:
       - authselect integrity check passed
   - name: Configure the root Account for Failed Password Attempts - Get authselect current features
     ansible.builtin.shell:
-      cmd: authselect current | tail -n+3 | awk '{ print $2 }'
+      cmd: 'set -o pipefail
+
+        authselect current | tail -n+3 | awk ''{ print $2 }'''
     register: result_authselect_features
     changed_when: false
     check_mode: false
     when:
     - result_authselect_check_cmd is success
-  - name: Configure the root Account for Failed Password Attempts - Ensure "with-faillock" feature is enabled using authselect
-      tool
+  - name: Configure the root Account for Failed Password Attempts - Ensure "with-faillock" feature is enabled using authselect tool
     ansible.builtin.command:
       cmd: authselect enable-feature with-faillock
     register: result_authselect_enable_feature_cmd
+    changed_when: true
     when:
     - result_authselect_check_cmd is success
     - result_authselect_features.stdout is not search("with-faillock")
   - name: Configure the root Account for Failed Password Attempts - Ensure authselect changes are applied
     ansible.builtin.command:
       cmd: authselect apply-changes -b
+    changed_when: true
     when:
     - result_authselect_enable_feature_cmd is not skipped
     - result_authselect_enable_feature_cmd is success
@@ -2306,7 +2288,6 @@
   - medium_severity
   - no_reboot_needed
   - restrict_strategy
-
 - name: Configure the root Account for Failed Password Attempts - Remediation where authselect tool is not present
   block:
   - name: Configure the root Account for Failed Password Attempts - Check if pam_faillock.so is already enabled
@@ -2373,7 +2354,6 @@
   - medium_severity
   - no_reboot_needed
   - restrict_strategy
-
 - name: Configure the root Account for Failed Password Attempts - Check the presence of /etc/security/faillock.conf file
   ansible.builtin.stat:
     path: /etc/security/faillock.conf
@@ -2400,7 +2380,6 @@
   - medium_severity
   - no_reboot_needed
   - restrict_strategy
-
 - name: Configure the root Account for Failed Password Attempts - Ensure the pam_faillock.so even_deny_root parameter in /etc/security/faillock.conf
   ansible.builtin.lineinfile:
     path: /etc/security/faillock.conf
@@ -2430,9 +2409,7 @@
   - medium_severity
   - no_reboot_needed
   - restrict_strategy
-
-- name: Configure the root Account for Failed Password Attempts - Ensure the pam_faillock.so even_deny_root parameter not
-    in PAM files
+- name: Configure the root Account for Failed Password Attempts - Ensure the pam_faillock.so even_deny_root parameter not in PAM files
   block:
   - name: Configure the root Account for Failed Password Attempts - Check if /etc/pam.d/system-auth file is present
     ansible.builtin.stat:
@@ -2447,8 +2424,7 @@
       ansible.builtin.stat:
         path: /usr/bin/authselect
       register: result_authselect_present
-    - name: Configure the root Account for Failed Password Attempts - Ensure authselect custom profile is used if authselect
-        is present
+    - name: Configure the root Account for Failed Password Attempts - Ensure authselect custom profile is used if authselect is present
       block:
       - name: Configure the root Account for Failed Password Attempts - Check integrity of authselect current profile
         ansible.builtin.command:
@@ -2457,23 +2433,22 @@
         changed_when: false
         check_mode: false
         failed_when: false
-      - name: Configure the root Account for Failed Password Attempts - Informative message based on the authselect integrity
-          check result
+      - name: Configure the root Account for Failed Password Attempts - Informative message based on the authselect integrity check result
         ansible.builtin.assert:
           that:
           - ansible_check_mode or result_authselect_check_cmd.rc == 0
           fail_msg:
           - authselect integrity check failed. Remediation aborted!
-          - This remediation could not be applied because an authselect profile was not selected or the selected profile is
-            not intact.
+          - This remediation could not be applied because an authselect profile was not selected or the selected profile is not intact.
           - It is not recommended to manually edit the PAM files when authselect tool is available.
-          - In cases where the default authselect profile does not cover a specific demand, a custom authselect profile is
-            recommended.
+          - In cases where the default authselect profile does not cover a specific demand, a custom authselect profile is recommended.
           success_msg:
           - authselect integrity check passed
       - name: Configure the root Account for Failed Password Attempts - Get authselect current profile
         ansible.builtin.shell:
-          cmd: authselect current -r | awk '{ print $1 }'
+          cmd: 'set -o pipefail
+
+            authselect current -r | awk ''{ print $1 }'''
         register: result_authselect_profile
         changed_when: false
         when:
@@ -2485,26 +2460,25 @@
         when:
         - result_authselect_profile is not skipped
         - result_authselect_profile.stdout is match("custom/")
-      - name: Configure the root Account for Failed Password Attempts - Define the new authselect custom profile as a local
-          fact
+      - name: Configure the root Account for Failed Password Attempts - Define the new authselect custom profile as a local fact
         ansible.builtin.set_fact:
           authselect_current_profile: '{{ result_authselect_profile.stdout }}'
           authselect_custom_profile: custom/hardening
         when:
         - result_authselect_profile is not skipped
         - result_authselect_profile.stdout is not match("custom/")
-      - name: Configure the root Account for Failed Password Attempts - Get authselect current features to also enable them
-          in the custom profile
+      - name: Configure the root Account for Failed Password Attempts - Get authselect current features to also enable them in the custom profile
         ansible.builtin.shell:
-          cmd: authselect current | tail -n+3 | awk '{ print $2 }'
+          cmd: 'set -o pipefail
+
+            authselect current | tail -n+3 | awk ''{ print $2 }'''
         register: result_authselect_features
         changed_when: false
         check_mode: false
         when:
         - result_authselect_profile is not skipped
         - authselect_current_profile is not match("custom/")
-      - name: Configure the root Account for Failed Password Attempts - Check if any custom profile with the same name was
-          already created
+      - name: Configure the root Account for Failed Password Attempts - Check if any custom profile with the same name was already created
         ansible.builtin.stat:
           path: /etc/authselect/{{ authselect_custom_profile }}
         register: result_authselect_custom_profile_present
@@ -2512,19 +2486,19 @@
         when:
         - result_authselect_profile is not skipped
         - authselect_current_profile is not match("custom/")
-      - name: Configure the root Account for Failed Password Attempts - Create an authselect custom profile based on the current
-          profile
+      - name: Configure the root Account for Failed Password Attempts - Create an authselect custom profile based on the current profile
         ansible.builtin.command:
           cmd: authselect create-profile hardening -b {{ authselect_current_profile }}
+        changed_when: true
         when:
         - result_authselect_profile is not skipped
         - result_authselect_check_cmd is success
         - authselect_current_profile is not match("^(custom/|local)")
         - not result_authselect_custom_profile_present.stat.exists
-      - name: Configure the root Account for Failed Password Attempts - Create an authselect custom profile based on sssd
-          profile
+      - name: Configure the root Account for Failed Password Attempts - Create an authselect custom profile based on sssd profile
         ansible.builtin.command:
           cmd: authselect create-profile hardening -b sssd
+        changed_when: true
         when:
         - result_authselect_profile is not skipped
         - result_authselect_check_cmd is success
@@ -2533,6 +2507,7 @@
       - name: Configure the root Account for Failed Password Attempts - Ensure authselect changes are applied
         ansible.builtin.command:
           cmd: authselect apply-changes -b --backup=before-hardening-custom-profile
+        changed_when: true
         when:
         - result_authselect_check_cmd is success
         - result_authselect_profile is not skipped
@@ -2542,6 +2517,7 @@
         ansible.builtin.command:
           cmd: authselect select {{ authselect_custom_profile }}
         register: result_pam_authselect_select_profile
+        changed_when: true
         when:
         - result_authselect_check_cmd is success
         - result_authselect_profile is not skipped
@@ -2559,28 +2535,26 @@
       - name: Configure the root Account for Failed Password Attempts - Ensure authselect changes are applied
         ansible.builtin.command:
           cmd: authselect apply-changes -b --backup=after-hardening-custom-profile
+        changed_when: true
         when:
         - result_authselect_check_cmd is success
         - result_authselect_profile is not skipped
         - result_pam_authselect_restore_features is not skipped
-      - name: Configure the root Account for Failed Password Attempts - Change the PAM file to be edited according to the
-          custom authselect profile
+      - name: Configure the root Account for Failed Password Attempts - Change the PAM file to be edited according to the custom authselect profile
         ansible.builtin.set_fact:
           pam_file_path: /etc/authselect/{{ authselect_custom_profile }}/{{ pam_file_path | basename }}
         when:
         - authselect_custom_profile is defined
       when:
       - result_authselect_present.stat.exists
-    - name: Configure the root Account for Failed Password Attempts - Define a fact for control already filtered in case filters
-        are used
+    - name: Configure the root Account for Failed Password Attempts - Define a fact for control already filtered in case filters are used
       ansible.builtin.set_fact:
         pam_module_control: ''
     - name: Configure the root Account for Failed Password Attempts - Check if {{ pam_file_path }} file is present
       ansible.builtin.stat:
         path: '{{ pam_file_path }}'
       register: result_pam_file_present
-    - name: Configure the root Account for Failed Password Attempts - Ensure the "even_deny_root" option from "pam_faillock.so"
-        is not present in {{ pam_file_path }}
+    - name: Configure the root Account for Failed Password Attempts - Ensure the "even_deny_root" option from "pam_faillock.so" is not present in {{ pam_file_path }}
       ansible.builtin.replace:
         dest: '{{ pam_file_path }}'
         regexp: (.*auth.*pam_faillock.so.*)\beven_deny_root\b=?[0-9a-zA-Z]*(.*)
@@ -2591,6 +2565,7 @@
     - name: Configure the root Account for Failed Password Attempts - Ensure authselect changes are applied
       ansible.builtin.command:
         cmd: authselect apply-changes -b
+      changed_when: true
       when:
       - result_authselect_present.stat.exists
       - result_pam_option_removal is changed
@@ -2609,8 +2584,7 @@
       ansible.builtin.stat:
         path: /usr/bin/authselect
       register: result_authselect_present
-    - name: Configure the root Account for Failed Password Attempts - Ensure authselect custom profile is used if authselect
-        is present
+    - name: Configure the root Account for Failed Password Attempts - Ensure authselect custom profile is used if authselect is present
       block:
       - name: Configure the root Account for Failed Password Attempts - Check integrity of authselect current profile
         ansible.builtin.command:
@@ -2619,23 +2593,22 @@
         changed_when: false
         check_mode: false
         failed_when: false
-      - name: Configure the root Account for Failed Password Attempts - Informative message based on the authselect integrity
-          check result
+      - name: Configure the root Account for Failed Password Attempts - Informative message based on the authselect integrity check result
         ansible.builtin.assert:
           that:
           - ansible_check_mode or result_authselect_check_cmd.rc == 0
           fail_msg:
           - authselect integrity check failed. Remediation aborted!
-          - This remediation could not be applied because an authselect profile was not selected or the selected profile is
-            not intact.
+          - This remediation could not be applied because an authselect profile was not selected or the selected profile is not intact.
           - It is not recommended to manually edit the PAM files when authselect tool is available.
-          - In cases where the default authselect profile does not cover a specific demand, a custom authselect profile is
-            recommended.
+          - In cases where the default authselect profile does not cover a specific demand, a custom authselect profile is recommended.
           success_msg:
           - authselect integrity check passed
       - name: Configure the root Account for Failed Password Attempts - Get authselect current profile
         ansible.builtin.shell:
-          cmd: authselect current -r | awk '{ print $1 }'
+          cmd: 'set -o pipefail
+
+            authselect current -r | awk ''{ print $1 }'''
         register: result_authselect_profile
         changed_when: false
         when:
@@ -2647,26 +2620,25 @@
         when:
         - result_authselect_profile is not skipped
         - result_authselect_profile.stdout is match("custom/")
-      - name: Configure the root Account for Failed Password Attempts - Define the new authselect custom profile as a local
-          fact
+      - name: Configure the root Account for Failed Password Attempts - Define the new authselect custom profile as a local fact
         ansible.builtin.set_fact:
           authselect_current_profile: '{{ result_authselect_profile.stdout }}'
           authselect_custom_profile: custom/hardening
         when:
         - result_authselect_profile is not skipped
         - result_authselect_profile.stdout is not match("custom/")
-      - name: Configure the root Account for Failed Password Attempts - Get authselect current features to also enable them
-          in the custom profile
+      - name: Configure the root Account for Failed Password Attempts - Get authselect current features to also enable them in the custom profile
         ansible.builtin.shell:
-          cmd: authselect current | tail -n+3 | awk '{ print $2 }'
+          cmd: 'set -o pipefail
+
+            authselect current | tail -n+3 | awk ''{ print $2 }'''
         register: result_authselect_features
         changed_when: false
         check_mode: false
         when:
         - result_authselect_profile is not skipped
         - authselect_current_profile is not match("custom/")
-      - name: Configure the root Account for Failed Password Attempts - Check if any custom profile with the same name was
-          already created
+      - name: Configure the root Account for Failed Password Attempts - Check if any custom profile with the same name was already created
         ansible.builtin.stat:
           path: /etc/authselect/{{ authselect_custom_profile }}
         register: result_authselect_custom_profile_present
@@ -2674,19 +2646,19 @@
         when:
         - result_authselect_profile is not skipped
         - authselect_current_profile is not match("custom/")
-      - name: Configure the root Account for Failed Password Attempts - Create an authselect custom profile based on the current
-          profile
+      - name: Configure the root Account for Failed Password Attempts - Create an authselect custom profile based on the current profile
         ansible.builtin.command:
           cmd: authselect create-profile hardening -b {{ authselect_current_profile }}
+        changed_when: true
         when:
         - result_authselect_profile is not skipped
         - result_authselect_check_cmd is success
         - authselect_current_profile is not match("^(custom/|local)")
         - not result_authselect_custom_profile_present.stat.exists
-      - name: Configure the root Account for Failed Password Attempts - Create an authselect custom profile based on sssd
-          profile
+      - name: Configure the root Account for Failed Password Attempts - Create an authselect custom profile based on sssd profile
         ansible.builtin.command:
           cmd: authselect create-profile hardening -b sssd
+        changed_when: true
         when:
         - result_authselect_profile is not skipped
         - result_authselect_check_cmd is success
@@ -2695,6 +2667,7 @@
       - name: Configure the root Account for Failed Password Attempts - Ensure authselect changes are applied
         ansible.builtin.command:
           cmd: authselect apply-changes -b --backup=before-hardening-custom-profile
+        changed_when: true
         when:
         - result_authselect_check_cmd is success
         - result_authselect_profile is not skipped
@@ -2704,6 +2677,7 @@
         ansible.builtin.command:
           cmd: authselect select {{ authselect_custom_profile }}
         register: result_pam_authselect_select_profile
+        changed_when: true
         when:
         - result_authselect_check_cmd is success
         - result_authselect_profile is not skipped
@@ -2721,28 +2695,26 @@
       - name: Configure the root Account for Failed Password Attempts - Ensure authselect changes are applied
         ansible.builtin.command:
           cmd: authselect apply-changes -b --backup=after-hardening-custom-profile
+        changed_when: true
         when:
         - result_authselect_check_cmd is success
         - result_authselect_profile is not skipped
         - result_pam_authselect_restore_features is not skipped
-      - name: Configure the root Account for Failed Password Attempts - Change the PAM file to be edited according to the
-          custom authselect profile
+      - name: Configure the root Account for Failed Password Attempts - Change the PAM file to be edited according to the custom authselect profile
         ansible.builtin.set_fact:
           pam_file_path: /etc/authselect/{{ authselect_custom_profile }}/{{ pam_file_path | basename }}
         when:
         - authselect_custom_profile is defined
       when:
       - result_authselect_present.stat.exists
-    - name: Configure the root Account for Failed Password Attempts - Define a fact for control already filtered in case filters
-        are used
+    - name: Configure the root Account for Failed Password Attempts - Define a fact for control already filtered in case filters are used
       ansible.builtin.set_fact:
         pam_module_control: ''
     - name: Configure the root Account for Failed Password Attempts - Check if {{ pam_file_path }} file is present
       ansible.builtin.stat:
         path: '{{ pam_file_path }}'
       register: result_pam_file_present
-    - name: Configure the root Account for Failed Password Attempts - Ensure the "even_deny_root" option from "pam_faillock.so"
-        is not present in {{ pam_file_path }}
+    - name: Configure the root Account for Failed Password Attempts - Ensure the "even_deny_root" option from "pam_faillock.so" is not present in {{ pam_file_path }}
       ansible.builtin.replace:
         dest: '{{ pam_file_path }}'
         regexp: (.*auth.*pam_faillock.so.*)\beven_deny_root\b=?[0-9a-zA-Z]*(.*)
@@ -2753,6 +2725,7 @@
     - name: Configure the root Account for Failed Password Attempts - Ensure authselect changes are applied
       ansible.builtin.command:
         cmd: authselect apply-changes -b
+      changed_when: true
       when:
       - result_authselect_present.stat.exists
       - result_pam_option_removal is changed
@@ -2781,12 +2754,9 @@
   - medium_severity
   - no_reboot_needed
   - restrict_strategy
-
-- name: Configure the root Account for Failed Password Attempts - Ensure the pam_faillock.so even_deny_root parameter in PAM
-    files
+- name: Configure the root Account for Failed Password Attempts - Ensure the pam_faillock.so even_deny_root parameter in PAM files
   block:
-  - name: Configure the root Account for Failed Password Attempts - Check if pam_faillock.so even_deny_root parameter is already
-      enabled in pam files
+  - name: Configure the root Account for Failed Password Attempts - Check if pam_faillock.so even_deny_root parameter is already enabled in pam files
     ansible.builtin.lineinfile:
       path: /etc/pam.d/system-auth
       regexp: .*auth.*pam_faillock\.so (preauth|authfail).*even_deny_root
@@ -2794,8 +2764,7 @@
     check_mode: true
     changed_when: false
     register: result_pam_faillock_even_deny_root_parameter_is_present
-  - name: Configure the root Account for Failed Password Attempts - Ensure the inclusion of pam_faillock.so preauth even_deny_root
-      parameter in auth section
+  - name: Configure the root Account for Failed Password Attempts - Ensure the inclusion of pam_faillock.so preauth even_deny_root parameter in auth section
     ansible.builtin.lineinfile:
       path: '{{ item }}'
       backrefs: true
@@ -2807,8 +2776,7 @@
     - /etc/pam.d/password-auth
     when:
     - result_pam_faillock_even_deny_root_parameter_is_present.found == 0
-  - name: Configure the root Account for Failed Password Attempts - Ensure the inclusion of pam_faillock.so authfail even_deny_root
-      parameter in auth section
+  - name: Configure the root Account for Failed Password Attempts - Ensure the inclusion of pam_faillock.so authfail even_deny_root parameter in auth section
     ansible.builtin.lineinfile:
       path: '{{ item }}'
       backrefs: true
@@ -2843,7 +2811,6 @@
   - medium_severity
   - no_reboot_needed
   - restrict_strategy
-
 - name: Set Interval For Counting Failed Password Attempts - Check if system relies on authselect tool
   ansible.builtin.stat:
     path: /usr/bin/authselect
@@ -2869,7 +2836,6 @@
   - medium_severity
   - no_reboot_needed
   - restrict_strategy
-
 - name: Set Interval For Counting Failed Password Attempts - Remediation where authselect tool is present
   block:
   - name: Set Interval For Counting Failed Password Attempts - Check integrity of authselect current profile
@@ -2879,38 +2845,39 @@
     changed_when: false
     check_mode: false
     failed_when: false
-  - name: Set Interval For Counting Failed Password Attempts - Informative message based on the authselect integrity check
-      result
+  - name: Set Interval For Counting Failed Password Attempts - Informative message based on the authselect integrity check result
     ansible.builtin.assert:
       that:
       - ansible_check_mode or result_authselect_check_cmd.rc == 0
       fail_msg:
       - authselect integrity check failed. Remediation aborted!
-      - This remediation could not be applied because an authselect profile was not selected or the selected profile is not
-        intact.
+      - This remediation could not be applied because an authselect profile was not selected or the selected profile is not intact.
       - It is not recommended to manually edit the PAM files when authselect tool is available.
       - In cases where the default authselect profile does not cover a specific demand, a custom authselect profile is recommended.
       success_msg:
       - authselect integrity check passed
   - name: Set Interval For Counting Failed Password Attempts - Get authselect current features
     ansible.builtin.shell:
-      cmd: authselect current | tail -n+3 | awk '{ print $2 }'
+      cmd: 'set -o pipefail
+
+        authselect current | tail -n+3 | awk ''{ print $2 }'''
     register: result_authselect_features
     changed_when: false
     check_mode: false
     when:
     - result_authselect_check_cmd is success
-  - name: Set Interval For Counting Failed Password Attempts - Ensure "with-faillock" feature is enabled using authselect
-      tool
+  - name: Set Interval For Counting Failed Password Attempts - Ensure "with-faillock" feature is enabled using authselect tool
     ansible.builtin.command:
       cmd: authselect enable-feature with-faillock
     register: result_authselect_enable_feature_cmd
+    changed_when: true
     when:
     - result_authselect_check_cmd is success
     - result_authselect_features.stdout is not search("with-faillock")
   - name: Set Interval For Counting Failed Password Attempts - Ensure authselect changes are applied
     ansible.builtin.command:
       cmd: authselect apply-changes -b
+    changed_when: true
     when:
     - result_authselect_enable_feature_cmd is not skipped
     - result_authselect_enable_feature_cmd is success
@@ -2936,7 +2903,6 @@
   - medium_severity
   - no_reboot_needed
   - restrict_strategy
-
 - name: Set Interval For Counting Failed Password Attempts - Remediation where authselect tool is not present
   block:
   - name: Set Interval For Counting Failed Password Attempts - Check if pam_faillock.so is already enabled
@@ -3002,7 +2968,6 @@
   - medium_severity
   - no_reboot_needed
   - restrict_strategy
-
 - name: Set Interval For Counting Failed Password Attempts - Check the presence of /etc/security/faillock.conf file
   ansible.builtin.stat:
     path: /etc/security/faillock.conf
@@ -3028,7 +2993,6 @@
   - medium_severity
   - no_reboot_needed
   - restrict_strategy
-
 - name: Set Interval For Counting Failed Password Attempts - Ensure the pam_faillock.so fail_interval parameter in /etc/security/faillock.conf
   ansible.builtin.lineinfile:
     path: /etc/security/faillock.conf
@@ -3057,9 +3021,7 @@
   - medium_severity
   - no_reboot_needed
   - restrict_strategy
-
-- name: Set Interval For Counting Failed Password Attempts - Ensure the pam_faillock.so fail_interval parameter not in PAM
-    files
+- name: Set Interval For Counting Failed Password Attempts - Ensure the pam_faillock.so fail_interval parameter not in PAM files
   block:
   - name: Set Interval For Counting Failed Password Attempts - Check if /etc/pam.d/system-auth file is present
     ansible.builtin.stat:
@@ -3074,8 +3036,7 @@
       ansible.builtin.stat:
         path: /usr/bin/authselect
       register: result_authselect_present
-    - name: Set Interval For Counting Failed Password Attempts - Ensure authselect custom profile is used if authselect is
-        present
+    - name: Set Interval For Counting Failed Password Attempts - Ensure authselect custom profile is used if authselect is present
       block:
       - name: Set Interval For Counting Failed Password Attempts - Check integrity of authselect current profile
         ansible.builtin.command:
@@ -3084,23 +3045,22 @@
         changed_when: false
         check_mode: false
         failed_when: false
-      - name: Set Interval For Counting Failed Password Attempts - Informative message based on the authselect integrity check
-          result
+      - name: Set Interval For Counting Failed Password Attempts - Informative message based on the authselect integrity check result
         ansible.builtin.assert:
           that:
           - ansible_check_mode or result_authselect_check_cmd.rc == 0
           fail_msg:
           - authselect integrity check failed. Remediation aborted!
-          - This remediation could not be applied because an authselect profile was not selected or the selected profile is
-            not intact.
+          - This remediation could not be applied because an authselect profile was not selected or the selected profile is not intact.
           - It is not recommended to manually edit the PAM files when authselect tool is available.
-          - In cases where the default authselect profile does not cover a specific demand, a custom authselect profile is
-            recommended.
+          - In cases where the default authselect profile does not cover a specific demand, a custom authselect profile is recommended.
           success_msg:
           - authselect integrity check passed
       - name: Set Interval For Counting Failed Password Attempts - Get authselect current profile
         ansible.builtin.shell:
-          cmd: authselect current -r | awk '{ print $1 }'
+          cmd: 'set -o pipefail
+
+            authselect current -r | awk ''{ print $1 }'''
         register: result_authselect_profile
         changed_when: false
         when:
@@ -3119,18 +3079,18 @@
         when:
         - result_authselect_profile is not skipped
         - result_authselect_profile.stdout is not match("custom/")
-      - name: Set Interval For Counting Failed Password Attempts - Get authselect current features to also enable them in
-          the custom profile
+      - name: Set Interval For Counting Failed Password Attempts - Get authselect current features to also enable them in the custom profile
         ansible.builtin.shell:
-          cmd: authselect current | tail -n+3 | awk '{ print $2 }'
+          cmd: 'set -o pipefail
+
+            authselect current | tail -n+3 | awk ''{ print $2 }'''
         register: result_authselect_features
         changed_when: false
         check_mode: false
         when:
         - result_authselect_profile is not skipped
         - authselect_current_profile is not match("custom/")
-      - name: Set Interval For Counting Failed Password Attempts - Check if any custom profile with the same name was already
-          created
+      - name: Set Interval For Counting Failed Password Attempts - Check if any custom profile with the same name was already created
         ansible.builtin.stat:
           path: /etc/authselect/{{ authselect_custom_profile }}
         register: result_authselect_custom_profile_present
@@ -3138,10 +3098,10 @@
         when:
         - result_authselect_profile is not skipped
         - authselect_current_profile is not match("custom/")
-      - name: Set Interval For Counting Failed Password Attempts - Create an authselect custom profile based on the current
-          profile
+      - name: Set Interval For Counting Failed Password Attempts - Create an authselect custom profile based on the current profile
         ansible.builtin.command:
           cmd: authselect create-profile hardening -b {{ authselect_current_profile }}
+        changed_when: true
         when:
         - result_authselect_profile is not skipped
         - result_authselect_check_cmd is success
@@ -3150,6 +3110,7 @@
       - name: Set Interval For Counting Failed Password Attempts - Create an authselect custom profile based on sssd profile
         ansible.builtin.command:
           cmd: authselect create-profile hardening -b sssd
+        changed_when: true
         when:
         - result_authselect_profile is not skipped
         - result_authselect_check_cmd is success
@@ -3158,6 +3119,7 @@
       - name: Set Interval For Counting Failed Password Attempts - Ensure authselect changes are applied
         ansible.builtin.command:
           cmd: authselect apply-changes -b --backup=before-hardening-custom-profile
+        changed_when: true
         when:
         - result_authselect_check_cmd is success
         - result_authselect_profile is not skipped
@@ -3167,6 +3129,7 @@
         ansible.builtin.command:
           cmd: authselect select {{ authselect_custom_profile }}
         register: result_pam_authselect_select_profile
+        changed_when: true
         when:
         - result_authselect_check_cmd is success
         - result_authselect_profile is not skipped
@@ -3184,28 +3147,26 @@
       - name: Set Interval For Counting Failed Password Attempts - Ensure authselect changes are applied
         ansible.builtin.command:
           cmd: authselect apply-changes -b --backup=after-hardening-custom-profile
+        changed_when: true
         when:
         - result_authselect_check_cmd is success
         - result_authselect_profile is not skipped
         - result_pam_authselect_restore_features is not skipped
-      - name: Set Interval For Counting Failed Password Attempts - Change the PAM file to be edited according to the custom
-          authselect profile
+      - name: Set Interval For Counting Failed Password Attempts - Change the PAM file to be edited according to the custom authselect profile
         ansible.builtin.set_fact:
           pam_file_path: /etc/authselect/{{ authselect_custom_profile }}/{{ pam_file_path | basename }}
         when:
         - authselect_custom_profile is defined
       when:
       - result_authselect_present.stat.exists
-    - name: Set Interval For Counting Failed Password Attempts - Define a fact for control already filtered in case filters
-        are used
+    - name: Set Interval For Counting Failed Password Attempts - Define a fact for control already filtered in case filters are used
       ansible.builtin.set_fact:
         pam_module_control: ''
     - name: Set Interval For Counting Failed Password Attempts - Check if {{ pam_file_path }} file is present
       ansible.builtin.stat:
         path: '{{ pam_file_path }}'
       register: result_pam_file_present
-    - name: Set Interval For Counting Failed Password Attempts - Ensure the "fail_interval" option from "pam_faillock.so"
-        is not present in {{ pam_file_path }}
+    - name: Set Interval For Counting Failed Password Attempts - Ensure the "fail_interval" option from "pam_faillock.so" is not present in {{ pam_file_path }}
       ansible.builtin.replace:
         dest: '{{ pam_file_path }}'
         regexp: (.*auth.*pam_faillock.so.*)\bfail_interval\b=?[0-9a-zA-Z]*(.*)
@@ -3216,6 +3177,7 @@
     - name: Set Interval For Counting Failed Password Attempts - Ensure authselect changes are applied
       ansible.builtin.command:
         cmd: authselect apply-changes -b
+      changed_when: true
       when:
       - result_authselect_present.stat.exists
       - result_pam_option_removal is changed
@@ -3234,8 +3196,7 @@
       ansible.builtin.stat:
         path: /usr/bin/authselect
       register: result_authselect_present
-    - name: Set Interval For Counting Failed Password Attempts - Ensure authselect custom profile is used if authselect is
-        present
+    - name: Set Interval For Counting Failed Password Attempts - Ensure authselect custom profile is used if authselect is present
       block:
       - name: Set Interval For Counting Failed Password Attempts - Check integrity of authselect current profile
         ansible.builtin.command:
@@ -3244,23 +3205,22 @@
         changed_when: false
         check_mode: false
         failed_when: false
-      - name: Set Interval For Counting Failed Password Attempts - Informative message based on the authselect integrity check
-          result
+      - name: Set Interval For Counting Failed Password Attempts - Informative message based on the authselect integrity check result
         ansible.builtin.assert:
           that:
           - ansible_check_mode or result_authselect_check_cmd.rc == 0
           fail_msg:
           - authselect integrity check failed. Remediation aborted!
-          - This remediation could not be applied because an authselect profile was not selected or the selected profile is
-            not intact.
+          - This remediation could not be applied because an authselect profile was not selected or the selected profile is not intact.
           - It is not recommended to manually edit the PAM files when authselect tool is available.
-          - In cases where the default authselect profile does not cover a specific demand, a custom authselect profile is
-            recommended.
+          - In cases where the default authselect profile does not cover a specific demand, a custom authselect profile is recommended.
           success_msg:
           - authselect integrity check passed
       - name: Set Interval For Counting Failed Password Attempts - Get authselect current profile
         ansible.builtin.shell:
-          cmd: authselect current -r | awk '{ print $1 }'
+          cmd: 'set -o pipefail
+
+            authselect current -r | awk ''{ print $1 }'''
         register: result_authselect_profile
         changed_when: false
         when:
@@ -3279,18 +3239,18 @@
         when:
         - result_authselect_profile is not skipped
         - result_authselect_profile.stdout is not match("custom/")
-      - name: Set Interval For Counting Failed Password Attempts - Get authselect current features to also enable them in
-          the custom profile
+      - name: Set Interval For Counting Failed Password Attempts - Get authselect current features to also enable them in the custom profile
         ansible.builtin.shell:
-          cmd: authselect current | tail -n+3 | awk '{ print $2 }'
+          cmd: 'set -o pipefail
+
+            authselect current | tail -n+3 | awk ''{ print $2 }'''
         register: result_authselect_features
         changed_when: false
         check_mode: false
         when:
         - result_authselect_profile is not skipped
         - authselect_current_profile is not match("custom/")
-      - name: Set Interval For Counting Failed Password Attempts - Check if any custom profile with the same name was already
-          created
+      - name: Set Interval For Counting Failed Password Attempts - Check if any custom profile with the same name was already created
         ansible.builtin.stat:
           path: /etc/authselect/{{ authselect_custom_profile }}
         register: result_authselect_custom_profile_present
@@ -3298,10 +3258,10 @@
         when:
         - result_authselect_profile is not skipped
         - authselect_current_profile is not match("custom/")
-      - name: Set Interval For Counting Failed Password Attempts - Create an authselect custom profile based on the current
-          profile
+      - name: Set Interval For Counting Failed Password Attempts - Create an authselect custom profile based on the current profile
         ansible.builtin.command:
           cmd: authselect create-profile hardening -b {{ authselect_current_profile }}
+        changed_when: true
         when:
         - result_authselect_profile is not skipped
         - result_authselect_check_cmd is success
@@ -3310,6 +3270,7 @@
       - name: Set Interval For Counting Failed Password Attempts - Create an authselect custom profile based on sssd profile
         ansible.builtin.command:
           cmd: authselect create-profile hardening -b sssd
+        changed_when: true
         when:
         - result_authselect_profile is not skipped
         - result_authselect_check_cmd is success
@@ -3318,6 +3279,7 @@
       - name: Set Interval For Counting Failed Password Attempts - Ensure authselect changes are applied
         ansible.builtin.command:
           cmd: authselect apply-changes -b --backup=before-hardening-custom-profile
+        changed_when: true
         when:
         - result_authselect_check_cmd is success
         - result_authselect_profile is not skipped
@@ -3327,6 +3289,7 @@
         ansible.builtin.command:
           cmd: authselect select {{ authselect_custom_profile }}
         register: result_pam_authselect_select_profile
+        changed_when: true
         when:
         - result_authselect_check_cmd is success
         - result_authselect_profile is not skipped
@@ -3344,28 +3307,26 @@
       - name: Set Interval For Counting Failed Password Attempts - Ensure authselect changes are applied
         ansible.builtin.command:
           cmd: authselect apply-changes -b --backup=after-hardening-custom-profile
+        changed_when: true
         when:
         - result_authselect_check_cmd is success
         - result_authselect_profile is not skipped
         - result_pam_authselect_restore_features is not skipped
-      - name: Set Interval For Counting Failed Password Attempts - Change the PAM file to be edited according to the custom
-          authselect profile
+      - name: Set Interval For Counting Failed Password Attempts - Change the PAM file to be edited according to the custom authselect profile
         ansible.builtin.set_fact:
           pam_file_path: /etc/authselect/{{ authselect_custom_profile }}/{{ pam_file_path | basename }}
         when:
         - authselect_custom_profile is defined
       when:
       - result_authselect_present.stat.exists
-    - name: Set Interval For Counting Failed Password Attempts - Define a fact for control already filtered in case filters
-        are used
+    - name: Set Interval For Counting Failed Password Attempts - Define a fact for control already filtered in case filters are used
       ansible.builtin.set_fact:
         pam_module_control: ''
     - name: Set Interval For Counting Failed Password Attempts - Check if {{ pam_file_path }} file is present
       ansible.builtin.stat:
         path: '{{ pam_file_path }}'
       register: result_pam_file_present
-    - name: Set Interval For Counting Failed Password Attempts - Ensure the "fail_interval" option from "pam_faillock.so"
-        is not present in {{ pam_file_path }}
+    - name: Set Interval For Counting Failed Password Attempts - Ensure the "fail_interval" option from "pam_faillock.so" is not present in {{ pam_file_path }}
       ansible.builtin.replace:
         dest: '{{ pam_file_path }}'
         regexp: (.*auth.*pam_faillock.so.*)\bfail_interval\b=?[0-9a-zA-Z]*(.*)
@@ -3376,6 +3337,7 @@
     - name: Set Interval For Counting Failed Password Attempts - Ensure authselect changes are applied
       ansible.builtin.command:
         cmd: authselect apply-changes -b
+      changed_when: true
       when:
       - result_authselect_present.stat.exists
       - result_pam_option_removal is changed
@@ -3403,11 +3365,9 @@
   - medium_severity
   - no_reboot_needed
   - restrict_strategy
-
 - name: Set Interval For Counting Failed Password Attempts - Ensure the pam_faillock.so fail_interval parameter in PAM files
   block:
-  - name: Set Interval For Counting Failed Password Attempts - Check if pam_faillock.so fail_interval parameter is already
-      enabled in pam files
+  - name: Set Interval For Counting Failed Password Attempts - Check if pam_faillock.so fail_interval parameter is already enabled in pam files
     ansible.builtin.lineinfile:
       path: /etc/pam.d/system-auth
       regexp: .*auth.*pam_faillock\.so (preauth|authfail).*fail_interval
@@ -3415,8 +3375,7 @@
     check_mode: true
     changed_when: false
     register: result_pam_faillock_fail_interval_parameter_is_present
-  - name: Set Interval For Counting Failed Password Attempts - Ensure the inclusion of pam_faillock.so preauth fail_interval
-      parameter in auth section
+  - name: Set Interval For Counting Failed Password Attempts - Ensure the inclusion of pam_faillock.so preauth fail_interval parameter in auth section
     ansible.builtin.lineinfile:
       path: '{{ item }}'
       backrefs: true
@@ -3428,8 +3387,7 @@
     - /etc/pam.d/password-auth
     when:
     - result_pam_faillock_fail_interval_parameter_is_present.found == 0
-  - name: Set Interval For Counting Failed Password Attempts - Ensure the inclusion of pam_faillock.so authfail fail_interval
-      parameter in auth section
+  - name: Set Interval For Counting Failed Password Attempts - Ensure the inclusion of pam_faillock.so authfail fail_interval parameter in auth section
     ansible.builtin.lineinfile:
       path: '{{ item }}'
       backrefs: true
@@ -3441,8 +3399,7 @@
     - /etc/pam.d/password-auth
     when:
     - result_pam_faillock_fail_interval_parameter_is_present.found == 0
-  - name: Set Interval For Counting Failed Password Attempts - Ensure the desired value for pam_faillock.so preauth fail_interval
-      parameter in auth section
+  - name: Set Interval For Counting Failed Password Attempts - Ensure the desired value for pam_faillock.so preauth fail_interval parameter in auth section
     ansible.builtin.lineinfile:
       path: '{{ item }}'
       backrefs: true
@@ -3454,8 +3411,7 @@
     - /etc/pam.d/password-auth
     when:
     - result_pam_faillock_fail_interval_parameter_is_present.found > 0
-  - name: Set Interval For Counting Failed Password Attempts - Ensure the desired value for pam_faillock.so authfail fail_interval
-      parameter in auth section
+  - name: Set Interval For Counting Failed Password Attempts - Ensure the desired value for pam_faillock.so authfail fail_interval parameter in auth section
     ansible.builtin.lineinfile:
       path: '{{ item }}'
       backrefs: true
@@ -3489,7 +3445,6 @@
   - medium_severity
   - no_reboot_needed
   - restrict_strategy
-
 - name: Set Lockout Time for Failed Password Attempts - Check if system relies on authselect tool
   ansible.builtin.stat:
     path: /usr/bin/authselect
@@ -3520,7 +3475,6 @@
   - medium_severity
   - no_reboot_needed
   - restrict_strategy
-
 - name: Set Lockout Time for Failed Password Attempts - Remediation where authselect tool is present
   block:
   - name: Set Lockout Time for Failed Password Attempts - Check integrity of authselect current profile
@@ -3536,15 +3490,16 @@
       - ansible_check_mode or result_authselect_check_cmd.rc == 0
       fail_msg:
       - authselect integrity check failed. Remediation aborted!
-      - This remediation could not be applied because an authselect profile was not selected or the selected profile is not
-        intact.
+      - This remediation could not be applied because an authselect profile was not selected or the selected profile is not intact.
       - It is not recommended to manually edit the PAM files when authselect tool is available.
       - In cases where the default authselect profile does not cover a specific demand, a custom authselect profile is recommended.
       success_msg:
       - authselect integrity check passed
   - name: Set Lockout Time for Failed Password Attempts - Get authselect current features
     ansible.builtin.shell:
-      cmd: authselect current | tail -n+3 | awk '{ print $2 }'
+      cmd: 'set -o pipefail
+
+        authselect current | tail -n+3 | awk ''{ print $2 }'''
     register: result_authselect_features
     changed_when: false
     check_mode: false
@@ -3554,12 +3509,14 @@
     ansible.builtin.command:
       cmd: authselect enable-feature with-faillock
     register: result_authselect_enable_feature_cmd
+    changed_when: true
     when:
     - result_authselect_check_cmd is success
     - result_authselect_features.stdout is not search("with-faillock")
   - name: Set Lockout Time for Failed Password Attempts - Ensure authselect changes are applied
     ansible.builtin.command:
       cmd: authselect apply-changes -b
+    changed_when: true
     when:
     - result_authselect_enable_feature_cmd is not skipped
     - result_authselect_enable_feature_cmd is success
@@ -3590,7 +3547,6 @@
   - medium_severity
   - no_reboot_needed
   - restrict_strategy
-
 - name: Set Lockout Time for Failed Password Attempts - Remediation where authselect tool is not present
   block:
   - name: Set Lockout Time for Failed Password Attempts - Check if pam_faillock.so is already enabled
@@ -3661,7 +3617,6 @@
   - medium_severity
   - no_reboot_needed
   - restrict_strategy
-
 - name: Set Lockout Time for Failed Password Attempts - Check the presence of /etc/security/faillock.conf file
   ansible.builtin.stat:
     path: /etc/security/faillock.conf
@@ -3692,7 +3647,6 @@
   - medium_severity
   - no_reboot_needed
   - restrict_strategy
-
 - name: Set Lockout Time for Failed Password Attempts - Ensure the pam_faillock.so unlock_time parameter in /etc/security/faillock.conf
   ansible.builtin.lineinfile:
     path: /etc/security/faillock.conf
@@ -3726,7 +3680,6 @@
   - medium_severity
   - no_reboot_needed
   - restrict_strategy
-
 - name: Set Lockout Time for Failed Password Attempts - Ensure the pam_faillock.so unlock_time parameter not in PAM files
   block:
   - name: Set Lockout Time for Failed Password Attempts - Check if /etc/pam.d/system-auth file is present
@@ -3751,23 +3704,22 @@
         changed_when: false
         check_mode: false
         failed_when: false
-      - name: Set Lockout Time for Failed Password Attempts - Informative message based on the authselect integrity check
-          result
+      - name: Set Lockout Time for Failed Password Attempts - Informative message based on the authselect integrity check result
         ansible.builtin.assert:
           that:
           - ansible_check_mode or result_authselect_check_cmd.rc == 0
           fail_msg:
           - authselect integrity check failed. Remediation aborted!
-          - This remediation could not be applied because an authselect profile was not selected or the selected profile is
-            not intact.
+          - This remediation could not be applied because an authselect profile was not selected or the selected profile is not intact.
           - It is not recommended to manually edit the PAM files when authselect tool is available.
-          - In cases where the default authselect profile does not cover a specific demand, a custom authselect profile is
-            recommended.
+          - In cases where the default authselect profile does not cover a specific demand, a custom authselect profile is recommended.
           success_msg:
           - authselect integrity check passed
       - name: Set Lockout Time for Failed Password Attempts - Get authselect current profile
         ansible.builtin.shell:
-          cmd: authselect current -r | awk '{ print $1 }'
+          cmd: 'set -o pipefail
+
+            authselect current -r | awk ''{ print $1 }'''
         register: result_authselect_profile
         changed_when: false
         when:
@@ -3786,10 +3738,11 @@
         when:
         - result_authselect_profile is not skipped
         - result_authselect_profile.stdout is not match("custom/")
-      - name: Set Lockout Time for Failed Password Attempts - Get authselect current features to also enable them in the custom
-          profile
+      - name: Set Lockout Time for Failed Password Attempts - Get authselect current features to also enable them in the custom profile
         ansible.builtin.shell:
-          cmd: authselect current | tail -n+3 | awk '{ print $2 }'
+          cmd: 'set -o pipefail
+
+            authselect current | tail -n+3 | awk ''{ print $2 }'''
         register: result_authselect_features
         changed_when: false
         check_mode: false
@@ -3807,6 +3760,7 @@
       - name: Set Lockout Time for Failed Password Attempts - Create an authselect custom profile based on the current profile
         ansible.builtin.command:
           cmd: authselect create-profile hardening -b {{ authselect_current_profile }}
+        changed_when: true
         when:
         - result_authselect_profile is not skipped
         - result_authselect_check_cmd is success
@@ -3815,6 +3769,7 @@
       - name: Set Lockout Time for Failed Password Attempts - Create an authselect custom profile based on sssd profile
         ansible.builtin.command:
           cmd: authselect create-profile hardening -b sssd
+        changed_when: true
         when:
         - result_authselect_profile is not skipped
         - result_authselect_check_cmd is success
@@ -3823,6 +3778,7 @@
       - name: Set Lockout Time for Failed Password Attempts - Ensure authselect changes are applied
         ansible.builtin.command:
           cmd: authselect apply-changes -b --backup=before-hardening-custom-profile
+        changed_when: true
         when:
         - result_authselect_check_cmd is success
         - result_authselect_profile is not skipped
@@ -3832,6 +3788,7 @@
         ansible.builtin.command:
           cmd: authselect select {{ authselect_custom_profile }}
         register: result_pam_authselect_select_profile
+        changed_when: true
         when:
         - result_authselect_check_cmd is success
         - result_authselect_profile is not skipped
@@ -3849,28 +3806,26 @@
       - name: Set Lockout Time for Failed Password Attempts - Ensure authselect changes are applied
         ansible.builtin.command:
           cmd: authselect apply-changes -b --backup=after-hardening-custom-profile
+        changed_when: true
         when:
         - result_authselect_check_cmd is success
         - result_authselect_profile is not skipped
         - result_pam_authselect_restore_features is not skipped
-      - name: Set Lockout Time for Failed Password Attempts - Change the PAM file to be edited according to the custom authselect
-          profile
+      - name: Set Lockout Time for Failed Password Attempts - Change the PAM file to be edited according to the custom authselect profile
         ansible.builtin.set_fact:
           pam_file_path: /etc/authselect/{{ authselect_custom_profile }}/{{ pam_file_path | basename }}
         when:
         - authselect_custom_profile is defined
       when:
       - result_authselect_present.stat.exists
-    - name: Set Lockout Time for Failed Password Attempts - Define a fact for control already filtered in case filters are
-        used
+    - name: Set Lockout Time for Failed Password Attempts - Define a fact for control already filtered in case filters are used
       ansible.builtin.set_fact:
         pam_module_control: ''
     - name: Set Lockout Time for Failed Password Attempts - Check if {{ pam_file_path }} file is present
       ansible.builtin.stat:
         path: '{{ pam_file_path }}'
       register: result_pam_file_present
-    - name: Set Lockout Time for Failed Password Attempts - Ensure the "unlock_time" option from "pam_faillock.so" is not
-        present in {{ pam_file_path }}
+    - name: Set Lockout Time for Failed Password Attempts - Ensure the "unlock_time" option from "pam_faillock.so" is not present in {{ pam_file_path }}
       ansible.builtin.replace:
         dest: '{{ pam_file_path }}'
         regexp: (.*auth.*pam_faillock.so.*)\bunlock_time\b=?[0-9a-zA-Z]*(.*)
@@ -3881,6 +3836,7 @@
     - name: Set Lockout Time for Failed Password Attempts - Ensure authselect changes are applied
       ansible.builtin.command:
         cmd: authselect apply-changes -b
+      changed_when: true
       when:
       - result_authselect_present.stat.exists
       - result_pam_option_removal is changed
@@ -3908,23 +3864,22 @@
         changed_when: false
         check_mode: false
         failed_when: false
-      - name: Set Lockout Time for Failed Password Attempts - Informative message based on the authselect integrity check
-          result
+      - name: Set Lockout Time for Failed Password Attempts - Informative message based on the authselect integrity check result
         ansible.builtin.assert:
           that:
           - ansible_check_mode or result_authselect_check_cmd.rc == 0
           fail_msg:
           - authselect integrity check failed. Remediation aborted!
-          - This remediation could not be applied because an authselect profile was not selected or the selected profile is
-            not intact.
+          - This remediation could not be applied because an authselect profile was not selected or the selected profile is not intact.
           - It is not recommended to manually edit the PAM files when authselect tool is available.
-          - In cases where the default authselect profile does not cover a specific demand, a custom authselect profile is
-            recommended.
+          - In cases where the default authselect profile does not cover a specific demand, a custom authselect profile is recommended.
           success_msg:
           - authselect integrity check passed
       - name: Set Lockout Time for Failed Password Attempts - Get authselect current profile
         ansible.builtin.shell:
-          cmd: authselect current -r | awk '{ print $1 }'
+          cmd: 'set -o pipefail
+
+            authselect current -r | awk ''{ print $1 }'''
         register: result_authselect_profile
         changed_when: false
         when:
@@ -3943,10 +3898,11 @@
         when:
         - result_authselect_profile is not skipped
         - result_authselect_profile.stdout is not match("custom/")
-      - name: Set Lockout Time for Failed Password Attempts - Get authselect current features to also enable them in the custom
-          profile
+      - name: Set Lockout Time for Failed Password Attempts - Get authselect current features to also enable them in the custom profile
         ansible.builtin.shell:
-          cmd: authselect current | tail -n+3 | awk '{ print $2 }'
+          cmd: 'set -o pipefail
+
+            authselect current | tail -n+3 | awk ''{ print $2 }'''
         register: result_authselect_features
         changed_when: false
         check_mode: false
@@ -3964,6 +3920,7 @@
       - name: Set Lockout Time for Failed Password Attempts - Create an authselect custom profile based on the current profile
         ansible.builtin.command:
           cmd: authselect create-profile hardening -b {{ authselect_current_profile }}
+        changed_when: true
         when:
         - result_authselect_profile is not skipped
         - result_authselect_check_cmd is success
@@ -3972,6 +3929,7 @@
       - name: Set Lockout Time for Failed Password Attempts - Create an authselect custom profile based on sssd profile
         ansible.builtin.command:
           cmd: authselect create-profile hardening -b sssd
+        changed_when: true
         when:
         - result_authselect_profile is not skipped
         - result_authselect_check_cmd is success
@@ -3980,6 +3938,7 @@
       - name: Set Lockout Time for Failed Password Attempts - Ensure authselect changes are applied
         ansible.builtin.command:
           cmd: authselect apply-changes -b --backup=before-hardening-custom-profile
+        changed_when: true
         when:
         - result_authselect_check_cmd is success
         - result_authselect_profile is not skipped
@@ -3989,6 +3948,7 @@
         ansible.builtin.command:
           cmd: authselect select {{ authselect_custom_profile }}
         register: result_pam_authselect_select_profile
+        changed_when: true
         when:
         - result_authselect_check_cmd is success
         - result_authselect_profile is not skipped
@@ -4006,28 +3966,26 @@
       - name: Set Lockout Time for Failed Password Attempts - Ensure authselect changes are applied
         ansible.builtin.command:
           cmd: authselect apply-changes -b --backup=after-hardening-custom-profile
+        changed_when: true
         when:
         - result_authselect_check_cmd is success
         - result_authselect_profile is not skipped
         - result_pam_authselect_restore_features is not skipped
-      - name: Set Lockout Time for Failed Password Attempts - Change the PAM file to be edited according to the custom authselect
-          profile
+      - name: Set Lockout Time for Failed Password Attempts - Change the PAM file to be edited according to the custom authselect profile
         ansible.builtin.set_fact:
           pam_file_path: /etc/authselect/{{ authselect_custom_profile }}/{{ pam_file_path | basename }}
         when:
         - authselect_custom_profile is defined
       when:
       - result_authselect_present.stat.exists
-    - name: Set Lockout Time for Failed Password Attempts - Define a fact for control already filtered in case filters are
-        used
+    - name: Set Lockout Time for Failed Password Attempts - Define a fact for control already filtered in case filters are used
       ansible.builtin.set_fact:
         pam_module_control: ''
     - name: Set Lockout Time for Failed Password Attempts - Check if {{ pam_file_path }} file is present
       ansible.builtin.stat:
         path: '{{ pam_file_path }}'
       register: result_pam_file_present
-    - name: Set Lockout Time for Failed Password Attempts - Ensure the "unlock_time" option from "pam_faillock.so" is not
-        present in {{ pam_file_path }}
+    - name: Set Lockout Time for Failed Password Attempts - Ensure the "unlock_time" option from "pam_faillock.so" is not present in {{ pam_file_path }}
       ansible.builtin.replace:
         dest: '{{ pam_file_path }}'
         regexp: (.*auth.*pam_faillock.so.*)\bunlock_time\b=?[0-9a-zA-Z]*(.*)
@@ -4038,6 +3996,7 @@
     - name: Set Lockout Time for Failed Password Attempts - Ensure authselect changes are applied
       ansible.builtin.command:
         cmd: authselect apply-changes -b
+      changed_when: true
       when:
       - result_authselect_present.stat.exists
       - result_pam_option_removal is changed
@@ -4070,11 +4029,9 @@
   - medium_severity
   - no_reboot_needed
   - restrict_strategy
-
 - name: Set Lockout Time for Failed Password Attempts - Ensure the pam_faillock.so unlock_time parameter in PAM files
   block:
-  - name: Set Lockout Time for Failed Password Attempts - Check if pam_faillock.so unlock_time parameter is already enabled
-      in pam files
+  - name: Set Lockout Time for Failed Password Attempts - Check if pam_faillock.so unlock_time parameter is already enabled in pam files
     ansible.builtin.lineinfile:
       path: /etc/pam.d/system-auth
       regexp: .*auth.*pam_faillock\.so (preauth|authfail).*unlock_time
@@ -4082,8 +4039,7 @@
     check_mode: true
     changed_when: false
     register: result_pam_faillock_unlock_time_parameter_is_present
-  - name: Set Lockout Time for Failed Password Attempts - Ensure the inclusion of pam_faillock.so preauth unlock_time parameter
-      in auth section
+  - name: Set Lockout Time for Failed Password Attempts - Ensure the inclusion of pam_faillock.so preauth unlock_time parameter in auth section
     ansible.builtin.lineinfile:
       path: '{{ item }}'
       backrefs: true
@@ -4095,8 +4051,7 @@
     - /etc/pam.d/password-auth
     when:
     - result_pam_faillock_unlock_time_parameter_is_present.found == 0
-  - name: Set Lockout Time for Failed Password Attempts - Ensure the inclusion of pam_faillock.so authfail unlock_time parameter
-      in auth section
+  - name: Set Lockout Time for Failed Password Attempts - Ensure the inclusion of pam_faillock.so authfail unlock_time parameter in auth section
     ansible.builtin.lineinfile:
       path: '{{ item }}'
       backrefs: true
@@ -4108,8 +4063,7 @@
     - /etc/pam.d/password-auth
     when:
     - result_pam_faillock_unlock_time_parameter_is_present.found == 0
-  - name: Set Lockout Time for Failed Password Attempts - Ensure the desired value for pam_faillock.so preauth unlock_time
-      parameter in auth section
+  - name: Set Lockout Time for Failed Password Attempts - Ensure the desired value for pam_faillock.so preauth unlock_time parameter in auth section
     ansible.builtin.lineinfile:
       path: '{{ item }}'
       backrefs: true
@@ -4121,8 +4075,7 @@
     - /etc/pam.d/password-auth
     when:
     - result_pam_faillock_unlock_time_parameter_is_present.found > 0
-  - name: Set Lockout Time for Failed Password Attempts - Ensure the desired value for pam_faillock.so authfail unlock_time
-      parameter in auth section
+  - name: Set Lockout Time for Failed Password Attempts - Ensure the desired value for pam_faillock.so authfail unlock_time parameter in auth section
     ansible.builtin.lineinfile:
       path: '{{ item }}'
       backrefs: true
@@ -4161,7 +4114,6 @@
   - medium_severity
   - no_reboot_needed
   - restrict_strategy
-
 - name: Ensure PAM Enforces Password Requirements - Minimum Digit Characters - Find pwquality.conf.d files
   ansible.builtin.find:
     paths: /etc/security/pwquality.conf.d/
@@ -4193,7 +4145,6 @@
   - medium_severity
   - no_reboot_needed
   - restrict_strategy
-
 - name: Ensure PAM Enforces Password Requirements - Minimum Digit Characters - Ensure dcredit is not set in pwquality.conf.d
   ansible.builtin.lineinfile:
     path: '{{ item.path }}'
@@ -4226,7 +4177,6 @@
   - medium_severity
   - no_reboot_needed
   - restrict_strategy
-
 - name: Ensure PAM Enforces Password Requirements - Minimum Digit Characters - Ensure PAM variable dcredit is set accordingly
   ansible.builtin.lineinfile:
     create: true
@@ -4260,7 +4210,6 @@
   - medium_severity
   - no_reboot_needed
   - restrict_strategy
-
 - name: Ensure PAM Enforces Password Requirements - Minimum Lowercase Characters - Find pwquality.conf.d files
   ansible.builtin.find:
     paths: /etc/security/pwquality.conf.d/
@@ -4292,7 +4241,6 @@
   - medium_severity
   - no_reboot_needed
   - restrict_strategy
-
 - name: Ensure PAM Enforces Password Requirements - Minimum Lowercase Characters - Ensure lcredit is not set in pwquality.conf.d
   ansible.builtin.lineinfile:
     path: '{{ item.path }}'
@@ -4325,7 +4273,6 @@
   - medium_severity
   - no_reboot_needed
   - restrict_strategy
-
 - name: Ensure PAM Enforces Password Requirements - Minimum Lowercase Characters - Ensure PAM variable lcredit is set accordingly
   ansible.builtin.lineinfile:
     create: true
@@ -4359,7 +4306,6 @@
   - medium_severity
   - no_reboot_needed
   - restrict_strategy
-
 - name: Ensure PAM Enforces Password Requirements - Minimum Different Categories - Find pwquality.conf.d files
   ansible.builtin.find:
     paths: /etc/security/pwquality.conf.d/
@@ -4388,7 +4334,6 @@
   - medium_severity
   - no_reboot_needed
   - restrict_strategy
-
 - name: Ensure PAM Enforces Password Requirements - Minimum Different Categories - Ensure minclass is not set in pwquality.conf.d
   ansible.builtin.lineinfile:
     path: '{{ item.path }}'
@@ -4418,7 +4363,6 @@
   - medium_severity
   - no_reboot_needed
   - restrict_strategy
-
 - name: Ensure PAM Enforces Password Requirements - Minimum Different Categories - Ensure PAM variable minclass is set accordingly
   ansible.builtin.lineinfile:
     create: true
@@ -4449,7 +4393,6 @@
   - medium_severity
   - no_reboot_needed
   - restrict_strategy
-
 - name: Ensure PAM Enforces Password Requirements - Minimum Length - Find pwquality.conf.d files
   ansible.builtin.find:
     paths: /etc/security/pwquality.conf.d/
@@ -4482,7 +4425,6 @@
   - medium_severity
   - no_reboot_needed
   - restrict_strategy
-
 - name: Ensure PAM Enforces Password Requirements - Minimum Length - Ensure minlen is not set in pwquality.conf.d
   ansible.builtin.lineinfile:
     path: '{{ item.path }}'
@@ -4516,7 +4458,6 @@
   - medium_severity
   - no_reboot_needed
   - restrict_strategy
-
 - name: Ensure PAM Enforces Password Requirements - Minimum Length - Ensure PAM variable minlen is set accordingly
   ansible.builtin.lineinfile:
     create: true
@@ -4551,7 +4492,6 @@
   - medium_severity
   - no_reboot_needed
   - restrict_strategy
-
 - name: Ensure PAM Enforces Password Requirements - Minimum Special Characters - Find pwquality.conf.d files
   ansible.builtin.find:
     paths: /etc/security/pwquality.conf.d/
@@ -4580,7 +4520,6 @@
   - medium_severity
   - no_reboot_needed
   - restrict_strategy
-
 - name: Ensure PAM Enforces Password Requirements - Minimum Special Characters - Ensure ocredit is not set in pwquality.conf.d
   ansible.builtin.lineinfile:
     path: '{{ item.path }}'
@@ -4610,7 +4549,6 @@
   - medium_severity
   - no_reboot_needed
   - restrict_strategy
-
 - name: Ensure PAM Enforces Password Requirements - Minimum Special Characters - Ensure PAM variable ocredit is set accordingly
   ansible.builtin.lineinfile:
     create: true
@@ -4641,7 +4579,6 @@
   - medium_severity
   - no_reboot_needed
   - restrict_strategy
-
 - name: Ensure PAM variable retry is set accordingly
   ansible.builtin.lineinfile:
     create: true
@@ -4670,9 +4607,7 @@
   - medium_disruption
   - medium_severity
   - no_reboot_needed
-
-- name: Ensure PAM Enforces Password Requirements - Authentication Retry Prompts Permitted Per-Session - Check if /etc/pam.d/password-auth
-    file is present
+- name: Ensure PAM Enforces Password Requirements - Authentication Retry Prompts Permitted Per-Session - Check if /etc/pam.d/password-auth file is present
   ansible.builtin.stat:
     path: /etc/pam.d/password-auth
   register: result_pam_password_auth_file_present
@@ -4697,79 +4632,70 @@
   - medium_disruption
   - medium_severity
   - no_reboot_needed
-
-- name: Ensure PAM Enforces Password Requirements - Authentication Retry Prompts Permitted Per-Session - Check the proper
-    remediation for the system
+- name: Ensure PAM Enforces Password Requirements - Authentication Retry Prompts Permitted Per-Session - Check the proper remediation for the system
   block:
-  - name: Ensure PAM Enforces Password Requirements - Authentication Retry Prompts Permitted Per-Session - Define the PAM
-      file to be edited as a local fact
+  - name: Ensure PAM Enforces Password Requirements - Authentication Retry Prompts Permitted Per-Session - Define the PAM file to be edited as a local fact
     ansible.builtin.set_fact:
       pam_file_path: /etc/pam.d/password-auth
-  - name: Ensure PAM Enforces Password Requirements - Authentication Retry Prompts Permitted Per-Session - Check if system
-      relies on authselect tool
+  - name: Ensure PAM Enforces Password Requirements - Authentication Retry Prompts Permitted Per-Session - Check if system relies on authselect tool
     ansible.builtin.stat:
       path: /usr/bin/authselect
     register: result_authselect_present
-  - name: Ensure PAM Enforces Password Requirements - Authentication Retry Prompts Permitted Per-Session - Ensure authselect
-      custom profile is used if authselect is present
+  - name: Ensure PAM Enforces Password Requirements - Authentication Retry Prompts Permitted Per-Session - Ensure authselect custom profile is used if authselect is present
     block:
-    - name: Ensure PAM Enforces Password Requirements - Authentication Retry Prompts Permitted Per-Session - Check integrity
-        of authselect current profile
+    - name: Ensure PAM Enforces Password Requirements - Authentication Retry Prompts Permitted Per-Session - Check integrity of authselect current profile
       ansible.builtin.command:
         cmd: authselect check
       register: result_authselect_check_cmd
       changed_when: false
       check_mode: false
       failed_when: false
-    - name: Ensure PAM Enforces Password Requirements - Authentication Retry Prompts Permitted Per-Session - Informative message
-        based on the authselect integrity check result
+    - name: Ensure PAM Enforces Password Requirements - Authentication Retry Prompts Permitted Per-Session - Informative message based on the authselect integrity check result
       ansible.builtin.assert:
         that:
         - ansible_check_mode or result_authselect_check_cmd.rc == 0
         fail_msg:
         - authselect integrity check failed. Remediation aborted!
-        - This remediation could not be applied because an authselect profile was not selected or the selected profile is
-          not intact.
+        - This remediation could not be applied because an authselect profile was not selected or the selected profile is not intact.
         - It is not recommended to manually edit the PAM files when authselect tool is available.
         - In cases where the default authselect profile does not cover a specific demand, a custom authselect profile is recommended.
         success_msg:
         - authselect integrity check passed
-    - name: Ensure PAM Enforces Password Requirements - Authentication Retry Prompts Permitted Per-Session - Get authselect
-        current profile
+    - name: Ensure PAM Enforces Password Requirements - Authentication Retry Prompts Permitted Per-Session - Get authselect current profile
       ansible.builtin.shell:
-        cmd: authselect current -r | awk '{ print $1 }'
+        cmd: 'set -o pipefail
+
+          authselect current -r | awk ''{ print $1 }'''
       register: result_authselect_profile
       changed_when: false
       when:
       - result_authselect_check_cmd is success
-    - name: Ensure PAM Enforces Password Requirements - Authentication Retry Prompts Permitted Per-Session - Define the current
-        authselect profile as a local fact
+    - name: Ensure PAM Enforces Password Requirements - Authentication Retry Prompts Permitted Per-Session - Define the current authselect profile as a local fact
       ansible.builtin.set_fact:
         authselect_current_profile: '{{ result_authselect_profile.stdout }}'
         authselect_custom_profile: '{{ result_authselect_profile.stdout }}'
       when:
       - result_authselect_profile is not skipped
       - result_authselect_profile.stdout is match("custom/")
-    - name: Ensure PAM Enforces Password Requirements - Authentication Retry Prompts Permitted Per-Session - Define the new
-        authselect custom profile as a local fact
+    - name: Ensure PAM Enforces Password Requirements - Authentication Retry Prompts Permitted Per-Session - Define the new authselect custom profile as a local fact
       ansible.builtin.set_fact:
         authselect_current_profile: '{{ result_authselect_profile.stdout }}'
         authselect_custom_profile: custom/hardening
       when:
       - result_authselect_profile is not skipped
       - result_authselect_profile.stdout is not match("custom/")
-    - name: Ensure PAM Enforces Password Requirements - Authentication Retry Prompts Permitted Per-Session - Get authselect
-        current features to also enable them in the custom profile
+    - name: Ensure PAM Enforces Password Requirements - Authentication Retry Prompts Permitted Per-Session - Get authselect current features to also enable them in the custom profile
       ansible.builtin.shell:
-        cmd: authselect current | tail -n+3 | awk '{ print $2 }'
+        cmd: 'set -o pipefail
+
+          authselect current | tail -n+3 | awk ''{ print $2 }'''
       register: result_authselect_features
       changed_when: false
       check_mode: false
       when:
       - result_authselect_profile is not skipped
       - authselect_current_profile is not match("custom/")
-    - name: Ensure PAM Enforces Password Requirements - Authentication Retry Prompts Permitted Per-Session - Check if any
-        custom profile with the same name was already created
+    - name: Ensure PAM Enforces Password Requirements - Authentication Retry Prompts Permitted Per-Session - Check if any custom profile with the same name was already created
       ansible.builtin.stat:
         path: /etc/authselect/{{ authselect_custom_profile }}
       register: result_authselect_custom_profile_present
@@ -4777,45 +4703,44 @@
       when:
       - result_authselect_profile is not skipped
       - authselect_current_profile is not match("custom/")
-    - name: Ensure PAM Enforces Password Requirements - Authentication Retry Prompts Permitted Per-Session - Create an authselect
-        custom profile based on the current profile
+    - name: Ensure PAM Enforces Password Requirements - Authentication Retry Prompts Permitted Per-Session - Create an authselect custom profile based on the current profile
       ansible.builtin.command:
         cmd: authselect create-profile hardening -b {{ authselect_current_profile }}
+      changed_when: true
       when:
       - result_authselect_profile is not skipped
       - result_authselect_check_cmd is success
       - authselect_current_profile is not match("^(custom/|local)")
       - not result_authselect_custom_profile_present.stat.exists
-    - name: Ensure PAM Enforces Password Requirements - Authentication Retry Prompts Permitted Per-Session - Create an authselect
-        custom profile based on sssd profile
+    - name: Ensure PAM Enforces Password Requirements - Authentication Retry Prompts Permitted Per-Session - Create an authselect custom profile based on sssd profile
       ansible.builtin.command:
         cmd: authselect create-profile hardening -b sssd
+      changed_when: true
       when:
       - result_authselect_profile is not skipped
       - result_authselect_check_cmd is success
       - authselect_current_profile is match("local")
       - not result_authselect_custom_profile_present.stat.exists
-    - name: Ensure PAM Enforces Password Requirements - Authentication Retry Prompts Permitted Per-Session - Ensure authselect
-        changes are applied
+    - name: Ensure PAM Enforces Password Requirements - Authentication Retry Prompts Permitted Per-Session - Ensure authselect changes are applied
       ansible.builtin.command:
         cmd: authselect apply-changes -b --backup=before-hardening-custom-profile
+      changed_when: true
       when:
       - result_authselect_check_cmd is success
       - result_authselect_profile is not skipped
       - authselect_current_profile is not match("custom/")
       - authselect_custom_profile is not match(authselect_current_profile)
-    - name: Ensure PAM Enforces Password Requirements - Authentication Retry Prompts Permitted Per-Session - Ensure the authselect
-        custom profile is selected
+    - name: Ensure PAM Enforces Password Requirements - Authentication Retry Prompts Permitted Per-Session - Ensure the authselect custom profile is selected
       ansible.builtin.command:
         cmd: authselect select {{ authselect_custom_profile }}
       register: result_pam_authselect_select_profile
+      changed_when: true
       when:
       - result_authselect_check_cmd is success
       - result_authselect_profile is not skipped
       - authselect_current_profile is not match("custom/")
       - authselect_custom_profile is not match(authselect_current_profile)
-    - name: Ensure PAM Enforces Password Requirements - Authentication Retry Prompts Permitted Per-Session - Restore the authselect
-        features in the custom profile
+    - name: Ensure PAM Enforces Password Requirements - Authentication Retry Prompts Permitted Per-Session - Restore the authselect features in the custom profile
       ansible.builtin.command:
         cmd: authselect enable-feature {{ item }}
       loop: '{{ result_authselect_features.stdout_lines }}'
@@ -4824,33 +4749,29 @@
       - result_authselect_profile is not skipped
       - result_authselect_features is not skipped
       - result_pam_authselect_select_profile is not skipped
-    - name: Ensure PAM Enforces Password Requirements - Authentication Retry Prompts Permitted Per-Session - Ensure authselect
-        changes are applied
+    - name: Ensure PAM Enforces Password Requirements - Authentication Retry Prompts Permitted Per-Session - Ensure authselect changes are applied
       ansible.builtin.command:
         cmd: authselect apply-changes -b --backup=after-hardening-custom-profile
+      changed_when: true
       when:
       - result_authselect_check_cmd is success
       - result_authselect_profile is not skipped
       - result_pam_authselect_restore_features is not skipped
-    - name: Ensure PAM Enforces Password Requirements - Authentication Retry Prompts Permitted Per-Session - Change the PAM
-        file to be edited according to the custom authselect profile
+    - name: Ensure PAM Enforces Password Requirements - Authentication Retry Prompts Permitted Per-Session - Change the PAM file to be edited according to the custom authselect profile
       ansible.builtin.set_fact:
         pam_file_path: /etc/authselect/{{ authselect_custom_profile }}/{{ pam_file_path | basename }}
       when:
       - authselect_custom_profile is defined
     when:
     - result_authselect_present.stat.exists
-  - name: Ensure PAM Enforces Password Requirements - Authentication Retry Prompts Permitted Per-Session - Define a fact for
-      control already filtered in case filters are used
+  - name: Ensure PAM Enforces Password Requirements - Authentication Retry Prompts Permitted Per-Session - Define a fact for control already filtered in case filters are used
     ansible.builtin.set_fact:
       pam_module_control: ''
-  - name: Ensure PAM Enforces Password Requirements - Authentication Retry Prompts Permitted Per-Session - Check if {{ pam_file_path
-      }} file is present
+  - name: Ensure PAM Enforces Password Requirements - Authentication Retry Prompts Permitted Per-Session - Check if {{ pam_file_path }} file is present
     ansible.builtin.stat:
       path: '{{ pam_file_path }}'
     register: result_pam_file_present
-  - name: Ensure PAM Enforces Password Requirements - Authentication Retry Prompts Permitted Per-Session - Ensure the "retry"
-      option from "pam_pwquality.so" is not present in {{ pam_file_path }}
+  - name: Ensure PAM Enforces Password Requirements - Authentication Retry Prompts Permitted Per-Session - Ensure the "retry" option from "pam_pwquality.so" is not present in {{ pam_file_path }}
     ansible.builtin.replace:
       dest: '{{ pam_file_path }}'
       regexp: (.*password.*pam_pwquality.so.*)\bretry\b=?[0-9a-zA-Z]*(.*)
@@ -4858,10 +4779,10 @@
     register: result_pam_option_removal
     when:
     - result_pam_file_present.stat.exists
-  - name: Ensure PAM Enforces Password Requirements - Authentication Retry Prompts Permitted Per-Session - Ensure authselect
-      changes are applied
+  - name: Ensure PAM Enforces Password Requirements - Authentication Retry Prompts Permitted Per-Session - Ensure authselect changes are applied
     ansible.builtin.command:
       cmd: authselect apply-changes -b
+    changed_when: true
     when:
     - result_authselect_present.stat.exists
     - result_pam_option_removal is changed
@@ -4887,9 +4808,7 @@
   - medium_disruption
   - medium_severity
   - no_reboot_needed
-
-- name: Ensure PAM Enforces Password Requirements - Authentication Retry Prompts Permitted Per-Session - Check if /etc/pam.d/system-auth
-    file is present
+- name: Ensure PAM Enforces Password Requirements - Authentication Retry Prompts Permitted Per-Session - Check if /etc/pam.d/system-auth file is present
   ansible.builtin.stat:
     path: /etc/pam.d/system-auth
   register: result_pam_auth_file_present
@@ -4914,79 +4833,70 @@
   - medium_disruption
   - medium_severity
   - no_reboot_needed
-
-- name: Ensure PAM Enforces Password Requirements - Authentication Retry Prompts Permitted Per-Session - Check the proper
-    remediation for the system
+- name: Ensure PAM Enforces Password Requirements - Authentication Retry Prompts Permitted Per-Session - Check the proper remediation for the system
   block:
-  - name: Ensure PAM Enforces Password Requirements - Authentication Retry Prompts Permitted Per-Session - Define the PAM
-      file to be edited as a local fact
+  - name: Ensure PAM Enforces Password Requirements - Authentication Retry Prompts Permitted Per-Session - Define the PAM file to be edited as a local fact
     ansible.builtin.set_fact:
       pam_file_path: /etc/pam.d/system-auth
-  - name: Ensure PAM Enforces Password Requirements - Authentication Retry Prompts Permitted Per-Session - Check if system
-      relies on authselect tool
+  - name: Ensure PAM Enforces Password Requirements - Authentication Retry Prompts Permitted Per-Session - Check if system relies on authselect tool
     ansible.builtin.stat:
       path: /usr/bin/authselect
     register: result_authselect_present
-  - name: Ensure PAM Enforces Password Requirements - Authentication Retry Prompts Permitted Per-Session - Ensure authselect
-      custom profile is used if authselect is present
+  - name: Ensure PAM Enforces Password Requirements - Authentication Retry Prompts Permitted Per-Session - Ensure authselect custom profile is used if authselect is present
     block:
-    - name: Ensure PAM Enforces Password Requirements - Authentication Retry Prompts Permitted Per-Session - Check integrity
-        of authselect current profile
+    - name: Ensure PAM Enforces Password Requirements - Authentication Retry Prompts Permitted Per-Session - Check integrity of authselect current profile
       ansible.builtin.command:
         cmd: authselect check
       register: result_authselect_check_cmd
       changed_when: false
       check_mode: false
       failed_when: false
-    - name: Ensure PAM Enforces Password Requirements - Authentication Retry Prompts Permitted Per-Session - Informative message
-        based on the authselect integrity check result
+    - name: Ensure PAM Enforces Password Requirements - Authentication Retry Prompts Permitted Per-Session - Informative message based on the authselect integrity check result
       ansible.builtin.assert:
         that:
         - ansible_check_mode or result_authselect_check_cmd.rc == 0
         fail_msg:
         - authselect integrity check failed. Remediation aborted!
-        - This remediation could not be applied because an authselect profile was not selected or the selected profile is
-          not intact.
+        - This remediation could not be applied because an authselect profile was not selected or the selected profile is not intact.
         - It is not recommended to manually edit the PAM files when authselect tool is available.
         - In cases where the default authselect profile does not cover a specific demand, a custom authselect profile is recommended.
         success_msg:
         - authselect integrity check passed
-    - name: Ensure PAM Enforces Password Requirements - Authentication Retry Prompts Permitted Per-Session - Get authselect
-        current profile
+    - name: Ensure PAM Enforces Password Requirements - Authentication Retry Prompts Permitted Per-Session - Get authselect current profile
       ansible.builtin.shell:
-        cmd: authselect current -r | awk '{ print $1 }'
+        cmd: 'set -o pipefail
+
+          authselect current -r | awk ''{ print $1 }'''
       register: result_authselect_profile
       changed_when: false
       when:
       - result_authselect_check_cmd is success
-    - name: Ensure PAM Enforces Password Requirements - Authentication Retry Prompts Permitted Per-Session - Define the current
-        authselect profile as a local fact
+    - name: Ensure PAM Enforces Password Requirements - Authentication Retry Prompts Permitted Per-Session - Define the current authselect profile as a local fact
       ansible.builtin.set_fact:
         authselect_current_profile: '{{ result_authselect_profile.stdout }}'
         authselect_custom_profile: '{{ result_authselect_profile.stdout }}'
       when:
       - result_authselect_profile is not skipped
       - result_authselect_profile.stdout is match("custom/")
-    - name: Ensure PAM Enforces Password Requirements - Authentication Retry Prompts Permitted Per-Session - Define the new
-        authselect custom profile as a local fact
+    - name: Ensure PAM Enforces Password Requirements - Authentication Retry Prompts Permitted Per-Session - Define the new authselect custom profile as a local fact
       ansible.builtin.set_fact:
         authselect_current_profile: '{{ result_authselect_profile.stdout }}'
         authselect_custom_profile: custom/hardening
       when:
       - result_authselect_profile is not skipped
       - result_authselect_profile.stdout is not match("custom/")
-    - name: Ensure PAM Enforces Password Requirements - Authentication Retry Prompts Permitted Per-Session - Get authselect
-        current features to also enable them in the custom profile
+    - name: Ensure PAM Enforces Password Requirements - Authentication Retry Prompts Permitted Per-Session - Get authselect current features to also enable them in the custom profile
       ansible.builtin.shell:
-        cmd: authselect current | tail -n+3 | awk '{ print $2 }'
+        cmd: 'set -o pipefail
+
+          authselect current | tail -n+3 | awk ''{ print $2 }'''
       register: result_authselect_features
       changed_when: false
       check_mode: false
       when:
       - result_authselect_profile is not skipped
       - authselect_current_profile is not match("custom/")
-    - name: Ensure PAM Enforces Password Requirements - Authentication Retry Prompts Permitted Per-Session - Check if any
-        custom profile with the same name was already created
+    - name: Ensure PAM Enforces Password Requirements - Authentication Retry Prompts Permitted Per-Session - Check if any custom profile with the same name was already created
       ansible.builtin.stat:
         path: /etc/authselect/{{ authselect_custom_profile }}
       register: result_authselect_custom_profile_present
@@ -4994,45 +4904,44 @@
       when:
       - result_authselect_profile is not skipped
       - authselect_current_profile is not match("custom/")
-    - name: Ensure PAM Enforces Password Requirements - Authentication Retry Prompts Permitted Per-Session - Create an authselect
-        custom profile based on the current profile
+    - name: Ensure PAM Enforces Password Requirements - Authentication Retry Prompts Permitted Per-Session - Create an authselect custom profile based on the current profile
       ansible.builtin.command:
         cmd: authselect create-profile hardening -b {{ authselect_current_profile }}
+      changed_when: true
       when:
       - result_authselect_profile is not skipped
       - result_authselect_check_cmd is success
       - authselect_current_profile is not match("^(custom/|local)")
       - not result_authselect_custom_profile_present.stat.exists
-    - name: Ensure PAM Enforces Password Requirements - Authentication Retry Prompts Permitted Per-Session - Create an authselect
-        custom profile based on sssd profile
+    - name: Ensure PAM Enforces Password Requirements - Authentication Retry Prompts Permitted Per-Session - Create an authselect custom profile based on sssd profile
       ansible.builtin.command:
         cmd: authselect create-profile hardening -b sssd
+      changed_when: true
       when:
       - result_authselect_profile is not skipped
       - result_authselect_check_cmd is success
       - authselect_current_profile is match("local")
       - not result_authselect_custom_profile_present.stat.exists
-    - name: Ensure PAM Enforces Password Requirements - Authentication Retry Prompts Permitted Per-Session - Ensure authselect
-        changes are applied
+    - name: Ensure PAM Enforces Password Requirements - Authentication Retry Prompts Permitted Per-Session - Ensure authselect changes are applied
       ansible.builtin.command:
         cmd: authselect apply-changes -b --backup=before-hardening-custom-profile
+      changed_when: true
       when:
       - result_authselect_check_cmd is success
       - result_authselect_profile is not skipped
       - authselect_current_profile is not match("custom/")
       - authselect_custom_profile is not match(authselect_current_profile)
-    - name: Ensure PAM Enforces Password Requirements - Authentication Retry Prompts Permitted Per-Session - Ensure the authselect
-        custom profile is selected
+    - name: Ensure PAM Enforces Password Requirements - Authentication Retry Prompts Permitted Per-Session - Ensure the authselect custom profile is selected
       ansible.builtin.command:
         cmd: authselect select {{ authselect_custom_profile }}
       register: result_pam_authselect_select_profile
+      changed_when: true
       when:
       - result_authselect_check_cmd is success
       - result_authselect_profile is not skipped
       - authselect_current_profile is not match("custom/")
       - authselect_custom_profile is not match(authselect_current_profile)
-    - name: Ensure PAM Enforces Password Requirements - Authentication Retry Prompts Permitted Per-Session - Restore the authselect
-        features in the custom profile
+    - name: Ensure PAM Enforces Password Requirements - Authentication Retry Prompts Permitted Per-Session - Restore the authselect features in the custom profile
       ansible.builtin.command:
         cmd: authselect enable-feature {{ item }}
       loop: '{{ result_authselect_features.stdout_lines }}'
@@ -5041,33 +4950,29 @@
       - result_authselect_profile is not skipped
       - result_authselect_features is not skipped
       - result_pam_authselect_select_profile is not skipped
-    - name: Ensure PAM Enforces Password Requirements - Authentication Retry Prompts Permitted Per-Session - Ensure authselect
-        changes are applied
+    - name: Ensure PAM Enforces Password Requirements - Authentication Retry Prompts Permitted Per-Session - Ensure authselect changes are applied
       ansible.builtin.command:
         cmd: authselect apply-changes -b --backup=after-hardening-custom-profile
+      changed_when: true
       when:
       - result_authselect_check_cmd is success
       - result_authselect_profile is not skipped
       - result_pam_authselect_restore_features is not skipped
-    - name: Ensure PAM Enforces Password Requirements - Authentication Retry Prompts Permitted Per-Session - Change the PAM
-        file to be edited according to the custom authselect profile
+    - name: Ensure PAM Enforces Password Requirements - Authentication Retry Prompts Permitted Per-Session - Change the PAM file to be edited according to the custom authselect profile
       ansible.builtin.set_fact:
         pam_file_path: /etc/authselect/{{ authselect_custom_profile }}/{{ pam_file_path | basename }}
       when:
       - authselect_custom_profile is defined
     when:
     - result_authselect_present.stat.exists
-  - name: Ensure PAM Enforces Password Requirements - Authentication Retry Prompts Permitted Per-Session - Define a fact for
-      control already filtered in case filters are used
+  - name: Ensure PAM Enforces Password Requirements - Authentication Retry Prompts Permitted Per-Session - Define a fact for control already filtered in case filters are used
     ansible.builtin.set_fact:
       pam_module_control: ''
-  - name: Ensure PAM Enforces Password Requirements - Authentication Retry Prompts Permitted Per-Session - Check if {{ pam_file_path
-      }} file is present
+  - name: Ensure PAM Enforces Password Requirements - Authentication Retry Prompts Permitted Per-Session - Check if {{ pam_file_path }} file is present
     ansible.builtin.stat:
       path: '{{ pam_file_path }}'
     register: result_pam_file_present
-  - name: Ensure PAM Enforces Password Requirements - Authentication Retry Prompts Permitted Per-Session - Ensure the "retry"
-      option from "pam_pwquality.so" is not present in {{ pam_file_path }}
+  - name: Ensure PAM Enforces Password Requirements - Authentication Retry Prompts Permitted Per-Session - Ensure the "retry" option from "pam_pwquality.so" is not present in {{ pam_file_path }}
     ansible.builtin.replace:
       dest: '{{ pam_file_path }}'
       regexp: (.*password.*pam_pwquality.so.*)\bretry\b=?[0-9a-zA-Z]*(.*)
@@ -5075,10 +4980,10 @@
     register: result_pam_option_removal
     when:
     - result_pam_file_present.stat.exists
-  - name: Ensure PAM Enforces Password Requirements - Authentication Retry Prompts Permitted Per-Session - Ensure authselect
-      changes are applied
+  - name: Ensure PAM Enforces Password Requirements - Authentication Retry Prompts Permitted Per-Session - Ensure authselect changes are applied
     ansible.builtin.command:
       cmd: authselect apply-changes -b
+    changed_when: true
     when:
     - result_authselect_present.stat.exists
     - result_pam_option_removal is changed
@@ -5104,7 +5009,6 @@
   - medium_disruption
   - medium_severity
   - no_reboot_needed
-
 - name: Ensure PAM Enforces Password Requirements - Minimum Uppercase Characters - Find pwquality.conf.d files
   ansible.builtin.find:
     paths: /etc/security/pwquality.conf.d/
@@ -5134,7 +5038,6 @@
   - medium_severity
   - no_reboot_needed
   - restrict_strategy
-
 - name: Ensure PAM Enforces Password Requirements - Minimum Uppercase Characters - Ensure ucredit is not set in pwquality.conf.d
   ansible.builtin.lineinfile:
     path: '{{ item.path }}'
@@ -5165,7 +5068,6 @@
   - medium_severity
   - no_reboot_needed
   - restrict_strategy
-
 - name: Ensure PAM Enforces Password Requirements - Minimum Uppercase Characters - Ensure PAM variable ucredit is set accordingly
   ansible.builtin.lineinfile:
     create: true
@@ -5197,7 +5099,6 @@
   - medium_severity
   - no_reboot_needed
   - restrict_strategy
-
 - name: Set PAM Password Hashing Algorithm - system-auth - Check if /etc/pam.d/system-auth file is present
   ansible.builtin.stat:
     path: /etc/pam.d/system-auth
@@ -5227,7 +5128,6 @@
   - medium_severity
   - no_reboot_needed
   - set_password_hashing_algorithm_systemauth
-
 - name: Set PAM Password Hashing Algorithm - system-auth - Check the proper remediation for the system
   block:
   - name: Set PAM Password Hashing Algorithm - system-auth - Define the PAM file to be edited as a local fact
@@ -5246,22 +5146,22 @@
       changed_when: false
       check_mode: false
       failed_when: false
-    - name: Set PAM Password Hashing Algorithm - system-auth - Informative message based on the authselect integrity check
-        result
+    - name: Set PAM Password Hashing Algorithm - system-auth - Informative message based on the authselect integrity check result
       ansible.builtin.assert:
         that:
         - ansible_check_mode or result_authselect_check_cmd.rc == 0
         fail_msg:
         - authselect integrity check failed. Remediation aborted!
-        - This remediation could not be applied because an authselect profile was not selected or the selected profile is
-          not intact.
+        - This remediation could not be applied because an authselect profile was not selected or the selected profile is not intact.
         - It is not recommended to manually edit the PAM files when authselect tool is available.
         - In cases where the default authselect profile does not cover a specific demand, a custom authselect profile is recommended.
         success_msg:
         - authselect integrity check passed
     - name: Set PAM Password Hashing Algorithm - system-auth - Get authselect current profile
       ansible.builtin.shell:
-        cmd: authselect current -r | awk '{ print $1 }'
+        cmd: 'set -o pipefail
+
+          authselect current -r | awk ''{ print $1 }'''
       register: result_authselect_profile
       changed_when: false
       when:
@@ -5280,18 +5180,18 @@
       when:
       - result_authselect_profile is not skipped
       - result_authselect_profile.stdout is not match("custom/")
-    - name: Set PAM Password Hashing Algorithm - system-auth - Get authselect current features to also enable them in the
-        custom profile
+    - name: Set PAM Password Hashing Algorithm - system-auth - Get authselect current features to also enable them in the custom profile
       ansible.builtin.shell:
-        cmd: authselect current | tail -n+3 | awk '{ print $2 }'
+        cmd: 'set -o pipefail
+
+          authselect current | tail -n+3 | awk ''{ print $2 }'''
       register: result_authselect_features
       changed_when: false
       check_mode: false
       when:
       - result_authselect_profile is not skipped
       - authselect_current_profile is not match("custom/")
-    - name: Set PAM Password Hashing Algorithm - system-auth - Check if any custom profile with the same name was already
-        created
+    - name: Set PAM Password Hashing Algorithm - system-auth - Check if any custom profile with the same name was already created
       ansible.builtin.stat:
         path: /etc/authselect/{{ authselect_custom_profile }}
       register: result_authselect_custom_profile_present
@@ -5302,6 +5202,7 @@
     - name: Set PAM Password Hashing Algorithm - system-auth - Create an authselect custom profile based on the current profile
       ansible.builtin.command:
         cmd: authselect create-profile hardening -b {{ authselect_current_profile }}
+      changed_when: true
       when:
       - result_authselect_profile is not skipped
       - result_authselect_check_cmd is success
@@ -5310,6 +5211,7 @@
     - name: Set PAM Password Hashing Algorithm - system-auth - Create an authselect custom profile based on sssd profile
       ansible.builtin.command:
         cmd: authselect create-profile hardening -b sssd
+      changed_when: true
       when:
       - result_authselect_profile is not skipped
       - result_authselect_check_cmd is success
@@ -5318,6 +5220,7 @@
     - name: Set PAM Password Hashing Algorithm - system-auth - Ensure authselect changes are applied
       ansible.builtin.command:
         cmd: authselect apply-changes -b --backup=before-hardening-custom-profile
+      changed_when: true
       when:
       - result_authselect_check_cmd is success
       - result_authselect_profile is not skipped
@@ -5327,6 +5230,7 @@
       ansible.builtin.command:
         cmd: authselect select {{ authselect_custom_profile }}
       register: result_pam_authselect_select_profile
+      changed_when: true
       when:
       - result_authselect_check_cmd is success
       - result_authselect_profile is not skipped
@@ -5344,24 +5248,22 @@
     - name: Set PAM Password Hashing Algorithm - system-auth - Ensure authselect changes are applied
       ansible.builtin.command:
         cmd: authselect apply-changes -b --backup=after-hardening-custom-profile
+      changed_when: true
       when:
       - result_authselect_check_cmd is success
       - result_authselect_profile is not skipped
       - result_pam_authselect_restore_features is not skipped
-    - name: Set PAM Password Hashing Algorithm - system-auth - Change the PAM file to be edited according to the custom authselect
-        profile
+    - name: Set PAM Password Hashing Algorithm - system-auth - Change the PAM file to be edited according to the custom authselect profile
       ansible.builtin.set_fact:
         pam_file_path: /etc/authselect/{{ authselect_custom_profile }}/{{ pam_file_path | basename }}
       when:
       - authselect_custom_profile is defined
     when:
     - result_authselect_present.stat.exists
-  - name: Set PAM Password Hashing Algorithm - system-auth - Define a fact for control already filtered in case filters are
-      used
+  - name: Set PAM Password Hashing Algorithm - system-auth - Define a fact for control already filtered in case filters are used
     ansible.builtin.set_fact:
       pam_module_control: sufficient
-  - name: Set PAM Password Hashing Algorithm - system-auth - Check if expected PAM module line is present in {{ pam_file_path
-      }}
+  - name: Set PAM Password Hashing Algorithm - system-auth - Check if expected PAM module line is present in {{ pam_file_path }}
     ansible.builtin.lineinfile:
       path: '{{ pam_file_path }}'
       regexp: ^\s*password\s+{{ pam_module_control | regex_escape() }}\s+pam_unix.so\s*.*
@@ -5371,8 +5273,7 @@
     register: result_pam_line_present
   - name: Set PAM Password Hashing Algorithm - system-auth - Include or update the PAM module line in {{ pam_file_path }}
     block:
-    - name: Set PAM Password Hashing Algorithm - system-auth - Check if required PAM module line is present in {{ pam_file_path
-        }} with different control
+    - name: Set PAM Password Hashing Algorithm - system-auth - Check if required PAM module line is present in {{ pam_file_path }} with different control
       ansible.builtin.lineinfile:
         path: '{{ pam_file_path }}'
         regexp: ^\s*password\s+.*\s+pam_unix.so\s*
@@ -5380,8 +5281,7 @@
       check_mode: true
       changed_when: false
       register: result_pam_line_other_control_present
-    - name: Set PAM Password Hashing Algorithm - system-auth - Ensure the correct control for the required PAM module line
-        in {{ pam_file_path }}
+    - name: Set PAM Password Hashing Algorithm - system-auth - Ensure the correct control for the required PAM module line in {{ pam_file_path }}
       ansible.builtin.replace:
         dest: '{{ pam_file_path }}'
         regexp: ^(\s*password\s+).*(\bpam_unix.so.*)
@@ -5389,8 +5289,7 @@
       register: result_pam_module_edit
       when:
       - result_pam_line_other_control_present.found == 1
-    - name: Set PAM Password Hashing Algorithm - system-auth - Ensure the required PAM module line is included in {{ pam_file_path
-        }}
+    - name: Set PAM Password Hashing Algorithm - system-auth - Ensure the required PAM module line is included in {{ pam_file_path }}
       ansible.builtin.lineinfile:
         dest: '{{ pam_file_path }}'
         line: password    {{ pam_module_control }}    pam_unix.so
@@ -5400,30 +5299,26 @@
     - name: Set PAM Password Hashing Algorithm - system-auth - Ensure authselect changes are applied
       ansible.builtin.command:
         cmd: authselect apply-changes -b
+      changed_when: true
       when:
       - result_authselect_present is defined
       - result_authselect_present.stat.exists
-      - "(result_pam_module_add is defined and result_pam_module_add.changed)\n or (result_pam_module_edit is defined and\
-        \ result_pam_module_edit.changed)"
+      - "(result_pam_module_add is defined and result_pam_module_add.changed)\n or (result_pam_module_edit is defined and result_pam_module_edit.changed)"
     when:
     - result_pam_line_present.found is defined
     - result_pam_line_present.found == 0
-  - name: Set PAM Password Hashing Algorithm - system-auth - Define a fact for control already filtered in case filters are
-      used
+  - name: Set PAM Password Hashing Algorithm - system-auth - Define a fact for control already filtered in case filters are used
     ansible.builtin.set_fact:
       pam_module_control: sufficient
-  - name: Set PAM Password Hashing Algorithm - system-auth - Check if the required PAM module option is present in {{ pam_file_path
-      }}
+  - name: Set PAM Password Hashing Algorithm - system-auth - Check if the required PAM module option is present in {{ pam_file_path }}
     ansible.builtin.lineinfile:
       path: '{{ pam_file_path }}'
-      regexp: ^\s*password\s+{{ pam_module_control | regex_escape() }}\s+pam_unix.so\s*.*\s{{ var_password_hashing_algorithm_pam.split("|")[0]
-        }}\b
+      regexp: ^\s*password\s+{{ pam_module_control | regex_escape() }}\s+pam_unix.so\s*.*\s{{ var_password_hashing_algorithm_pam.split("|")[0] }}\b
       state: absent
     check_mode: true
     changed_when: false
     register: result_pam_module_set_password_hashing_algorithm_systemauth_option_present
-  - name: Set PAM Password Hashing Algorithm - system-auth - Ensure the "{{ var_password_hashing_algorithm_pam.split("|")[0]
-      }}" PAM option for "pam_unix.so" is included in {{ pam_file_path }}
+  - name: Set PAM Password Hashing Algorithm - system-auth - Ensure the "{{ var_password_hashing_algorithm_pam.split("|")[0] }}" PAM option for "pam_unix.so" is included in {{ pam_file_path }}
     ansible.builtin.lineinfile:
       path: '{{ pam_file_path }}'
       backrefs: true
@@ -5437,10 +5332,10 @@
   - name: Set PAM Password Hashing Algorithm - system-auth - Ensure authselect changes are applied
     ansible.builtin.command:
       cmd: authselect apply-changes -b
+    changed_when: true
     when:
     - result_authselect_present.stat.exists
-    - "(result_pam_set_password_hashing_algorithm_systemauth_add is defined and result_pam_set_password_hashing_algorithm_systemauth_add.changed)\n\
-      \ or (result_pam_set_password_hashing_algorithm_systemauth_edit is defined and result_pam_set_password_hashing_algorithm_systemauth_edit.changed)"
+    - "(result_pam_set_password_hashing_algorithm_systemauth_add is defined and result_pam_set_password_hashing_algorithm_systemauth_add.changed)\n or (result_pam_set_password_hashing_algorithm_systemauth_edit is defined and result_pam_set_password_hashing_algorithm_systemauth_edit.changed)"
   when:
   - configure_strategy | bool
   - low_complexity | bool
@@ -5467,7 +5362,6 @@
   - medium_severity
   - no_reboot_needed
   - set_password_hashing_algorithm_systemauth
-
 - name: Set PAM Password Hashing Algorithm - system-auth - Check if /etc/pam.d/system-auth File is Present
   ansible.builtin.stat:
     path: /etc/pam.d/system-auth
@@ -5497,7 +5391,6 @@
   - medium_severity
   - no_reboot_needed
   - set_password_hashing_algorithm_systemauth
-
 - name: Set PAM Password Hashing Algorithm - system-auth - Check The Proper Remediation For The System
   block:
   - name: Set PAM Password Hashing Algorithm - system-auth - Define the PAM file to be edited as a local fact
@@ -5516,22 +5409,22 @@
       changed_when: false
       check_mode: false
       failed_when: false
-    - name: Set PAM Password Hashing Algorithm - system-auth - Informative message based on the authselect integrity check
-        result
+    - name: Set PAM Password Hashing Algorithm - system-auth - Informative message based on the authselect integrity check result
       ansible.builtin.assert:
         that:
         - ansible_check_mode or result_authselect_check_cmd.rc == 0
         fail_msg:
         - authselect integrity check failed. Remediation aborted!
-        - This remediation could not be applied because an authselect profile was not selected or the selected profile is
-          not intact.
+        - This remediation could not be applied because an authselect profile was not selected or the selected profile is not intact.
         - It is not recommended to manually edit the PAM files when authselect tool is available.
         - In cases where the default authselect profile does not cover a specific demand, a custom authselect profile is recommended.
         success_msg:
         - authselect integrity check passed
     - name: Set PAM Password Hashing Algorithm - system-auth - Get authselect current profile
       ansible.builtin.shell:
-        cmd: authselect current -r | awk '{ print $1 }'
+        cmd: 'set -o pipefail
+
+          authselect current -r | awk ''{ print $1 }'''
       register: result_authselect_profile
       changed_when: false
       when:
@@ -5550,18 +5443,18 @@
       when:
       - result_authselect_profile is not skipped
       - result_authselect_profile.stdout is not match("custom/")
-    - name: Set PAM Password Hashing Algorithm - system-auth - Get authselect current features to also enable them in the
-        custom profile
+    - name: Set PAM Password Hashing Algorithm - system-auth - Get authselect current features to also enable them in the custom profile
       ansible.builtin.shell:
-        cmd: authselect current | tail -n+3 | awk '{ print $2 }'
+        cmd: 'set -o pipefail
+
+          authselect current | tail -n+3 | awk ''{ print $2 }'''
       register: result_authselect_features
       changed_when: false
       check_mode: false
       when:
       - result_authselect_profile is not skipped
       - authselect_current_profile is not match("custom/")
-    - name: Set PAM Password Hashing Algorithm - system-auth - Check if any custom profile with the same name was already
-        created
+    - name: Set PAM Password Hashing Algorithm - system-auth - Check if any custom profile with the same name was already created
       ansible.builtin.stat:
         path: /etc/authselect/{{ authselect_custom_profile }}
       register: result_authselect_custom_profile_present
@@ -5572,6 +5465,7 @@
     - name: Set PAM Password Hashing Algorithm - system-auth - Create an authselect custom profile based on the current profile
       ansible.builtin.command:
         cmd: authselect create-profile hardening -b {{ authselect_current_profile }}
+      changed_when: true
       when:
       - result_authselect_profile is not skipped
       - result_authselect_check_cmd is success
@@ -5580,6 +5474,7 @@
     - name: Set PAM Password Hashing Algorithm - system-auth - Create an authselect custom profile based on sssd profile
       ansible.builtin.command:
         cmd: authselect create-profile hardening -b sssd
+      changed_when: true
       when:
       - result_authselect_profile is not skipped
       - result_authselect_check_cmd is success
@@ -5588,6 +5483,7 @@
     - name: Set PAM Password Hashing Algorithm - system-auth - Ensure authselect changes are applied
       ansible.builtin.command:
         cmd: authselect apply-changes -b --backup=before-hardening-custom-profile
+      changed_when: true
       when:
       - result_authselect_check_cmd is success
       - result_authselect_profile is not skipped
@@ -5597,6 +5493,7 @@
       ansible.builtin.command:
         cmd: authselect select {{ authselect_custom_profile }}
       register: result_pam_authselect_select_profile
+      changed_when: true
       when:
       - result_authselect_check_cmd is success
       - result_authselect_profile is not skipped
@@ -5614,12 +5511,12 @@
     - name: Set PAM Password Hashing Algorithm - system-auth - Ensure authselect changes are applied
       ansible.builtin.command:
         cmd: authselect apply-changes -b --backup=after-hardening-custom-profile
+      changed_when: true
       when:
       - result_authselect_check_cmd is success
       - result_authselect_profile is not skipped
       - result_pam_authselect_restore_features is not skipped
-    - name: Set PAM Password Hashing Algorithm - system-auth - Change the PAM file to be edited according to the custom authselect
-        profile
+    - name: Set PAM Password Hashing Algorithm - system-auth - Change the PAM file to be edited according to the custom authselect profile
       ansible.builtin.set_fact:
         pam_file_path: /etc/authselect/{{ authselect_custom_profile }}/{{ pam_file_path | basename }}
       when:
@@ -5630,8 +5527,7 @@
     ansible.builtin.stat:
       path: '{{ pam_file_path }}'
     register: pam_file_path_present
-  - name: Set PAM Password Hashing Algorithm - system-auth - Ensure That Only the Correct Hashing Algorithm Option For pam_unix.so
-      Is Used in {{ pam_file_path }}
+  - name: Set PAM Password Hashing Algorithm - system-auth - Ensure That Only the Correct Hashing Algorithm Option For pam_unix.so Is Used in {{ pam_file_path }}
     ansible.builtin.replace:
       dest: '{{ pam_file_path }}'
       regexp: (^\s*password.*pam_unix\.so.*)\b{{ item }}\b\s*(.*)
@@ -5651,6 +5547,7 @@
   - name: Set PAM Password Hashing Algorithm - system-auth - Ensure authselect changes are applied
     ansible.builtin.command:
       cmd: authselect apply-changes -b
+    changed_when: true
     when:
     - result_authselect_present.stat.exists
     - result_pam_hashing_options_removal is changed
@@ -5680,7 +5577,6 @@
   - medium_severity
   - no_reboot_needed
   - set_password_hashing_algorithm_systemauth
-
 - name: Set Password Minimum Length
   ansible.builtin.lineinfile:
     dest: /etc/login.defs
@@ -5710,7 +5606,6 @@
   - medium_severity
   - no_reboot_needed
   - restrict_strategy
-
 - name: Change the maximum time period between password changes
   ansible.builtin.user:
     user: root
@@ -5731,7 +5626,6 @@
   - medium_severity
   - no_reboot_needed
   - restrict_strategy
-
 - name: Set number of Password Hashing Rounds - password-auth - Check if /etc/pam.d/password-auth file is present
   ansible.builtin.stat:
     path: /etc/pam.d/password-auth
@@ -5754,7 +5648,6 @@
   - medium_disruption
   - medium_severity
   - no_reboot_needed
-
 - name: Set number of Password Hashing Rounds - password-auth - Check the proper remediation for the system
   block:
   - name: Set number of Password Hashing Rounds - password-auth - Define the PAM file to be edited as a local fact
@@ -5764,8 +5657,7 @@
     ansible.builtin.stat:
       path: /usr/bin/authselect
     register: result_authselect_present
-  - name: Set number of Password Hashing Rounds - password-auth - Ensure authselect custom profile is used if authselect is
-      present
+  - name: Set number of Password Hashing Rounds - password-auth - Ensure authselect custom profile is used if authselect is present
     block:
     - name: Set number of Password Hashing Rounds - password-auth - Check integrity of authselect current profile
       ansible.builtin.command:
@@ -5774,22 +5666,22 @@
       changed_when: false
       check_mode: false
       failed_when: false
-    - name: Set number of Password Hashing Rounds - password-auth - Informative message based on the authselect integrity
-        check result
+    - name: Set number of Password Hashing Rounds - password-auth - Informative message based on the authselect integrity check result
       ansible.builtin.assert:
         that:
         - ansible_check_mode or result_authselect_check_cmd.rc == 0
         fail_msg:
         - authselect integrity check failed. Remediation aborted!
-        - This remediation could not be applied because an authselect profile was not selected or the selected profile is
-          not intact.
+        - This remediation could not be applied because an authselect profile was not selected or the selected profile is not intact.
         - It is not recommended to manually edit the PAM files when authselect tool is available.
         - In cases where the default authselect profile does not cover a specific demand, a custom authselect profile is recommended.
         success_msg:
         - authselect integrity check passed
     - name: Set number of Password Hashing Rounds - password-auth - Get authselect current profile
       ansible.builtin.shell:
-        cmd: authselect current -r | awk '{ print $1 }'
+        cmd: 'set -o pipefail
+
+          authselect current -r | awk ''{ print $1 }'''
       register: result_authselect_profile
       changed_when: false
       when:
@@ -5808,18 +5700,18 @@
       when:
       - result_authselect_profile is not skipped
       - result_authselect_profile.stdout is not match("custom/")
-    - name: Set number of Password Hashing Rounds - password-auth - Get authselect current features to also enable them in
-        the custom profile
+    - name: Set number of Password Hashing Rounds - password-auth - Get authselect current features to also enable them in the custom profile
       ansible.builtin.shell:
-        cmd: authselect current | tail -n+3 | awk '{ print $2 }'
+        cmd: 'set -o pipefail
+
+          authselect current | tail -n+3 | awk ''{ print $2 }'''
       register: result_authselect_features
       changed_when: false
       check_mode: false
       when:
       - result_authselect_profile is not skipped
       - authselect_current_profile is not match("custom/")
-    - name: Set number of Password Hashing Rounds - password-auth - Check if any custom profile with the same name was already
-        created
+    - name: Set number of Password Hashing Rounds - password-auth - Check if any custom profile with the same name was already created
       ansible.builtin.stat:
         path: /etc/authselect/{{ authselect_custom_profile }}
       register: result_authselect_custom_profile_present
@@ -5827,10 +5719,10 @@
       when:
       - result_authselect_profile is not skipped
       - authselect_current_profile is not match("custom/")
-    - name: Set number of Password Hashing Rounds - password-auth - Create an authselect custom profile based on the current
-        profile
+    - name: Set number of Password Hashing Rounds - password-auth - Create an authselect custom profile based on the current profile
       ansible.builtin.command:
         cmd: authselect create-profile hardening -b {{ authselect_current_profile }}
+      changed_when: true
       when:
       - result_authselect_profile is not skipped
       - result_authselect_check_cmd is success
@@ -5839,6 +5731,7 @@
     - name: Set number of Password Hashing Rounds - password-auth - Create an authselect custom profile based on sssd profile
       ansible.builtin.command:
         cmd: authselect create-profile hardening -b sssd
+      changed_when: true
       when:
       - result_authselect_profile is not skipped
       - result_authselect_check_cmd is success
@@ -5847,6 +5740,7 @@
     - name: Set number of Password Hashing Rounds - password-auth - Ensure authselect changes are applied
       ansible.builtin.command:
         cmd: authselect apply-changes -b --backup=before-hardening-custom-profile
+      changed_when: true
       when:
       - result_authselect_check_cmd is success
       - result_authselect_profile is not skipped
@@ -5856,6 +5750,7 @@
       ansible.builtin.command:
         cmd: authselect select {{ authselect_custom_profile }}
       register: result_pam_authselect_select_profile
+      changed_when: true
       when:
       - result_authselect_check_cmd is success
       - result_authselect_profile is not skipped
@@ -5873,24 +5768,22 @@
     - name: Set number of Password Hashing Rounds - password-auth - Ensure authselect changes are applied
       ansible.builtin.command:
         cmd: authselect apply-changes -b --backup=after-hardening-custom-profile
+      changed_when: true
       when:
       - result_authselect_check_cmd is success
       - result_authselect_profile is not skipped
       - result_pam_authselect_restore_features is not skipped
-    - name: Set number of Password Hashing Rounds - password-auth - Change the PAM file to be edited according to the custom
-        authselect profile
+    - name: Set number of Password Hashing Rounds - password-auth - Change the PAM file to be edited according to the custom authselect profile
       ansible.builtin.set_fact:
         pam_file_path: /etc/authselect/{{ authselect_custom_profile }}/{{ pam_file_path | basename }}
       when:
       - authselect_custom_profile is defined
     when:
     - result_authselect_present.stat.exists
-  - name: Set number of Password Hashing Rounds - password-auth - Define a fact for control already filtered in case filters
-      are used
+  - name: Set number of Password Hashing Rounds - password-auth - Define a fact for control already filtered in case filters are used
     ansible.builtin.set_fact:
       pam_module_control: sufficient
-  - name: Set number of Password Hashing Rounds - password-auth - Check if expected PAM module line is present in {{ pam_file_path
-      }}
+  - name: Set number of Password Hashing Rounds - password-auth - Check if expected PAM module line is present in {{ pam_file_path }}
     ansible.builtin.lineinfile:
       path: '{{ pam_file_path }}'
       regexp: ^\s*password\s+{{ pam_module_control | regex_escape() }}\s+pam_unix.so\s*.*
@@ -5898,11 +5791,9 @@
     check_mode: true
     changed_when: false
     register: result_pam_line_present
-  - name: Set number of Password Hashing Rounds - password-auth - Include or update the PAM module line in {{ pam_file_path
-      }}
+  - name: Set number of Password Hashing Rounds - password-auth - Include or update the PAM module line in {{ pam_file_path }}
     block:
-    - name: Set number of Password Hashing Rounds - password-auth - Check if required PAM module line is present in {{ pam_file_path
-        }} with different control
+    - name: Set number of Password Hashing Rounds - password-auth - Check if required PAM module line is present in {{ pam_file_path }} with different control
       ansible.builtin.lineinfile:
         path: '{{ pam_file_path }}'
         regexp: ^\s*password\s+.*\s+pam_unix.so\s*
@@ -5910,8 +5801,7 @@
       check_mode: true
       changed_when: false
       register: result_pam_line_other_control_present
-    - name: Set number of Password Hashing Rounds - password-auth - Ensure the correct control for the required PAM module
-        line in {{ pam_file_path }}
+    - name: Set number of Password Hashing Rounds - password-auth - Ensure the correct control for the required PAM module line in {{ pam_file_path }}
       ansible.builtin.replace:
         dest: '{{ pam_file_path }}'
         regexp: ^(\s*password\s+).*(\bpam_unix.so.*)
@@ -5919,8 +5809,7 @@
       register: result_pam_module_edit
       when:
       - result_pam_line_other_control_present.found == 1
-    - name: Set number of Password Hashing Rounds - password-auth - Ensure the required PAM module line is included in {{
-        pam_file_path }}
+    - name: Set number of Password Hashing Rounds - password-auth - Ensure the required PAM module line is included in {{ pam_file_path }}
       ansible.builtin.lineinfile:
         dest: '{{ pam_file_path }}'
         line: password    {{ pam_module_control }}    pam_unix.so
@@ -5930,20 +5819,18 @@
     - name: Set number of Password Hashing Rounds - password-auth - Ensure authselect changes are applied
       ansible.builtin.command:
         cmd: authselect apply-changes -b
+      changed_when: true
       when:
       - result_authselect_present is defined
       - result_authselect_present.stat.exists
-      - "(result_pam_module_add is defined and result_pam_module_add.changed)\n or (result_pam_module_edit is defined and\
-        \ result_pam_module_edit.changed)"
+      - "(result_pam_module_add is defined and result_pam_module_add.changed)\n or (result_pam_module_edit is defined and result_pam_module_edit.changed)"
     when:
     - result_pam_line_present.found is defined
     - result_pam_line_present.found == 0
-  - name: Set number of Password Hashing Rounds - password-auth - Define a fact for control already filtered in case filters
-      are used
+  - name: Set number of Password Hashing Rounds - password-auth - Define a fact for control already filtered in case filters are used
     ansible.builtin.set_fact:
       pam_module_control: sufficient
-  - name: Set number of Password Hashing Rounds - password-auth - Check if the required PAM module option is present in {{
-      pam_file_path }}
+  - name: Set number of Password Hashing Rounds - password-auth - Check if the required PAM module option is present in {{ pam_file_path }}
     ansible.builtin.lineinfile:
       path: '{{ pam_file_path }}'
       regexp: ^\s*password\s+{{ pam_module_control | regex_escape() }}\s+pam_unix.so\s*.*\srounds\b
@@ -5951,8 +5838,7 @@
     check_mode: true
     changed_when: false
     register: result_pam_module_accounts_password_pam_unix_rounds_password_auth_option_present
-  - name: Set number of Password Hashing Rounds - password-auth - Ensure the "rounds" PAM option for "pam_unix.so" is included
-      in {{ pam_file_path }}
+  - name: Set number of Password Hashing Rounds - password-auth - Ensure the "rounds" PAM option for "pam_unix.so" is included in {{ pam_file_path }}
     ansible.builtin.lineinfile:
       path: '{{ pam_file_path }}'
       backrefs: true
@@ -5963,8 +5849,7 @@
     when:
     - result_pam_module_accounts_password_pam_unix_rounds_password_auth_option_present.found is defined
     - result_pam_module_accounts_password_pam_unix_rounds_password_auth_option_present.found == 0
-  - name: Set number of Password Hashing Rounds - password-auth - Ensure the required value for "rounds" PAM option from "pam_unix.so"
-      in {{ pam_file_path }}
+  - name: Set number of Password Hashing Rounds - password-auth - Ensure the required value for "rounds" PAM option from "pam_unix.so" in {{ pam_file_path }}
     ansible.builtin.lineinfile:
       path: '{{ pam_file_path }}'
       backrefs: true
@@ -5976,10 +5861,10 @@
   - name: Set number of Password Hashing Rounds - password-auth - Ensure authselect changes are applied
     ansible.builtin.command:
       cmd: authselect apply-changes -b
+    changed_when: true
     when:
     - result_authselect_present.stat.exists
-    - "(result_pam_accounts_password_pam_unix_rounds_password_auth_add is defined and result_pam_accounts_password_pam_unix_rounds_password_auth_add.changed)\n\
-      \ or (result_pam_accounts_password_pam_unix_rounds_password_auth_edit is defined and result_pam_accounts_password_pam_unix_rounds_password_auth_edit.changed)"
+    - "(result_pam_accounts_password_pam_unix_rounds_password_auth_add is defined and result_pam_accounts_password_pam_unix_rounds_password_auth_add.changed)\n or (result_pam_accounts_password_pam_unix_rounds_password_auth_edit is defined and result_pam_accounts_password_pam_unix_rounds_password_auth_edit.changed)"
   when:
   - DISA_STIG_RHEL_09_611050 | bool
   - accounts_password_pam_unix_rounds_password_auth | bool
@@ -5999,7 +5884,6 @@
   - medium_disruption
   - medium_severity
   - no_reboot_needed
-
 - name: Set number of Password Hashing Rounds - system-auth - Check if /etc/pam.d/system-auth file is present
   ansible.builtin.stat:
     path: /etc/pam.d/system-auth
@@ -6022,7 +5906,6 @@
   - medium_disruption
   - medium_severity
   - no_reboot_needed
-
 - name: Set number of Password Hashing Rounds - system-auth - Check the proper remediation for the system
   block:
   - name: Set number of Password Hashing Rounds - system-auth - Define the PAM file to be edited as a local fact
@@ -6032,8 +5915,7 @@
     ansible.builtin.stat:
       path: /usr/bin/authselect
     register: result_authselect_present
-  - name: Set number of Password Hashing Rounds - system-auth - Ensure authselect custom profile is used if authselect is
-      present
+  - name: Set number of Password Hashing Rounds - system-auth - Ensure authselect custom profile is used if authselect is present
     block:
     - name: Set number of Password Hashing Rounds - system-auth - Check integrity of authselect current profile
       ansible.builtin.command:
@@ -6042,22 +5924,22 @@
       changed_when: false
       check_mode: false
       failed_when: false
-    - name: Set number of Password Hashing Rounds - system-auth - Informative message based on the authselect integrity check
-        result
+    - name: Set number of Password Hashing Rounds - system-auth - Informative message based on the authselect integrity check result
       ansible.builtin.assert:
         that:
         - ansible_check_mode or result_authselect_check_cmd.rc == 0
         fail_msg:
         - authselect integrity check failed. Remediation aborted!
-        - This remediation could not be applied because an authselect profile was not selected or the selected profile is
-          not intact.
+        - This remediation could not be applied because an authselect profile was not selected or the selected profile is not intact.
         - It is not recommended to manually edit the PAM files when authselect tool is available.
         - In cases where the default authselect profile does not cover a specific demand, a custom authselect profile is recommended.
         success_msg:
         - authselect integrity check passed
     - name: Set number of Password Hashing Rounds - system-auth - Get authselect current profile
       ansible.builtin.shell:
-        cmd: authselect current -r | awk '{ print $1 }'
+        cmd: 'set -o pipefail
+
+          authselect current -r | awk ''{ print $1 }'''
       register: result_authselect_profile
       changed_when: false
       when:
@@ -6076,18 +5958,18 @@
       when:
       - result_authselect_profile is not skipped
       - result_authselect_profile.stdout is not match("custom/")
-    - name: Set number of Password Hashing Rounds - system-auth - Get authselect current features to also enable them in the
-        custom profile
+    - name: Set number of Password Hashing Rounds - system-auth - Get authselect current features to also enable them in the custom profile
       ansible.builtin.shell:
-        cmd: authselect current | tail -n+3 | awk '{ print $2 }'
+        cmd: 'set -o pipefail
+
+          authselect current | tail -n+3 | awk ''{ print $2 }'''
       register: result_authselect_features
       changed_when: false
       check_mode: false
       when:
       - result_authselect_profile is not skipped
       - authselect_current_profile is not match("custom/")
-    - name: Set number of Password Hashing Rounds - system-auth - Check if any custom profile with the same name was already
-        created
+    - name: Set number of Password Hashing Rounds - system-auth - Check if any custom profile with the same name was already created
       ansible.builtin.stat:
         path: /etc/authselect/{{ authselect_custom_profile }}
       register: result_authselect_custom_profile_present
@@ -6095,10 +5977,10 @@
       when:
       - result_authselect_profile is not skipped
       - authselect_current_profile is not match("custom/")
-    - name: Set number of Password Hashing Rounds - system-auth - Create an authselect custom profile based on the current
-        profile
+    - name: Set number of Password Hashing Rounds - system-auth - Create an authselect custom profile based on the current profile
       ansible.builtin.command:
         cmd: authselect create-profile hardening -b {{ authselect_current_profile }}
+      changed_when: true
       when:
       - result_authselect_profile is not skipped
       - result_authselect_check_cmd is success
@@ -6107,6 +5989,7 @@
     - name: Set number of Password Hashing Rounds - system-auth - Create an authselect custom profile based on sssd profile
       ansible.builtin.command:
         cmd: authselect create-profile hardening -b sssd
+      changed_when: true
       when:
       - result_authselect_profile is not skipped
       - result_authselect_check_cmd is success
@@ -6115,6 +5998,7 @@
     - name: Set number of Password Hashing Rounds - system-auth - Ensure authselect changes are applied
       ansible.builtin.command:
         cmd: authselect apply-changes -b --backup=before-hardening-custom-profile
+      changed_when: true
       when:
       - result_authselect_check_cmd is success
       - result_authselect_profile is not skipped
@@ -6124,6 +6008,7 @@
       ansible.builtin.command:
         cmd: authselect select {{ authselect_custom_profile }}
       register: result_pam_authselect_select_profile
+      changed_when: true
       when:
       - result_authselect_check_cmd is success
       - result_authselect_profile is not skipped
@@ -6141,24 +6026,22 @@
     - name: Set number of Password Hashing Rounds - system-auth - Ensure authselect changes are applied
       ansible.builtin.command:
         cmd: authselect apply-changes -b --backup=after-hardening-custom-profile
+      changed_when: true
       when:
       - result_authselect_check_cmd is success
       - result_authselect_profile is not skipped
       - result_pam_authselect_restore_features is not skipped
-    - name: Set number of Password Hashing Rounds - system-auth - Change the PAM file to be edited according to the custom
-        authselect profile
+    - name: Set number of Password Hashing Rounds - system-auth - Change the PAM file to be edited according to the custom authselect profile
       ansible.builtin.set_fact:
         pam_file_path: /etc/authselect/{{ authselect_custom_profile }}/{{ pam_file_path | basename }}
       when:
       - authselect_custom_profile is defined
     when:
     - result_authselect_present.stat.exists
-  - name: Set number of Password Hashing Rounds - system-auth - Define a fact for control already filtered in case filters
-      are used
+  - name: Set number of Password Hashing Rounds - system-auth - Define a fact for control already filtered in case filters are used
     ansible.builtin.set_fact:
       pam_module_control: sufficient
-  - name: Set number of Password Hashing Rounds - system-auth - Check if expected PAM module line is present in {{ pam_file_path
-      }}
+  - name: Set number of Password Hashing Rounds - system-auth - Check if expected PAM module line is present in {{ pam_file_path }}
     ansible.builtin.lineinfile:
       path: '{{ pam_file_path }}'
       regexp: ^\s*password\s+{{ pam_module_control | regex_escape() }}\s+pam_unix.so\s*.*
@@ -6166,11 +6049,9 @@
     check_mode: true
     changed_when: false
     register: result_pam_line_present
-  - name: Set number of Password Hashing Rounds - system-auth - Include or update the PAM module line in {{ pam_file_path
-      }}
+  - name: Set number of Password Hashing Rounds - system-auth - Include or update the PAM module line in {{ pam_file_path }}
     block:
-    - name: Set number of Password Hashing Rounds - system-auth - Check if required PAM module line is present in {{ pam_file_path
-        }} with different control
+    - name: Set number of Password Hashing Rounds - system-auth - Check if required PAM module line is present in {{ pam_file_path }} with different control
       ansible.builtin.lineinfile:
         path: '{{ pam_file_path }}'
         regexp: ^\s*password\s+.*\s+pam_unix.so\s*
@@ -6178,8 +6059,7 @@
       check_mode: true
       changed_when: false
       register: result_pam_line_other_control_present
-    - name: Set number of Password Hashing Rounds - system-auth - Ensure the correct control for the required PAM module line
-        in {{ pam_file_path }}
+    - name: Set number of Password Hashing Rounds - system-auth - Ensure the correct control for the required PAM module line in {{ pam_file_path }}
       ansible.builtin.replace:
         dest: '{{ pam_file_path }}'
         regexp: ^(\s*password\s+).*(\bpam_unix.so.*)
@@ -6187,8 +6067,7 @@
       register: result_pam_module_edit
       when:
       - result_pam_line_other_control_present.found == 1
-    - name: Set number of Password Hashing Rounds - system-auth - Ensure the required PAM module line is included in {{ pam_file_path
-        }}
+    - name: Set number of Password Hashing Rounds - system-auth - Ensure the required PAM module line is included in {{ pam_file_path }}
       ansible.builtin.lineinfile:
         dest: '{{ pam_file_path }}'
         line: password    {{ pam_module_control }}    pam_unix.so
@@ -6198,20 +6077,18 @@
     - name: Set number of Password Hashing Rounds - system-auth - Ensure authselect changes are applied
       ansible.builtin.command:
         cmd: authselect apply-changes -b
+      changed_when: true
       when:
       - result_authselect_present is defined
       - result_authselect_present.stat.exists
-      - "(result_pam_module_add is defined and result_pam_module_add.changed)\n or (result_pam_module_edit is defined and\
-        \ result_pam_module_edit.changed)"
+      - "(result_pam_module_add is defined and result_pam_module_add.changed)\n or (result_pam_module_edit is defined and result_pam_module_edit.changed)"
     when:
     - result_pam_line_present.found is defined
     - result_pam_line_present.found == 0
-  - name: Set number of Password Hashing Rounds - system-auth - Define a fact for control already filtered in case filters
-      are used
+  - name: Set number of Password Hashing Rounds - system-auth - Define a fact for control already filtered in case filters are used
     ansible.builtin.set_fact:
       pam_module_control: sufficient
-  - name: Set number of Password Hashing Rounds - system-auth - Check if the required PAM module option is present in {{ pam_file_path
-      }}
+  - name: Set number of Password Hashing Rounds - system-auth - Check if the required PAM module option is present in {{ pam_file_path }}
     ansible.builtin.lineinfile:
       path: '{{ pam_file_path }}'
       regexp: ^\s*password\s+{{ pam_module_control | regex_escape() }}\s+pam_unix.so\s*.*\srounds\b
@@ -6219,8 +6096,7 @@
     check_mode: true
     changed_when: false
     register: result_pam_module_accounts_password_pam_unix_rounds_system_auth_option_present
-  - name: Set number of Password Hashing Rounds - system-auth - Ensure the "rounds" PAM option for "pam_unix.so" is included
-      in {{ pam_file_path }}
+  - name: Set number of Password Hashing Rounds - system-auth - Ensure the "rounds" PAM option for "pam_unix.so" is included in {{ pam_file_path }}
     ansible.builtin.lineinfile:
       path: '{{ pam_file_path }}'
       backrefs: true
@@ -6231,8 +6107,7 @@
     when:
     - result_pam_module_accounts_password_pam_unix_rounds_system_auth_option_present.found is defined
     - result_pam_module_accounts_password_pam_unix_rounds_system_auth_option_present.found == 0
-  - name: Set number of Password Hashing Rounds - system-auth - Ensure the required value for "rounds" PAM option from "pam_unix.so"
-      in {{ pam_file_path }}
+  - name: Set number of Password Hashing Rounds - system-auth - Ensure the required value for "rounds" PAM option from "pam_unix.so" in {{ pam_file_path }}
     ansible.builtin.lineinfile:
       path: '{{ pam_file_path }}'
       backrefs: true
@@ -6244,10 +6119,10 @@
   - name: Set number of Password Hashing Rounds - system-auth - Ensure authselect changes are applied
     ansible.builtin.command:
       cmd: authselect apply-changes -b
+    changed_when: true
     when:
     - result_authselect_present.stat.exists
-    - "(result_pam_accounts_password_pam_unix_rounds_system_auth_add is defined and result_pam_accounts_password_pam_unix_rounds_system_auth_add.changed)\n\
-      \ or (result_pam_accounts_password_pam_unix_rounds_system_auth_edit is defined and result_pam_accounts_password_pam_unix_rounds_system_auth_edit.changed)"
+    - "(result_pam_accounts_password_pam_unix_rounds_system_auth_add is defined and result_pam_accounts_password_pam_unix_rounds_system_auth_add.changed)\n or (result_pam_accounts_password_pam_unix_rounds_system_auth_edit is defined and result_pam_accounts_password_pam_unix_rounds_system_auth_edit.changed)"
   when:
   - DISA_STIG_RHEL_09_611055 | bool
   - accounts_password_pam_unix_rounds_system_auth | bool
@@ -6267,7 +6142,6 @@
   - medium_disruption
   - medium_severity
   - no_reboot_needed
-
 - name: Ensure All World-Writable Directories Are Owned by root User - Define Excluded (Non-Local) File Systems and Paths
   ansible.builtin.set_fact:
     excluded_fstypes:
@@ -6312,9 +6186,7 @@
   - medium_severity | bool
   - no_reboot_needed | bool
   - restrict_strategy | bool
-
-- name: Ensure All World-Writable Directories Are Owned by root User - Find Relevant Root Directories Ignoring Pre-Defined
-    Excluded Paths
+- name: Ensure All World-Writable Directories Are Owned by root User - Find Relevant Root Directories Ignoring Pre-Defined Excluded Paths
   ansible.builtin.find:
     paths: /
     file_type: directory
@@ -6337,9 +6209,7 @@
   - medium_severity | bool
   - no_reboot_needed | bool
   - restrict_strategy | bool
-
-- name: Ensure All World-Writable Directories Are Owned by root User - Include Relevant Root Directories in a List of Paths
-    to be Searched
+- name: Ensure All World-Writable Directories Are Owned by root User - Include Relevant Root Directories in a List of Paths to be Searched
   ansible.builtin.set_fact:
     search_paths: '{{ search_paths | union([item.path]) }}'
   loop: '{{ result_relevant_root_dirs.files }}'
@@ -6358,9 +6228,7 @@
   - medium_severity | bool
   - no_reboot_needed | bool
   - restrict_strategy | bool
-
-- name: Ensure All World-Writable Directories Are Owned by root User - Increment Search Paths List with Local Partitions Mount
-    Points
+- name: Ensure All World-Writable Directories Are Owned by root User - Increment Search Paths List with Local Partitions Mount Points
   ansible.builtin.set_fact:
     search_paths: '{{ search_paths | union([item.mount]) }}'
   loop: '{{ ansible_mounts }}'
@@ -6381,9 +6249,7 @@
   - medium_severity
   - no_reboot_needed
   - restrict_strategy
-
-- name: Ensure All World-Writable Directories Are Owned by root User - Increment Search Paths List with Local NFS File System
-    Targets
+- name: Ensure All World-Writable Directories Are Owned by root User - Increment Search Paths List with Local NFS File System Targets
   ansible.builtin.set_fact:
     search_paths: '{{ search_paths | union([item.device.split('':'')[1]]) }}'
   loop: '{{ ansible_mounts }}'
@@ -6403,7 +6269,6 @@
   - medium_severity
   - no_reboot_needed
   - restrict_strategy
-
 - name: Ensure All World-Writable Directories Are Owned by root User - Define Rule Specific Facts
   ansible.builtin.set_fact:
     world_writable_dirs: []
@@ -6422,7 +6287,6 @@
   - medium_severity | bool
   - no_reboot_needed | bool
   - restrict_strategy | bool
-
 - name: Ensure All World-Writable Directories Are Owned by root User - Find All Uncompliant Directories in Local File Systems
   ansible.builtin.command:
     cmd: find {{ item }} -xdev -type d -perm -0002 -uid +0
@@ -6444,9 +6308,7 @@
   - medium_severity | bool
   - no_reboot_needed | bool
   - restrict_strategy | bool
-
-- name: Ensure All World-Writable Directories Are Owned by root User - Create List of World Writable Directories Not Owned
-    by root
+- name: Ensure All World-Writable Directories Are Owned by root User - Create List of World Writable Directories Not Owned by root
   ansible.builtin.set_fact:
     world_writable_dirs: '{{ world_writable_dirs | union(item.stdout_lines) | list }}'
   loop: '{{ result_found_dirs.results }}'
@@ -6466,7 +6328,6 @@
   - medium_severity
   - no_reboot_needed
   - restrict_strategy
-
 - name: Ensure All World-Writable Directories Are Owned by root User - Ensure root Ownership on Local World Writable Directories
   ansible.builtin.file:
     path: '{{ item }}'
@@ -6487,7 +6348,6 @@
   - medium_severity | bool
   - no_reboot_needed | bool
   - restrict_strategy | bool
-
 - name: Verify that All World-Writable Directories Have Sticky Bits Set - Define Excluded (Non-Local) File Systems and Paths
   ansible.builtin.set_fact:
     excluded_fstypes:
@@ -6538,9 +6398,7 @@
   - medium_severity | bool
   - no_reboot_needed | bool
   - restrict_strategy | bool
-
-- name: Verify that All World-Writable Directories Have Sticky Bits Set - Find Relevant Root Directories Ignoring Pre-Defined
-    Excluded Paths
+- name: Verify that All World-Writable Directories Have Sticky Bits Set - Find Relevant Root Directories Ignoring Pre-Defined Excluded Paths
   ansible.builtin.find:
     paths: /
     file_type: directory
@@ -6569,9 +6427,7 @@
   - medium_severity | bool
   - no_reboot_needed | bool
   - restrict_strategy | bool
-
-- name: Verify that All World-Writable Directories Have Sticky Bits Set - Include Relevant Root Directories in a List of Paths
-    to be Searched
+- name: Verify that All World-Writable Directories Have Sticky Bits Set - Include Relevant Root Directories in a List of Paths to be Searched
   ansible.builtin.set_fact:
     search_paths: '{{ search_paths | union([item.path]) }}'
   loop: '{{ result_relevant_root_dirs.files }}'
@@ -6596,9 +6452,7 @@
   - medium_severity | bool
   - no_reboot_needed | bool
   - restrict_strategy | bool
-
-- name: Verify that All World-Writable Directories Have Sticky Bits Set - Increment Search Paths List with Local Partitions
-    Mount Points
+- name: Verify that All World-Writable Directories Have Sticky Bits Set - Increment Search Paths List with Local Partitions Mount Points
   ansible.builtin.set_fact:
     search_paths: '{{ search_paths | union([item.mount]) }}'
   loop: '{{ ansible_mounts }}'
@@ -6625,9 +6479,7 @@
   - medium_severity
   - no_reboot_needed
   - restrict_strategy
-
-- name: Verify that All World-Writable Directories Have Sticky Bits Set - Increment Search Paths List with Local NFS File
-    System Targets
+- name: Verify that All World-Writable Directories Have Sticky Bits Set - Increment Search Paths List with Local NFS File System Targets
   ansible.builtin.set_fact:
     search_paths: '{{ search_paths | union([item.device.split('':'')[1]]) }}'
   loop: '{{ ansible_mounts }}'
@@ -6653,7 +6505,6 @@
   - medium_severity
   - no_reboot_needed
   - restrict_strategy
-
 - name: Verify that All World-Writable Directories Have Sticky Bits Set - Define Rule Specific Facts
   ansible.builtin.set_fact:
     world_writable_dirs: []
@@ -6678,7 +6529,6 @@
   - medium_severity | bool
   - no_reboot_needed | bool
   - restrict_strategy | bool
-
 - name: Verify that All World-Writable Directories Have Sticky Bits Set - Find All Uncompliant Directories in Local File Systems
   ansible.builtin.command:
     cmd: find {{ item }} -xdev -type d ( -perm -0002 -a ! -perm -1000 )
@@ -6706,9 +6556,7 @@
   - medium_severity | bool
   - no_reboot_needed | bool
   - restrict_strategy | bool
-
-- name: Verify that All World-Writable Directories Have Sticky Bits Set - Create List of World Writable Directories Without
-    Sticky Bit
+- name: Verify that All World-Writable Directories Have Sticky Bits Set - Create List of World Writable Directories Without Sticky Bit
   ansible.builtin.set_fact:
     world_writable_dirs: '{{ world_writable_dirs | union(item.stdout_lines) | list }}'
   loop: '{{ result_found_dirs.results }}'
@@ -6734,9 +6582,7 @@
   - medium_severity
   - no_reboot_needed
   - restrict_strategy
-
-- name: Verify that All World-Writable Directories Have Sticky Bits Set - Ensure Sticky Bit is Set on Local World Writable
-    Directories
+- name: Verify that All World-Writable Directories Have Sticky Bits Set - Ensure Sticky Bit is Set on Local World Writable Directories
   ansible.builtin.file:
     path: '{{ item }}'
     mode: a+t
