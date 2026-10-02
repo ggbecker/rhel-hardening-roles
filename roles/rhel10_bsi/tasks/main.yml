@@ -6185,6 +6185,7 @@
     follow: false
     state: directory
     group: '{{ file_groupowner_cron_yearly_newgroup }}'
+    mode: '0700'
   when:
   - configure_strategy | bool
   - file_groupowner_cron_yearly | bool
@@ -6579,6 +6580,7 @@
     follow: false
     state: directory
     owner: '{{ file_owner_cron_yearly_newown }}'
+    mode: '0700'
   when:
   - configure_strategy | bool
   - file_owner_cron_yearly | bool

@@ -962,6 +962,7 @@
         cmd: authselect enable-feature {{ item }}
       loop: '{{ result_authselect_features.stdout_lines }}'
       register: result_pam_authselect_restore_features
+      changed_when: true
       when:
       - result_authselect_profile is not skipped
       - result_authselect_features is not skipped
@@ -1217,6 +1218,7 @@
             cmd: authselect enable-feature {{ item }}
           loop: '{{ result_authselect_features.stdout_lines }}'
           register: result_pam_authselect_restore_features
+          changed_when: true
           when:
           - result_authselect_profile is not skipped
           - result_authselect_features is not skipped
@@ -1401,6 +1403,7 @@
         cmd: authselect enable-feature {{ item }}
       loop: '{{ result_authselect_features.stdout_lines }}'
       register: result_pam_authselect_restore_features
+      changed_when: true
       when:
       - result_authselect_profile is not skipped
       - result_authselect_features is not skipped
@@ -1897,6 +1900,7 @@
           cmd: authselect enable-feature {{ item }}
         loop: '{{ result_authselect_features.stdout_lines }}'
         register: result_pam_authselect_restore_features
+        changed_when: true
         when:
         - result_authselect_profile is not skipped
         - result_authselect_features is not skipped
@@ -2063,6 +2067,7 @@
           cmd: authselect enable-feature {{ item }}
         loop: '{{ result_authselect_features.stdout_lines }}'
         register: result_pam_authselect_restore_features
+        changed_when: true
         when:
         - result_authselect_profile is not skipped
         - result_authselect_features is not skipped
@@ -2580,6 +2585,7 @@
           cmd: authselect enable-feature {{ item }}
         loop: '{{ result_authselect_features.stdout_lines }}'
         register: result_pam_authselect_restore_features
+        changed_when: true
         when:
         - result_authselect_profile is not skipped
         - result_authselect_features is not skipped
@@ -2752,6 +2758,7 @@
           cmd: authselect enable-feature {{ item }}
         loop: '{{ result_authselect_features.stdout_lines }}'
         register: result_pam_authselect_restore_features
+        changed_when: true
         when:
         - result_authselect_profile is not skipped
         - result_authselect_features is not skipped
@@ -3229,6 +3236,7 @@
           cmd: authselect enable-feature {{ item }}
         loop: '{{ result_authselect_features.stdout_lines }}'
         register: result_pam_authselect_restore_features
+        changed_when: true
         when:
         - result_authselect_profile is not skipped
         - result_authselect_features is not skipped
@@ -3399,6 +3407,7 @@
           cmd: authselect enable-feature {{ item }}
         loop: '{{ result_authselect_features.stdout_lines }}'
         register: result_pam_authselect_restore_features
+        changed_when: true
         when:
         - result_authselect_profile is not skipped
         - result_authselect_features is not skipped
@@ -3918,6 +3927,7 @@
           cmd: authselect enable-feature {{ item }}
         loop: '{{ result_authselect_features.stdout_lines }}'
         register: result_pam_authselect_restore_features
+        changed_when: true
         when:
         - result_authselect_profile is not skipped
         - result_authselect_features is not skipped
@@ -4085,6 +4095,7 @@
           cmd: authselect enable-feature {{ item }}
         loop: '{{ result_authselect_features.stdout_lines }}'
         register: result_pam_authselect_restore_features
+        changed_when: true
         when:
         - result_authselect_profile is not skipped
         - result_authselect_features is not skipped
@@ -4972,6 +4983,7 @@
         cmd: authselect enable-feature {{ item }}
       loop: '{{ result_authselect_features.stdout_lines }}'
       register: result_pam_authselect_restore_features
+      changed_when: true
       when:
       - result_authselect_profile is not skipped
       - result_authselect_features is not skipped
@@ -5257,6 +5269,7 @@
         cmd: authselect enable-feature {{ item }}
       loop: '{{ result_authselect_features.stdout_lines }}'
       register: result_pam_authselect_restore_features
+      changed_when: true
       when:
       - result_authselect_profile is not skipped
       - result_authselect_features is not skipped
@@ -5528,6 +5541,7 @@
         cmd: authselect enable-feature {{ item }}
       loop: '{{ result_authselect_features.stdout_lines }}'
       register: result_pam_authselect_restore_features
+      changed_when: true
       when:
       - result_authselect_profile is not skipped
       - result_authselect_features is not skipped
@@ -5807,6 +5821,7 @@
         cmd: authselect enable-feature {{ item }}
       loop: '{{ result_authselect_features.stdout_lines }}'
       register: result_pam_authselect_restore_features
+      changed_when: true
       when:
       - result_authselect_profile is not skipped
       - result_authselect_features is not skipped

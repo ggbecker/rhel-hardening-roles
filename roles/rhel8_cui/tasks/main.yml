@@ -1485,6 +1485,7 @@
 - name: Put a file with shell wrapper to configure OpenSSL to always use strong entropy
   copy:
     dest: /etc/profile.d/openssl-rand.sh
+    mode: '0644'
     content: "# provide a default -rand /dev/random option to openssl commands that\n# support it\n\n# written inefficiently for maximum shell compatibility\nopenssl()\n(\n  openssl_bin=/usr/bin/openssl\n\n  case \"$*\" in\n    # if user specified -rand, honor it\n    *\\ -rand\\ *|*\\ -help*) exec $openssl_bin \"$@\" ;;\n  esac\n\n  cmds=`$openssl_bin list -digest-commands -cipher-commands | tr '\\n' ' '`\n  for i in `$openssl_bin list -commands`; do\n    if $openssl_bin list -options \"$i\" | grep -q '^rand '; then\n      cmds=\" $i $cmds\"\n    fi\n  done\n\n  case \"$cmds\" in\n    *\\ \"$1\"\\ *)\n      cmd=\"$1\"; shift\n      exec $openssl_bin \"$cmd\" -rand /dev/random \"$@\" ;;\n  esac\n\n  exec $openssl_bin \"$@\"\n)\n"
   tags:
   - CCE-82721-2
@@ -2284,6 +2285,7 @@
         cmd: authselect enable-feature {{ item }}
       loop: '{{ result_authselect_features.stdout_lines }}'
       register: result_pam_authselect_restore_features
+      changed_when: true
       when:
       - result_authselect_profile is not skipped
       - result_authselect_features is not skipped
@@ -2533,6 +2535,7 @@
             cmd: authselect enable-feature {{ item }}
           loop: '{{ result_authselect_features.stdout_lines }}'
           register: result_pam_authselect_restore_features
+          changed_when: true
           when:
           - result_authselect_profile is not skipped
           - result_authselect_features is not skipped
@@ -2714,6 +2717,7 @@
         cmd: authselect enable-feature {{ item }}
       loop: '{{ result_authselect_features.stdout_lines }}'
       register: result_pam_authselect_restore_features
+      changed_when: true
       when:
       - result_authselect_profile is not skipped
       - result_authselect_features is not skipped
@@ -3197,6 +3201,7 @@
           cmd: authselect enable-feature {{ item }}
         loop: '{{ result_authselect_features.stdout_lines }}'
         register: result_pam_authselect_restore_features
+        changed_when: true
         when:
         - result_authselect_profile is not skipped
         - result_authselect_features is not skipped
@@ -3357,6 +3362,7 @@
           cmd: authselect enable-feature {{ item }}
         loop: '{{ result_authselect_features.stdout_lines }}'
         register: result_pam_authselect_restore_features
+        changed_when: true
         when:
         - result_authselect_profile is not skipped
         - result_authselect_features is not skipped
@@ -3851,6 +3857,7 @@
           cmd: authselect enable-feature {{ item }}
         loop: '{{ result_authselect_features.stdout_lines }}'
         register: result_pam_authselect_restore_features
+        changed_when: true
         when:
         - result_authselect_profile is not skipped
         - result_authselect_features is not skipped
@@ -4011,6 +4018,7 @@
           cmd: authselect enable-feature {{ item }}
         loop: '{{ result_authselect_features.stdout_lines }}'
         register: result_pam_authselect_restore_features
+        changed_when: true
         when:
         - result_authselect_profile is not skipped
         - result_authselect_features is not skipped
@@ -4524,6 +4532,7 @@
           cmd: authselect enable-feature {{ item }}
         loop: '{{ result_authselect_features.stdout_lines }}'
         register: result_pam_authselect_restore_features
+        changed_when: true
         when:
         - result_authselect_profile is not skipped
         - result_authselect_features is not skipped
@@ -4684,6 +4693,7 @@
           cmd: authselect enable-feature {{ item }}
         loop: '{{ result_authselect_features.stdout_lines }}'
         register: result_pam_authselect_restore_features
+        changed_when: true
         when:
         - result_authselect_profile is not skipped
         - result_authselect_features is not skipped

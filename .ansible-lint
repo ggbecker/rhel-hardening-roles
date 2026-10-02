@@ -35,4 +35,3 @@ skip_list:
   - var-naming[no-role-prefix] # SCAP variable names are not role-prefixed
   - var-naming[pattern]        # SCAP variable names
   - ignore-errors
-  - no-handler
