@@ -409,6 +409,10 @@
     manager: auto
   tags:
   - always
+- name: Gather the service facts
+  ansible.builtin.service_facts: null
+  tags:
+  - always
 - name: Verify firewalld Enabled - Enable service firewalld
   block:
   - name: Verify firewalld Enabled - Enable Service firewalld
@@ -5714,6 +5718,36 @@
   - reboot_required
   - restrict_strategy
   - selinux_not_disabled
+- name: Check the current permissions of /etc/selinux/config to preserve them
+  ansible.builtin.stat:
+    path: /etc/selinux/config
+  register: kvp_mode_stat
+  when:
+  - DISA_STIG_RHEL_10_700400 | bool
+  - configure_strategy | bool
+  - low_complexity | bool
+  - low_disruption | bool
+  - medium_severity | bool
+  - no_reboot_needed | bool
+  - selinux_policytype | bool
+  - '"kernel-core" in ansible_facts.packages'
+  tags:
+  - CCE-88366-0
+  - DISA-STIG-RHEL-10-700400
+  - NIST-800-171-3.1.2
+  - NIST-800-171-3.7.2
+  - NIST-800-53-AC-3
+  - NIST-800-53-AC-3(3)(a)
+  - NIST-800-53-AU-9
+  - NIST-800-53-SC-7(21)
+  - PCI-DSSv4-1.2
+  - PCI-DSSv4-1.2.6
+  - configure_strategy
+  - low_complexity
+  - low_disruption
+  - medium_severity
+  - no_reboot_needed
+  - selinux_policytype
 - name: Configure SELinux Policy
   block:
   - name: Check for duplicate values
@@ -5721,7 +5755,7 @@
       path: /etc/selinux/config
       create: true
       regexp: (?i)^SELINUXTYPE=
-      mode: '0644'
+      mode: '{{ kvp_mode_stat.stat.mode if kvp_mode_stat.stat.exists else ''0644'' }}'
       state: absent
     check_mode: true
     changed_when: false
@@ -5731,7 +5765,7 @@
       path: /etc/selinux/config
       create: true
       regexp: (?i)^SELINUXTYPE=
-      mode: '0644'
+      mode: '{{ kvp_mode_stat.stat.mode if kvp_mode_stat.stat.exists else ''0644'' }}'
       state: absent
     when: dupes.found is defined and dupes.found > 1
   - name: Insert correct line to /etc/selinux/config
@@ -5739,7 +5773,7 @@
       path: /etc/selinux/config
       create: true
       regexp: (?i)^SELINUXTYPE=
-      mode: '0644'
+      mode: '{{ kvp_mode_stat.stat.mode if kvp_mode_stat.stat.exists else ''0644'' }}'
       line: SELINUXTYPE={{ var_selinux_policy_name }}
       state: present
   when:
@@ -5913,13 +5947,39 @@
   - low_disruption
   - medium_severity
   - no_reboot_needed
+- name: Test for existence /etc/cron.d/
+  ansible.builtin.stat:
+    path: /etc/cron.d/
+  register: file_exists
+  when:
+  - DISA_STIG_RHEL_10_400135 | bool
+  - configure_strategy | bool
+  - file_groupowner_cron_d | bool
+  - low_complexity | bool
+  - low_disruption | bool
+  - medium_severity | bool
+  - no_reboot_needed | bool
+  - '"kernel-core" in ansible_facts.packages'
+  tags:
+  - CCE-89321-4
+  - DISA-STIG-RHEL-10-400135
+  - NIST-800-53-AC-6(1)
+  - NIST-800-53-CM-6(a)
+  - PCI-DSSv4-2.2
+  - PCI-DSSv4-2.2.6
+  - configure_strategy
+  - file_groupowner_cron_d
+  - low_complexity
+  - low_disruption
+  - medium_severity
+  - no_reboot_needed
 - name: Ensure group owner on /etc/cron.d/
   ansible.builtin.file:
     path: /etc/cron.d/
     follow: false
     state: directory
     group: '{{ file_groupowner_cron_d_newgroup }}'
-    mode: '0700'
+    mode: '{{ file_exists.stat.mode if file_exists.stat.exists else ''0700'' }}'
   when:
   - DISA_STIG_RHEL_10_400135 | bool
   - configure_strategy | bool
@@ -5967,13 +6027,39 @@
   - low_disruption
   - medium_severity
   - no_reboot_needed
+- name: Test for existence /etc/cron.daily/
+  ansible.builtin.stat:
+    path: /etc/cron.daily/
+  register: file_exists
+  when:
+  - DISA_STIG_RHEL_10_400135 | bool
+  - configure_strategy | bool
+  - file_groupowner_cron_daily | bool
+  - low_complexity | bool
+  - low_disruption | bool
+  - medium_severity | bool
+  - no_reboot_needed | bool
+  - '"kernel-core" in ansible_facts.packages'
+  tags:
+  - CCE-90342-7
+  - DISA-STIG-RHEL-10-400135
+  - NIST-800-53-AC-6(1)
+  - NIST-800-53-CM-6(a)
+  - PCI-DSSv4-2.2
+  - PCI-DSSv4-2.2.6
+  - configure_strategy
+  - file_groupowner_cron_daily
+  - low_complexity
+  - low_disruption
+  - medium_severity
+  - no_reboot_needed
 - name: Ensure group owner on /etc/cron.daily/
   ansible.builtin.file:
     path: /etc/cron.daily/
     follow: false
     state: directory
     group: '{{ file_groupowner_cron_daily_newgroup }}'
-    mode: '0700'
+    mode: '{{ file_exists.stat.mode if file_exists.stat.exists else ''0700'' }}'
   when:
   - DISA_STIG_RHEL_10_400135 | bool
   - configure_strategy | bool
@@ -6021,13 +6107,39 @@
   - low_disruption
   - medium_severity
   - no_reboot_needed
+- name: Test for existence /etc/cron.hourly/
+  ansible.builtin.stat:
+    path: /etc/cron.hourly/
+  register: file_exists
+  when:
+  - DISA_STIG_RHEL_10_400135 | bool
+  - configure_strategy | bool
+  - file_groupowner_cron_hourly | bool
+  - low_complexity | bool
+  - low_disruption | bool
+  - medium_severity | bool
+  - no_reboot_needed | bool
+  - '"kernel-core" in ansible_facts.packages'
+  tags:
+  - CCE-88140-9
+  - DISA-STIG-RHEL-10-400135
+  - NIST-800-53-AC-6(1)
+  - NIST-800-53-CM-6(a)
+  - PCI-DSSv4-2.2
+  - PCI-DSSv4-2.2.6
+  - configure_strategy
+  - file_groupowner_cron_hourly
+  - low_complexity
+  - low_disruption
+  - medium_severity
+  - no_reboot_needed
 - name: Ensure group owner on /etc/cron.hourly/
   ansible.builtin.file:
     path: /etc/cron.hourly/
     follow: false
     state: directory
     group: '{{ file_groupowner_cron_hourly_newgroup }}'
-    mode: '0700'
+    mode: '{{ file_exists.stat.mode if file_exists.stat.exists else ''0700'' }}'
   when:
   - DISA_STIG_RHEL_10_400135 | bool
   - configure_strategy | bool
@@ -6075,13 +6187,39 @@
   - low_disruption
   - medium_severity
   - no_reboot_needed
+- name: Test for existence /etc/cron.monthly/
+  ansible.builtin.stat:
+    path: /etc/cron.monthly/
+  register: file_exists
+  when:
+  - DISA_STIG_RHEL_10_400135 | bool
+  - configure_strategy | bool
+  - file_groupowner_cron_monthly | bool
+  - low_complexity | bool
+  - low_disruption | bool
+  - medium_severity | bool
+  - no_reboot_needed | bool
+  - '"kernel-core" in ansible_facts.packages'
+  tags:
+  - CCE-88986-5
+  - DISA-STIG-RHEL-10-400135
+  - NIST-800-53-AC-6(1)
+  - NIST-800-53-CM-6(a)
+  - PCI-DSSv4-2.2
+  - PCI-DSSv4-2.2.6
+  - configure_strategy
+  - file_groupowner_cron_monthly
+  - low_complexity
+  - low_disruption
+  - medium_severity
+  - no_reboot_needed
 - name: Ensure group owner on /etc/cron.monthly/
   ansible.builtin.file:
     path: /etc/cron.monthly/
     follow: false
     state: directory
     group: '{{ file_groupowner_cron_monthly_newgroup }}'
-    mode: '0700'
+    mode: '{{ file_exists.stat.mode if file_exists.stat.exists else ''0700'' }}'
   when:
   - DISA_STIG_RHEL_10_400135 | bool
   - configure_strategy | bool
@@ -6129,13 +6267,39 @@
   - low_disruption
   - medium_severity
   - no_reboot_needed
+- name: Test for existence /etc/cron.weekly/
+  ansible.builtin.stat:
+    path: /etc/cron.weekly/
+  register: file_exists
+  when:
+  - DISA_STIG_RHEL_10_400135 | bool
+  - configure_strategy | bool
+  - file_groupowner_cron_weekly | bool
+  - low_complexity | bool
+  - low_disruption | bool
+  - medium_severity | bool
+  - no_reboot_needed | bool
+  - '"kernel-core" in ansible_facts.packages'
+  tags:
+  - CCE-89080-6
+  - DISA-STIG-RHEL-10-400135
+  - NIST-800-53-AC-6(1)
+  - NIST-800-53-CM-6(a)
+  - PCI-DSSv4-2.2
+  - PCI-DSSv4-2.2.6
+  - configure_strategy
+  - file_groupowner_cron_weekly
+  - low_complexity
+  - low_disruption
+  - medium_severity
+  - no_reboot_needed
 - name: Ensure group owner on /etc/cron.weekly/
   ansible.builtin.file:
     path: /etc/cron.weekly/
     follow: false
     state: directory
     group: '{{ file_groupowner_cron_weekly_newgroup }}'
-    mode: '0700'
+    mode: '{{ file_exists.stat.mode if file_exists.stat.exists else ''0700'' }}'
   when:
   - DISA_STIG_RHEL_10_400135 | bool
   - configure_strategy | bool
@@ -6179,13 +6343,35 @@
   - low_disruption
   - medium_severity
   - no_reboot_needed
+- name: Test for existence /etc/cron.yearly/
+  ansible.builtin.stat:
+    path: /etc/cron.yearly/
+  register: file_exists
+  when:
+  - configure_strategy | bool
+  - file_groupowner_cron_yearly | bool
+  - low_complexity | bool
+  - low_disruption | bool
+  - medium_severity | bool
+  - no_reboot_needed | bool
+  - '"kernel-core" in ansible_facts.packages'
+  tags:
+  - CCE-88898-2
+  - NIST-800-53-AC-6(1)
+  - NIST-800-53-CM-6(a)
+  - configure_strategy
+  - file_groupowner_cron_yearly
+  - low_complexity
+  - low_disruption
+  - medium_severity
+  - no_reboot_needed
 - name: Ensure group owner on /etc/cron.yearly/
   ansible.builtin.file:
     path: /etc/cron.yearly/
     follow: false
     state: directory
     group: '{{ file_groupowner_cron_yearly_newgroup }}'
-    mode: '0700'
+    mode: '{{ file_exists.stat.mode if file_exists.stat.exists else ''0700'' }}'
   when:
   - configure_strategy | bool
   - file_groupowner_cron_yearly | bool
@@ -6308,13 +6494,39 @@
   - low_disruption
   - medium_severity
   - no_reboot_needed
+- name: Test for existence /etc/cron.d/
+  ansible.builtin.stat:
+    path: /etc/cron.d/
+  register: file_exists
+  when:
+  - DISA_STIG_RHEL_10_400130 | bool
+  - configure_strategy | bool
+  - file_owner_cron_d | bool
+  - low_complexity | bool
+  - low_disruption | bool
+  - medium_severity | bool
+  - no_reboot_needed | bool
+  - '"kernel-core" in ansible_facts.packages'
+  tags:
+  - CCE-88741-4
+  - DISA-STIG-RHEL-10-400130
+  - NIST-800-53-AC-6(1)
+  - NIST-800-53-CM-6(a)
+  - PCI-DSSv4-2.2
+  - PCI-DSSv4-2.2.6
+  - configure_strategy
+  - file_owner_cron_d
+  - low_complexity
+  - low_disruption
+  - medium_severity
+  - no_reboot_needed
 - name: Ensure owner on directory /etc/cron.d/
   ansible.builtin.file:
     path: /etc/cron.d/
     follow: false
     state: directory
     owner: '{{ file_owner_cron_d_newown }}'
-    mode: '0700'
+    mode: '{{ file_exists.stat.mode if file_exists.stat.exists else ''0700'' }}'
   when:
   - DISA_STIG_RHEL_10_400130 | bool
   - configure_strategy | bool
@@ -6362,13 +6574,39 @@
   - low_disruption
   - medium_severity
   - no_reboot_needed
+- name: Test for existence /etc/cron.daily/
+  ansible.builtin.stat:
+    path: /etc/cron.daily/
+  register: file_exists
+  when:
+  - DISA_STIG_RHEL_10_400130 | bool
+  - configure_strategy | bool
+  - file_owner_cron_daily | bool
+  - low_complexity | bool
+  - low_disruption | bool
+  - medium_severity | bool
+  - no_reboot_needed | bool
+  - '"kernel-core" in ansible_facts.packages'
+  tags:
+  - CCE-87499-0
+  - DISA-STIG-RHEL-10-400130
+  - NIST-800-53-AC-6(1)
+  - NIST-800-53-CM-6(a)
+  - PCI-DSSv4-2.2
+  - PCI-DSSv4-2.2.6
+  - configure_strategy
+  - file_owner_cron_daily
+  - low_complexity
+  - low_disruption
+  - medium_severity
+  - no_reboot_needed
 - name: Ensure owner on directory /etc/cron.daily/
   ansible.builtin.file:
     path: /etc/cron.daily/
     follow: false
     state: directory
     owner: '{{ file_owner_cron_daily_newown }}'
-    mode: '0700'
+    mode: '{{ file_exists.stat.mode if file_exists.stat.exists else ''0700'' }}'
   when:
   - DISA_STIG_RHEL_10_400130 | bool
   - configure_strategy | bool
@@ -6416,13 +6654,39 @@
   - low_disruption
   - medium_severity
   - no_reboot_needed
+- name: Test for existence /etc/cron.hourly/
+  ansible.builtin.stat:
+    path: /etc/cron.hourly/
+  register: file_exists
+  when:
+  - DISA_STIG_RHEL_10_400130 | bool
+  - configure_strategy | bool
+  - file_owner_cron_hourly | bool
+  - low_complexity | bool
+  - low_disruption | bool
+  - medium_severity | bool
+  - no_reboot_needed | bool
+  - '"kernel-core" in ansible_facts.packages'
+  tags:
+  - CCE-89705-8
+  - DISA-STIG-RHEL-10-400130
+  - NIST-800-53-AC-6(1)
+  - NIST-800-53-CM-6(a)
+  - PCI-DSSv4-2.2
+  - PCI-DSSv4-2.2.6
+  - configure_strategy
+  - file_owner_cron_hourly
+  - low_complexity
+  - low_disruption
+  - medium_severity
+  - no_reboot_needed
 - name: Ensure owner on directory /etc/cron.hourly/
   ansible.builtin.file:
     path: /etc/cron.hourly/
     follow: false
     state: directory
     owner: '{{ file_owner_cron_hourly_newown }}'
-    mode: '0700'
+    mode: '{{ file_exists.stat.mode if file_exists.stat.exists else ''0700'' }}'
   when:
   - DISA_STIG_RHEL_10_400130 | bool
   - configure_strategy | bool
@@ -6470,13 +6734,39 @@
   - low_disruption
   - medium_severity
   - no_reboot_needed
+- name: Test for existence /etc/cron.monthly/
+  ansible.builtin.stat:
+    path: /etc/cron.monthly/
+  register: file_exists
+  when:
+  - DISA_STIG_RHEL_10_400130 | bool
+  - configure_strategy | bool
+  - file_owner_cron_monthly | bool
+  - low_complexity | bool
+  - low_disruption | bool
+  - medium_severity | bool
+  - no_reboot_needed | bool
+  - '"kernel-core" in ansible_facts.packages'
+  tags:
+  - CCE-90753-5
+  - DISA-STIG-RHEL-10-400130
+  - NIST-800-53-AC-6(1)
+  - NIST-800-53-CM-6(a)
+  - PCI-DSSv4-2.2
+  - PCI-DSSv4-2.2.6
+  - configure_strategy
+  - file_owner_cron_monthly
+  - low_complexity
+  - low_disruption
+  - medium_severity
+  - no_reboot_needed
 - name: Ensure owner on directory /etc/cron.monthly/
   ansible.builtin.file:
     path: /etc/cron.monthly/
     follow: false
     state: directory
     owner: '{{ file_owner_cron_monthly_newown }}'
-    mode: '0700'
+    mode: '{{ file_exists.stat.mode if file_exists.stat.exists else ''0700'' }}'
   when:
   - DISA_STIG_RHEL_10_400130 | bool
   - configure_strategy | bool
@@ -6524,13 +6814,39 @@
   - low_disruption
   - medium_severity
   - no_reboot_needed
+- name: Test for existence /etc/cron.weekly/
+  ansible.builtin.stat:
+    path: /etc/cron.weekly/
+  register: file_exists
+  when:
+  - DISA_STIG_RHEL_10_400130 | bool
+  - configure_strategy | bool
+  - file_owner_cron_weekly | bool
+  - low_complexity | bool
+  - low_disruption | bool
+  - medium_severity | bool
+  - no_reboot_needed | bool
+  - '"kernel-core" in ansible_facts.packages'
+  tags:
+  - CCE-88943-6
+  - DISA-STIG-RHEL-10-400130
+  - NIST-800-53-AC-6(1)
+  - NIST-800-53-CM-6(a)
+  - PCI-DSSv4-2.2
+  - PCI-DSSv4-2.2.6
+  - configure_strategy
+  - file_owner_cron_weekly
+  - low_complexity
+  - low_disruption
+  - medium_severity
+  - no_reboot_needed
 - name: Ensure owner on directory /etc/cron.weekly/
   ansible.builtin.file:
     path: /etc/cron.weekly/
     follow: false
     state: directory
     owner: '{{ file_owner_cron_weekly_newown }}'
-    mode: '0700'
+    mode: '{{ file_exists.stat.mode if file_exists.stat.exists else ''0700'' }}'
   when:
   - DISA_STIG_RHEL_10_400130 | bool
   - configure_strategy | bool
@@ -6574,13 +6890,35 @@
   - low_disruption
   - medium_severity
   - no_reboot_needed
+- name: Test for existence /etc/cron.yearly/
+  ansible.builtin.stat:
+    path: /etc/cron.yearly/
+  register: file_exists
+  when:
+  - configure_strategy | bool
+  - file_owner_cron_yearly | bool
+  - low_complexity | bool
+  - low_disruption | bool
+  - medium_severity | bool
+  - no_reboot_needed | bool
+  - '"kernel-core" in ansible_facts.packages'
+  tags:
+  - CCE-90735-2
+  - NIST-800-53-AC-6(1)
+  - NIST-800-53-CM-6(a)
+  - configure_strategy
+  - file_owner_cron_yearly
+  - low_complexity
+  - low_disruption
+  - medium_severity
+  - no_reboot_needed
 - name: Ensure owner on directory /etc/cron.yearly/
   ansible.builtin.file:
     path: /etc/cron.yearly/
     follow: false
     state: directory
     owner: '{{ file_owner_cron_yearly_newown }}'
-    mode: '0700'
+    mode: '{{ file_exists.stat.mode if file_exists.stat.exists else ''0700'' }}'
   when:
   - configure_strategy | bool
   - file_owner_cron_yearly | bool
@@ -7525,13 +7863,38 @@
   - low_disruption
   - medium_severity
   - no_reboot_needed
+- name: Test for existence /etc/ssh/sshd_config.d/
+  ansible.builtin.stat:
+    path: /etc/ssh/sshd_config.d/
+  register: file_exists
+  when:
+  - DISA_STIG_RHEL_10_400150 | bool
+  - configure_strategy | bool
+  - directory_groupowner_sshd_config_d | bool
+  - low_complexity | bool
+  - low_disruption | bool
+  - medium_severity | bool
+  - no_reboot_needed | bool
+  - '"kernel-core" in ansible_facts.packages'
+  tags:
+  - CCE-89991-4
+  - DISA-STIG-RHEL-10-400150
+  - NIST-800-53-AC-17(a)
+  - NIST-800-53-AC-6(1)
+  - NIST-800-53-CM-6(a)
+  - configure_strategy
+  - directory_groupowner_sshd_config_d
+  - low_complexity
+  - low_disruption
+  - medium_severity
+  - no_reboot_needed
 - name: Ensure group owner on /etc/ssh/sshd_config.d/
   ansible.builtin.file:
     path: /etc/ssh/sshd_config.d/
     follow: false
     state: directory
     group: '{{ directory_groupowner_sshd_config_d_newgroup }}'
-    mode: '0700'
+    mode: '{{ file_exists.stat.mode if file_exists.stat.exists else ''0700'' }}'
   when:
   - DISA_STIG_RHEL_10_400150 | bool
   - configure_strategy | bool
@@ -7577,13 +7940,38 @@
   - low_disruption
   - medium_severity
   - no_reboot_needed
+- name: Test for existence /etc/ssh/sshd_config.d/
+  ansible.builtin.stat:
+    path: /etc/ssh/sshd_config.d/
+  register: file_exists
+  when:
+  - DISA_STIG_RHEL_10_400155 | bool
+  - configure_strategy | bool
+  - directory_owner_sshd_config_d | bool
+  - low_complexity | bool
+  - low_disruption | bool
+  - medium_severity | bool
+  - no_reboot_needed | bool
+  - '"kernel-core" in ansible_facts.packages'
+  tags:
+  - CCE-89747-0
+  - DISA-STIG-RHEL-10-400155
+  - NIST-800-53-AC-17(a)
+  - NIST-800-53-AC-6(1)
+  - NIST-800-53-CM-6(a)
+  - configure_strategy
+  - directory_owner_sshd_config_d
+  - low_complexity
+  - low_disruption
+  - medium_severity
+  - no_reboot_needed
 - name: Ensure owner on directory /etc/ssh/sshd_config.d/
   ansible.builtin.file:
     path: /etc/ssh/sshd_config.d/
     follow: false
     state: directory
     owner: '{{ directory_owner_sshd_config_d_newown }}'
-    mode: '0700'
+    mode: '{{ file_exists.stat.mode if file_exists.stat.exists else ''0700'' }}'
   when:
   - DISA_STIG_RHEL_10_400155 | bool
   - configure_strategy | bool
@@ -8467,6 +8855,7 @@
       cmd: 'set -o pipefail
 
         nmcli -g UUID,TYPE con | grep -v loopback | awk -F '':'' ''{ print $1 }'''
+      executable: /bin/bash
     register: result_nmcli_cmd_connections_names
     check_mode: false
     changed_when: false
@@ -8476,6 +8865,7 @@
       cmd: 'set -o pipefail
 
         nmcli -f connection.zone connection show {{ item | trim }} | awk ''{ print $2}'''
+      executable: /bin/bash
     register: result_nmcli_cmd_connections_zones
     changed_when: false
     failed_when: false
@@ -8509,6 +8899,7 @@
       cmd: 'set -o pipefail
 
         firewall-cmd --get-active-zones | grep -v "^ " | cut -d " " -f 1'
+      executable: /bin/bash
     register: result_firewall_cmd_zones_names
     changed_when: false
     failed_when: false

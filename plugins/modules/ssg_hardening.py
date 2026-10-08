@@ -13,6 +13,8 @@ call a binary directly because no stock Ansible module provides the behavior:
 * ``rpm -Va`` / ``rpm -qV`` / ``rpm -qf`` / ``rpm --restore`` /
   ``rpm --setperms`` / ``rpm --setugids`` -- the ``package`` module has no
   verify, query-owner or restore semantics.
+* ``rpm --import`` -- the ``rpm_key`` module cannot import post-quantum (PQC)
+  keys, so the key format introduced for RHEL requires ``rpm --import``.
 * multiline RainerScript block/range removal from the rsyslog configuration --
   ``replace``/``lineinfile`` cannot delete a block conditionally on its content
   or a pattern range across a file glob.
@@ -22,10 +24,6 @@ generated collection roles never shell out to ``command`` for them. It is
 vendored into the collection at build time; the datastream and standalone
 playbooks keep the original ``command`` tasks.
 """
-
-from __future__ import absolute_import, division, print_function
-
-__metaclass__ = type
 
 DOCUMENTATION = r"""
 ---
@@ -48,6 +46,7 @@ options:
       - rpm_restore
       - rpm_setperms
       - rpm_setugids
+      - rpm_import
       - rsyslog_remove
   name:
     description:
@@ -56,8 +55,8 @@ options:
     type: str
   path:
     description:
-      - File path argument for C(rpm_query_file) and C(rpm_restore), or the
-        single rsyslog file to edit for C(rsyslog_remove).
+      - File path argument for C(rpm_query_file), C(rpm_restore) and
+        C(rpm_import), or the single rsyslog file to edit for C(rsyslog_remove).
     type: str
   flags:
     description: Extra flags passed to C(rpm -Va) for C(rpm_verify_all).
@@ -150,9 +149,47 @@ import re
 from ansible.module_utils.basic import AnsibleModule
 
 
-# Operations that only read state: safe to run in check mode, never "changed",
-# and a non-zero return code is left for the task's own failed_when to judge.
-READ_ONLY_OPS = frozenset(("rpm_verify_all", "rpm_verify_package", "rpm_query_file"))
+# Table of every supported operation, defined in one place so that the argument
+# spec choices, the required_if rules, the read-only set and the command
+# dispatch all derive from the same source instead of being spread around.
+#
+# Each entry provides:
+#   required:  parameters that must be set for the operation (feeds required_if)
+#   read_only: True for query-only operations -- safe to run in check mode,
+#              never "changed", and a non-zero return code is left for the
+#              task's own failed_when to judge
+#   argv:      builds the binary's argument vector from the module params, or
+#              None for operations handled in pure Python (rsyslog_remove)
+OPERATIONS = {
+    "service_restart": dict(
+        required=("name",), read_only=False,
+        argv=lambda p: ["service", p["name"], "restart"]),
+    "rpm_verify_all": dict(
+        required=(), read_only=True,
+        argv=lambda p: ["rpm", "-Va"] + list(p["flags"])),
+    "rpm_verify_package": dict(
+        required=("name",), read_only=True,
+        argv=lambda p: ["rpm", "-qV", p["name"]]),
+    "rpm_query_file": dict(
+        required=("path",), read_only=True,
+        argv=lambda p: ["rpm", "-qf", p["path"]]),
+    "rpm_restore": dict(
+        required=("path",), read_only=False,
+        argv=lambda p: ["rpm", "--restore", p["path"]]),
+    "rpm_setperms": dict(
+        required=("name",), read_only=False,
+        argv=lambda p: ["rpm", "--setperms", p["name"]]),
+    "rpm_setugids": dict(
+        required=("name",), read_only=False,
+        argv=lambda p: ["rpm", "--setugids", p["name"]]),
+    "rpm_import": dict(
+        required=("path",), read_only=False,
+        argv=lambda p: ["rpm", "--import", p["path"]]),
+    "rsyslog_remove": dict(
+        required=("mode",), read_only=False, argv=None),
+}
+
+READ_ONLY_OPS = frozenset(op for op, spec in OPERATIONS.items() if spec["read_only"])
 
 # POSIX character classes used by the sed programs these operations replace.
 _POSIX_CLASSES = {
@@ -297,20 +334,7 @@ def _do_rsyslog_remove(module, p):
 def main():
     module = AnsibleModule(
         argument_spec=dict(
-            operation=dict(
-                type="str",
-                required=True,
-                choices=[
-                    "service_restart",
-                    "rpm_verify_all",
-                    "rpm_verify_package",
-                    "rpm_query_file",
-                    "rpm_restore",
-                    "rpm_setperms",
-                    "rpm_setugids",
-                    "rsyslog_remove",
-                ],
-            ),
+            operation=dict(type="str", required=True, choices=list(OPERATIONS)),
             name=dict(type="str"),
             path=dict(type="str"),
             flags=dict(type="list", elements="str", default=[]),
@@ -322,13 +346,8 @@ def main():
             end=dict(type="str"),
         ),
         required_if=[
-            ("operation", "service_restart", ("name",)),
-            ("operation", "rpm_verify_package", ("name",)),
-            ("operation", "rpm_setperms", ("name",)),
-            ("operation", "rpm_setugids", ("name",)),
-            ("operation", "rpm_query_file", ("path",)),
-            ("operation", "rpm_restore", ("path",)),
-            ("operation", "rsyslog_remove", ("mode",)),
+            ("operation", op, spec["required"])
+            for op, spec in OPERATIONS.items() if spec["required"]
         ],
         supports_check_mode=True,
     )
@@ -339,23 +358,7 @@ def main():
         module.exit_json(**_do_rsyslog_remove(module, p))
 
     read_only = op in READ_ONLY_OPS
-
-    if op == "service_restart":
-        argv = ["service", p["name"], "restart"]
-    elif op == "rpm_verify_all":
-        argv = ["rpm", "-Va"] + list(p["flags"])
-    elif op == "rpm_verify_package":
-        argv = ["rpm", "-qV", p["name"]]
-    elif op == "rpm_query_file":
-        argv = ["rpm", "-qf", p["path"]]
-    elif op == "rpm_restore":
-        argv = ["rpm", "--restore", p["path"]]
-    elif op == "rpm_setperms":
-        argv = ["rpm", "--setperms", p["name"]]
-    elif op == "rpm_setugids":
-        argv = ["rpm", "--setugids", p["name"]]
-    else:  # pragma: no cover - guarded by choices
-        module.fail_json(msg="unsupported operation %s" % op)
+    argv = OPERATIONS[op]["argv"](p)
 
     # State-changing operations are no-ops in check mode.
     if not read_only and module.check_mode:

@@ -522,9 +522,10 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
 - name: 'Ensure Red Hat GPG Key Installed: Import RedHat GPG key'
-  ansible.builtin.rpm_key:
-    state: present
-    key: /etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
+  redhat.rhel_hardening_roles.ssg_hardening:
+    operation: rpm_import
+    path: /etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
+  changed_when: true
   when:
   - DISA_STIG_RHEL_09_214010 | bool
   - ensure_redhat_gpgkey_installed | bool
@@ -807,6 +808,7 @@
       cmd: 'set -o pipefail
 
         authselect current | tail -n+3 | awk ''{ print $2 }'''
+      executable: /bin/bash
     register: result_authselect_features
     changed_when: false
     check_mode: false
@@ -887,6 +889,7 @@
         cmd: 'set -o pipefail
 
           authselect current -r | awk ''{ print $1 }'''
+        executable: /bin/bash
       register: result_authselect_profile
       changed_when: false
       when:
@@ -910,6 +913,7 @@
         cmd: 'set -o pipefail
 
           authselect current | tail -n+3 | awk ''{ print $2 }'''
+        executable: /bin/bash
       register: result_authselect_features
       changed_when: false
       check_mode: false
@@ -1137,6 +1141,7 @@
             cmd: 'set -o pipefail
 
               authselect current -r | awk ''{ print $1 }'''
+            executable: /bin/bash
           register: result_authselect_profile
           changed_when: false
           when:
@@ -1160,6 +1165,7 @@
             cmd: 'set -o pipefail
 
               authselect current | tail -n+3 | awk ''{ print $2 }'''
+            executable: /bin/bash
           register: result_authselect_features
           changed_when: false
           check_mode: false
@@ -1319,6 +1325,7 @@
         cmd: 'set -o pipefail
 
           authselect current -r | awk ''{ print $1 }'''
+        executable: /bin/bash
       register: result_authselect_profile
       changed_when: false
       when:
@@ -1342,6 +1349,7 @@
         cmd: 'set -o pipefail
 
           authselect current | tail -n+3 | awk ''{ print $2 }'''
+        executable: /bin/bash
       register: result_authselect_features
       changed_when: false
       check_mode: false
@@ -1583,6 +1591,7 @@
       cmd: 'set -o pipefail
 
         authselect current | tail -n+3 | awk ''{ print $2 }'''
+      executable: /bin/bash
     register: result_authselect_features
     changed_when: false
     check_mode: false
@@ -1803,6 +1812,7 @@
           cmd: 'set -o pipefail
 
             authselect current -r | awk ''{ print $1 }'''
+          executable: /bin/bash
         register: result_authselect_profile
         changed_when: false
         when:
@@ -1826,6 +1836,7 @@
           cmd: 'set -o pipefail
 
             authselect current | tail -n+3 | awk ''{ print $2 }'''
+          executable: /bin/bash
         register: result_authselect_features
         changed_when: false
         check_mode: false
@@ -1964,6 +1975,7 @@
           cmd: 'set -o pipefail
 
             authselect current -r | awk ''{ print $1 }'''
+          executable: /bin/bash
         register: result_authselect_profile
         changed_when: false
         when:
@@ -1987,6 +1999,7 @@
           cmd: 'set -o pipefail
 
             authselect current | tail -n+3 | awk ''{ print $2 }'''
+          executable: /bin/bash
         register: result_authselect_features
         changed_when: false
         check_mode: false
@@ -2250,6 +2263,7 @@
       cmd: 'set -o pipefail
 
         authselect current | tail -n+3 | awk ''{ print $2 }'''
+      executable: /bin/bash
     register: result_authselect_features
     changed_when: false
     check_mode: false
@@ -2454,6 +2468,7 @@
           cmd: 'set -o pipefail
 
             authselect current -r | awk ''{ print $1 }'''
+          executable: /bin/bash
         register: result_authselect_profile
         changed_when: false
         when:
@@ -2477,6 +2492,7 @@
           cmd: 'set -o pipefail
 
             authselect current | tail -n+3 | awk ''{ print $2 }'''
+          executable: /bin/bash
         register: result_authselect_features
         changed_when: false
         check_mode: false
@@ -2615,6 +2631,7 @@
           cmd: 'set -o pipefail
 
             authselect current -r | awk ''{ print $1 }'''
+          executable: /bin/bash
         register: result_authselect_profile
         changed_when: false
         when:
@@ -2638,6 +2655,7 @@
           cmd: 'set -o pipefail
 
             authselect current | tail -n+3 | awk ''{ print $2 }'''
+          executable: /bin/bash
         register: result_authselect_features
         changed_when: false
         check_mode: false
@@ -2868,6 +2886,7 @@
       cmd: 'set -o pipefail
 
         authselect current | tail -n+3 | awk ''{ print $2 }'''
+      executable: /bin/bash
     register: result_authselect_features
     changed_when: false
     check_mode: false
@@ -3068,6 +3087,7 @@
           cmd: 'set -o pipefail
 
             authselect current -r | awk ''{ print $1 }'''
+          executable: /bin/bash
         register: result_authselect_profile
         changed_when: false
         when:
@@ -3091,6 +3111,7 @@
           cmd: 'set -o pipefail
 
             authselect current | tail -n+3 | awk ''{ print $2 }'''
+          executable: /bin/bash
         register: result_authselect_features
         changed_when: false
         check_mode: false
@@ -3229,6 +3250,7 @@
           cmd: 'set -o pipefail
 
             authselect current -r | awk ''{ print $1 }'''
+          executable: /bin/bash
         register: result_authselect_profile
         changed_when: false
         when:
@@ -3252,6 +3274,7 @@
           cmd: 'set -o pipefail
 
             authselect current | tail -n+3 | awk ''{ print $2 }'''
+          executable: /bin/bash
         register: result_authselect_features
         changed_when: false
         check_mode: false
@@ -3509,6 +3532,7 @@
       cmd: 'set -o pipefail
 
         authselect current | tail -n+3 | awk ''{ print $2 }'''
+      executable: /bin/bash
     register: result_authselect_features
     changed_when: false
     check_mode: false
@@ -3729,6 +3753,7 @@
           cmd: 'set -o pipefail
 
             authselect current -r | awk ''{ print $1 }'''
+          executable: /bin/bash
         register: result_authselect_profile
         changed_when: false
         when:
@@ -3752,6 +3777,7 @@
           cmd: 'set -o pipefail
 
             authselect current | tail -n+3 | awk ''{ print $2 }'''
+          executable: /bin/bash
         register: result_authselect_features
         changed_when: false
         check_mode: false
@@ -3890,6 +3916,7 @@
           cmd: 'set -o pipefail
 
             authselect current -r | awk ''{ print $1 }'''
+          executable: /bin/bash
         register: result_authselect_profile
         changed_when: false
         when:
@@ -3913,6 +3940,7 @@
           cmd: 'set -o pipefail
 
             authselect current | tail -n+3 | awk ''{ print $2 }'''
+          executable: /bin/bash
         register: result_authselect_features
         changed_when: false
         check_mode: false
@@ -4677,6 +4705,7 @@
         cmd: 'set -o pipefail
 
           authselect current -r | awk ''{ print $1 }'''
+        executable: /bin/bash
       register: result_authselect_profile
       changed_when: false
       when:
@@ -4700,6 +4729,7 @@
         cmd: 'set -o pipefail
 
           authselect current | tail -n+3 | awk ''{ print $2 }'''
+        executable: /bin/bash
       register: result_authselect_features
       changed_when: false
       check_mode: false
@@ -4879,6 +4909,7 @@
         cmd: 'set -o pipefail
 
           authselect current -r | awk ''{ print $1 }'''
+        executable: /bin/bash
       register: result_authselect_profile
       changed_when: false
       when:
@@ -4902,6 +4933,7 @@
         cmd: 'set -o pipefail
 
           authselect current | tail -n+3 | awk ''{ print $2 }'''
+        executable: /bin/bash
       register: result_authselect_features
       changed_when: false
       check_mode: false
@@ -5175,6 +5207,7 @@
         cmd: 'set -o pipefail
 
           authselect current -r | awk ''{ print $1 }'''
+        executable: /bin/bash
       register: result_authselect_profile
       changed_when: false
       when:
@@ -5198,6 +5231,7 @@
         cmd: 'set -o pipefail
 
           authselect current | tail -n+3 | awk ''{ print $2 }'''
+        executable: /bin/bash
       register: result_authselect_features
       changed_when: false
       check_mode: false
@@ -5439,6 +5473,7 @@
         cmd: 'set -o pipefail
 
           authselect current -r | awk ''{ print $1 }'''
+        executable: /bin/bash
       register: result_authselect_profile
       changed_when: false
       when:
@@ -5462,6 +5497,7 @@
         cmd: 'set -o pipefail
 
           authselect current | tail -n+3 | awk ''{ print $2 }'''
+        executable: /bin/bash
       register: result_authselect_features
       changed_when: false
       check_mode: false
@@ -5697,6 +5733,7 @@
         cmd: 'set -o pipefail
 
           authselect current -r | awk ''{ print $1 }'''
+        executable: /bin/bash
       register: result_authselect_profile
       changed_when: false
       when:
@@ -5720,6 +5757,7 @@
         cmd: 'set -o pipefail
 
           authselect current | tail -n+3 | awk ''{ print $2 }'''
+        executable: /bin/bash
       register: result_authselect_features
       changed_when: false
       check_mode: false
@@ -5956,6 +5994,7 @@
         cmd: 'set -o pipefail
 
           authselect current -r | awk ''{ print $1 }'''
+        executable: /bin/bash
       register: result_authselect_profile
       changed_when: false
       when:
@@ -5979,6 +6018,7 @@
         cmd: 'set -o pipefail
 
           authselect current | tail -n+3 | awk ''{ print $2 }'''
+        executable: /bin/bash
       register: result_authselect_features
       changed_when: false
       check_mode: false

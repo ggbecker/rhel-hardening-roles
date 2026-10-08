@@ -800,6 +800,10 @@
     manager: auto
   tags:
   - always
+- name: Gather the service facts
+  ansible.builtin.service_facts: null
+  tags:
+  - always
 - name: Enable rsyslog Service - Enable service rsyslog
   block:
   - name: Enable rsyslog Service - Enable Service rsyslog
@@ -2650,9 +2654,10 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
 - name: 'Ensure Red Hat GPG Key Installed: Import RedHat GPG key'
-  ansible.builtin.rpm_key:
-    state: present
-    key: /etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
+  redhat.rhel_hardening_roles.ssg_hardening:
+    operation: rpm_import
+    path: /etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
+  changed_when: true
   when:
   - DISA_STIG_RHEL_08_010019 | bool
   - ensure_redhat_gpgkey_installed | bool
@@ -3659,6 +3664,7 @@
     cmd: 'set -o pipefail
 
       authselect current -r | awk ''{ print $1 }'''
+    executable: /bin/bash
   register: result_authselect_profile
   changed_when: false
   when:
@@ -3727,6 +3733,7 @@
     cmd: 'set -o pipefail
 
       authselect current | tail -n+3 | awk ''{ print $2 }'''
+    executable: /bin/bash
   register: result_authselect_features
   changed_when: false
   check_mode: false
@@ -4269,6 +4276,7 @@
       cmd: 'set -o pipefail
 
         authselect current | tail -n+3 | awk ''{ print $2 }'''
+      executable: /bin/bash
     register: result_authselect_features
     changed_when: false
     check_mode: false
@@ -4420,6 +4428,7 @@
       cmd: 'set -o pipefail
 
         authselect current | tail -n+3 | awk ''{ print $2 }'''
+      executable: /bin/bash
     register: result_authselect_features
     changed_when: false
     check_mode: false
@@ -4523,12 +4532,33 @@
   - low_disruption
   - medium_severity
   - no_reboot_needed
+- name: Check the current permissions of /etc/security/pwhistory.conf to preserve them
+  ansible.builtin.stat:
+    path: /etc/security/pwhistory.conf
+  register: lineinfile_mode_stat
+  when:
+  - accounts_password_pam_pwhistory_enforce_for_root | bool
+  - low_complexity | bool
+  - low_disruption | bool
+  - medium_severity | bool
+  - no_reboot_needed | bool
+  - restrict_strategy | bool
+  - '"kernel-core" in ansible_facts.packages'
+  - '"pam" in ansible_facts.packages'
+  tags:
+  - CCE-86734-1
+  - accounts_password_pam_pwhistory_enforce_for_root
+  - low_complexity
+  - low_disruption
+  - medium_severity
+  - no_reboot_needed
+  - restrict_strategy
 - name: Ensure Password History Is Enforced for the Root User
   ansible.builtin.lineinfile:
     path: /etc/security/pwhistory.conf
     create: true
     regexp: ''
-    mode: '0644'
+    mode: '{{ lineinfile_mode_stat.stat.mode if lineinfile_mode_stat.stat.exists else ''0644'' }}'
     line: enforce_for_root
     state: present
   when:
@@ -4632,6 +4662,7 @@
       cmd: 'set -o pipefail
 
         authselect current | tail -n+3 | awk ''{ print $2 }'''
+      executable: /bin/bash
     register: result_authselect_features
     changed_when: false
     check_mode: false
@@ -4712,6 +4743,7 @@
         cmd: 'set -o pipefail
 
           authselect current -r | awk ''{ print $1 }'''
+        executable: /bin/bash
       register: result_authselect_profile
       changed_when: false
       when:
@@ -4735,6 +4767,7 @@
         cmd: 'set -o pipefail
 
           authselect current | tail -n+3 | awk ''{ print $2 }'''
+        executable: /bin/bash
       register: result_authselect_features
       changed_when: false
       check_mode: false
@@ -4962,6 +4995,7 @@
             cmd: 'set -o pipefail
 
               authselect current -r | awk ''{ print $1 }'''
+            executable: /bin/bash
           register: result_authselect_profile
           changed_when: false
           when:
@@ -4985,6 +5019,7 @@
             cmd: 'set -o pipefail
 
               authselect current | tail -n+3 | awk ''{ print $2 }'''
+            executable: /bin/bash
           register: result_authselect_features
           changed_when: false
           check_mode: false
@@ -5144,6 +5179,7 @@
         cmd: 'set -o pipefail
 
           authselect current -r | awk ''{ print $1 }'''
+        executable: /bin/bash
       register: result_authselect_profile
       changed_when: false
       when:
@@ -5167,6 +5203,7 @@
         cmd: 'set -o pipefail
 
           authselect current | tail -n+3 | awk ''{ print $2 }'''
+        executable: /bin/bash
       register: result_authselect_features
       changed_when: false
       check_mode: false
@@ -5437,6 +5474,7 @@
       cmd: 'set -o pipefail
 
         authselect current | tail -n+3 | awk ''{ print $2 }'''
+      executable: /bin/bash
     register: result_authselect_features
     changed_when: false
     check_mode: false
@@ -5517,6 +5555,7 @@
         cmd: 'set -o pipefail
 
           authselect current -r | awk ''{ print $1 }'''
+        executable: /bin/bash
       register: result_authselect_profile
       changed_when: false
       when:
@@ -5540,6 +5579,7 @@
         cmd: 'set -o pipefail
 
           authselect current | tail -n+3 | awk ''{ print $2 }'''
+        executable: /bin/bash
       register: result_authselect_features
       changed_when: false
       check_mode: false
@@ -5767,6 +5807,7 @@
             cmd: 'set -o pipefail
 
               authselect current -r | awk ''{ print $1 }'''
+            executable: /bin/bash
           register: result_authselect_profile
           changed_when: false
           when:
@@ -5790,6 +5831,7 @@
             cmd: 'set -o pipefail
 
               authselect current | tail -n+3 | awk ''{ print $2 }'''
+            executable: /bin/bash
           register: result_authselect_features
           changed_when: false
           check_mode: false
@@ -5949,6 +5991,7 @@
         cmd: 'set -o pipefail
 
           authselect current -r | awk ''{ print $1 }'''
+        executable: /bin/bash
       register: result_authselect_profile
       changed_when: false
       when:
@@ -5972,6 +6015,7 @@
         cmd: 'set -o pipefail
 
           authselect current | tail -n+3 | awk ''{ print $2 }'''
+        executable: /bin/bash
       register: result_authselect_features
       changed_when: false
       check_mode: false
@@ -6204,6 +6248,7 @@
       cmd: 'set -o pipefail
 
         authselect current -r | awk ''{ print $1 }'''
+      executable: /bin/bash
     register: result_authselect_profile
     changed_when: false
     when:
@@ -6227,6 +6272,7 @@
       cmd: 'set -o pipefail
 
         authselect current | tail -n+3 | awk ''{ print $2 }'''
+      executable: /bin/bash
     register: result_authselect_features
     changed_when: false
     check_mode: false
@@ -6319,6 +6365,7 @@
     cmd: 'set -o pipefail
 
       authselect current -r | awk ''{ print $1 }'''
+    executable: /bin/bash
   register: result_authselect_profile
   changed_when: false
   when:
@@ -6911,6 +6958,7 @@
       cmd: 'set -o pipefail
 
         authselect current | tail -n+3 | awk ''{ print $2 }'''
+      executable: /bin/bash
     register: result_authselect_features
     changed_when: false
     check_mode: false
@@ -7131,6 +7179,7 @@
           cmd: 'set -o pipefail
 
             authselect current -r | awk ''{ print $1 }'''
+          executable: /bin/bash
         register: result_authselect_profile
         changed_when: false
         when:
@@ -7154,6 +7203,7 @@
           cmd: 'set -o pipefail
 
             authselect current | tail -n+3 | awk ''{ print $2 }'''
+          executable: /bin/bash
         register: result_authselect_features
         changed_when: false
         check_mode: false
@@ -7292,6 +7342,7 @@
           cmd: 'set -o pipefail
 
             authselect current -r | awk ''{ print $1 }'''
+          executable: /bin/bash
         register: result_authselect_profile
         changed_when: false
         when:
@@ -7315,6 +7366,7 @@
           cmd: 'set -o pipefail
 
             authselect current | tail -n+3 | awk ''{ print $2 }'''
+          executable: /bin/bash
         register: result_authselect_features
         changed_when: false
         check_mode: false
@@ -7573,6 +7625,7 @@
       cmd: 'set -o pipefail
 
         authselect current | tail -n+3 | awk ''{ print $2 }'''
+      executable: /bin/bash
     register: result_authselect_features
     changed_when: false
     check_mode: false
@@ -7757,6 +7810,7 @@
           cmd: 'set -o pipefail
 
             authselect current -r | awk ''{ print $1 }'''
+          executable: /bin/bash
         register: result_authselect_profile
         changed_when: false
         when:
@@ -7780,6 +7834,7 @@
           cmd: 'set -o pipefail
 
             authselect current | tail -n+3 | awk ''{ print $2 }'''
+          executable: /bin/bash
         register: result_authselect_features
         changed_when: false
         check_mode: false
@@ -7918,6 +7973,7 @@
           cmd: 'set -o pipefail
 
             authselect current -r | awk ''{ print $1 }'''
+          executable: /bin/bash
         register: result_authselect_profile
         changed_when: false
         when:
@@ -7941,6 +7997,7 @@
           cmd: 'set -o pipefail
 
             authselect current | tail -n+3 | awk ''{ print $2 }'''
+          executable: /bin/bash
         register: result_authselect_features
         changed_when: false
         check_mode: false
@@ -8312,12 +8369,37 @@
   - medium_severity
   - no_reboot_needed
   - restrict_strategy
+- name: Check the current permissions of /etc/security/pwquality.conf to preserve them
+  ansible.builtin.stat:
+    path: /etc/security/pwquality.conf
+  register: lineinfile_mode_stat
+  when:
+  - accounts_password_pam_enforce_root | bool
+  - low_complexity | bool
+  - low_disruption | bool
+  - medium_severity | bool
+  - no_reboot_needed | bool
+  - restrict_strategy | bool
+  - '"kernel-core" in ansible_facts.packages'
+  - '"libpwquality" in ansible_facts.packages'
+  tags:
+  - CCE-83377-2
+  - NIST-800-53-CM-6(a)
+  - NIST-800-53-IA-5(1)(a)
+  - NIST-800-53-IA-5(4)
+  - NIST-800-53-IA-5(c)
+  - accounts_password_pam_enforce_root
+  - low_complexity
+  - low_disruption
+  - medium_severity
+  - no_reboot_needed
+  - restrict_strategy
 - name: Ensure PAM Enforces Password Requirements - Enforce for root User
   ansible.builtin.lineinfile:
     path: /etc/security/pwquality.conf
     create: true
     regexp: ''
-    mode: '0644'
+    mode: '{{ lineinfile_mode_stat.stat.mode if lineinfile_mode_stat.stat.exists else ''0644'' }}'
     line: enforce_for_root
     state: present
   when:
@@ -8650,6 +8732,7 @@
         cmd: 'set -o pipefail
 
           authselect current -r | awk ''{ print $1 }'''
+        executable: /bin/bash
       register: result_authselect_profile
       changed_when: false
       when:
@@ -8673,6 +8756,7 @@
         cmd: 'set -o pipefail
 
           authselect current | tail -n+3 | awk ''{ print $2 }'''
+        executable: /bin/bash
       register: result_authselect_features
       changed_when: false
       check_mode: false
@@ -8881,6 +8965,7 @@
         cmd: 'set -o pipefail
 
           authselect current -r | awk ''{ print $1 }'''
+        executable: /bin/bash
       register: result_authselect_profile
       changed_when: false
       when:
@@ -8904,6 +8989,7 @@
         cmd: 'set -o pipefail
 
           authselect current | tail -n+3 | awk ''{ print $2 }'''
+        executable: /bin/bash
       register: result_authselect_features
       changed_when: false
       check_mode: false
@@ -9153,6 +9239,7 @@
         cmd: 'set -o pipefail
 
           authselect current -r | awk ''{ print $1 }'''
+        executable: /bin/bash
       register: result_authselect_profile
       changed_when: false
       when:
@@ -9176,6 +9263,7 @@
         cmd: 'set -o pipefail
 
           authselect current | tail -n+3 | awk ''{ print $2 }'''
+        executable: /bin/bash
       register: result_authselect_features
       changed_when: false
       check_mode: false
@@ -9417,6 +9505,7 @@
         cmd: 'set -o pipefail
 
           authselect current -r | awk ''{ print $1 }'''
+        executable: /bin/bash
       register: result_authselect_profile
       changed_when: false
       when:
@@ -9440,6 +9529,7 @@
         cmd: 'set -o pipefail
 
           authselect current | tail -n+3 | awk ''{ print $2 }'''
+        executable: /bin/bash
       register: result_authselect_features
       changed_when: false
       check_mode: false
@@ -9635,6 +9725,7 @@
         cmd: 'set -o pipefail
 
           authselect current -r | awk ''{ print $1 }'''
+        executable: /bin/bash
       register: result_authselect_profile
       changed_when: false
       when:
@@ -9658,6 +9749,7 @@
         cmd: 'set -o pipefail
 
           authselect current | tail -n+3 | awk ''{ print $2 }'''
+        executable: /bin/bash
       register: result_authselect_features
       changed_when: false
       check_mode: false
@@ -9903,6 +9995,7 @@
         cmd: 'set -o pipefail
 
           authselect current -r | awk ''{ print $1 }'''
+        executable: /bin/bash
       register: result_authselect_profile
       changed_when: false
       when:
@@ -9926,6 +10019,7 @@
         cmd: 'set -o pipefail
 
           authselect current | tail -n+3 | awk ''{ print $2 }'''
+        executable: /bin/bash
       register: result_authselect_features
       changed_when: false
       check_mode: false
@@ -10380,6 +10474,7 @@
         cmd: 'set -o pipefail
 
           authselect current -r | awk ''{ print $1 }'''
+        executable: /bin/bash
       register: result_authselect_profile
       changed_when: false
       when:
@@ -10403,6 +10498,7 @@
         cmd: 'set -o pipefail
 
           authselect current | tail -n+3 | awk ''{ print $2 }'''
+        executable: /bin/bash
       register: result_authselect_features
       changed_when: false
       check_mode: false
@@ -10572,6 +10668,7 @@
         cmd: 'set -o pipefail
 
           authselect current -r | awk ''{ print $1 }'''
+        executable: /bin/bash
       register: result_authselect_profile
       changed_when: false
       when:
@@ -10595,6 +10692,7 @@
         cmd: 'set -o pipefail
 
           authselect current | tail -n+3 | awk ''{ print $2 }'''
+        executable: /bin/bash
       register: result_authselect_features
       changed_when: false
       check_mode: false
@@ -10768,6 +10866,7 @@
       cmd: 'set -o pipefail
 
         authselect current | tail -n+3 | awk ''{ print $2 }'''
+      executable: /bin/bash
     register: result_authselect_features
     changed_when: false
     check_mode: false
@@ -14048,6 +14147,28 @@
   - medium_severity
   - no_reboot_needed
   - restrict_strategy
+- name: Ensure journald is configured to compress large log files - Collect current permissions of existing drop-in files
+  ansible.builtin.stat:
+    path: '{{item}}'
+  register: systemd_dropin_existing_modes
+  when:
+  - journald_compress | bool
+  - low_complexity | bool
+  - low_disruption | bool
+  - medium_severity | bool
+  - no_reboot_needed | bool
+  - restrict_strategy | bool
+  - '"kernel-core" in ansible_facts.packages'
+  - count_of_systemd_dropin_files_with_section | int > 0
+  loop: '{{systemd_dropin_files_with_section.results | sum(attribute=''files'', start=[]) | map(attribute=''path'') | list }}'
+  tags:
+  - CCE-85930-6
+  - journald_compress
+  - low_complexity
+  - low_disruption
+  - medium_severity
+  - no_reboot_needed
+  - restrict_strategy
 - name: Ensure journald is configured to compress large log files - Add missing configuration to correct section
   redhat.rhel_hardening_roles.ini_file:
     path: '{{item}}'
@@ -14056,7 +14177,7 @@
     value: 'yes'
     state: present
     no_extra_spaces: true
-    mode: 420
+    mode: '{{ (systemd_dropin_existing_modes.results | selectattr(''item'', ''equalto'', item) | map(attribute=''stat.mode'') | first) | default(''0644'', true) }}'
   when:
   - journald_compress | bool
   - low_complexity | bool
@@ -14084,7 +14205,7 @@
     state: present
     no_extra_spaces: true
     create: true
-    mode: 420
+    mode: '0644'
   when:
   - journald_compress | bool
   - low_complexity | bool
@@ -14152,6 +14273,29 @@
   - medium_severity
   - no_reboot_needed
   - restrict_strategy
+- name: Ensure journald ForwardToSyslog is disabled - Collect current permissions of existing drop-in files
+  ansible.builtin.stat:
+    path: '{{item}}'
+  register: systemd_dropin_existing_modes
+  when:
+  - journald_disable_forward_to_syslog | bool
+  - low_complexity | bool
+  - low_disruption | bool
+  - medium_severity | bool
+  - no_reboot_needed | bool
+  - restrict_strategy | bool
+  - '"kernel-core" in ansible_facts.packages'
+  - '"systemd" in ansible_facts.packages'
+  - count_of_systemd_dropin_files_with_section | int > 0
+  loop: '{{systemd_dropin_files_with_section.results | sum(attribute=''files'', start=[]) | map(attribute=''path'') | list }}'
+  tags:
+  - CCE-88250-6
+  - journald_disable_forward_to_syslog
+  - low_complexity
+  - low_disruption
+  - medium_severity
+  - no_reboot_needed
+  - restrict_strategy
 - name: Ensure journald ForwardToSyslog is disabled - Add missing configuration to correct section
   redhat.rhel_hardening_roles.ini_file:
     path: '{{item}}'
@@ -14160,7 +14304,7 @@
     value: 'no'
     state: present
     no_extra_spaces: true
-    mode: 420
+    mode: '{{ (systemd_dropin_existing_modes.results | selectattr(''item'', ''equalto'', item) | map(attribute=''stat.mode'') | first) | default(''0644'', true) }}'
   when:
   - journald_disable_forward_to_syslog | bool
   - low_complexity | bool
@@ -14189,7 +14333,7 @@
     state: present
     no_extra_spaces: true
     create: true
-    mode: 420
+    mode: '0644'
   when:
   - journald_disable_forward_to_syslog | bool
   - low_complexity | bool
@@ -14256,6 +14400,28 @@
   - medium_severity
   - no_reboot_needed
   - restrict_strategy
+- name: Ensure journald is configured to write log files to persistent disk - Collect current permissions of existing drop-in files
+  ansible.builtin.stat:
+    path: '{{item}}'
+  register: systemd_dropin_existing_modes
+  when:
+  - journald_storage | bool
+  - low_complexity | bool
+  - low_disruption | bool
+  - medium_severity | bool
+  - no_reboot_needed | bool
+  - restrict_strategy | bool
+  - '"kernel-core" in ansible_facts.packages'
+  - count_of_systemd_dropin_files_with_section | int > 0
+  loop: '{{systemd_dropin_files_with_section.results | sum(attribute=''files'', start=[]) | map(attribute=''path'') | list }}'
+  tags:
+  - CCE-86045-2
+  - journald_storage
+  - low_complexity
+  - low_disruption
+  - medium_severity
+  - no_reboot_needed
+  - restrict_strategy
 - name: Ensure journald is configured to write log files to persistent disk - Add missing configuration to correct section
   redhat.rhel_hardening_roles.ini_file:
     path: '{{item}}'
@@ -14264,7 +14430,7 @@
     value: persistent
     state: present
     no_extra_spaces: true
-    mode: 420
+    mode: '{{ (systemd_dropin_existing_modes.results | selectattr(''item'', ''equalto'', item) | map(attribute=''stat.mode'') | first) | default(''0644'', true) }}'
   when:
   - journald_storage | bool
   - low_complexity | bool
@@ -14292,7 +14458,7 @@
     state: present
     no_extra_spaces: true
     create: true
-    mode: 420
+    mode: '0644'
   when:
   - journald_storage | bool
   - low_complexity | bool
@@ -14705,9 +14871,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.all.accept_ra\s*=\s*.*$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.all.accept_ra\s*=\s*.*$'''
+    executable: /bin/bash
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -14738,9 +14903,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.all.accept_ra\s*=\s*{{ sysctl_net_ipv6_conf_all_accept_ra_value }}$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.all.accept_ra\s*=\s*{{ sysctl_net_ipv6_conf_all_accept_ra_value }}$'''
+    executable: /bin/bash
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -14888,9 +15052,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.all.accept_redirects\s*=\s*.*$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.all.accept_redirects\s*=\s*.*$'''
+    executable: /bin/bash
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -14923,9 +15086,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.all.accept_redirects\s*=\s*{{ sysctl_net_ipv6_conf_all_accept_redirects_value }}$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.all.accept_redirects\s*=\s*{{ sysctl_net_ipv6_conf_all_accept_redirects_value }}$'''
+    executable: /bin/bash
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -15079,9 +15241,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.all.accept_source_route\s*=\s*.*$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.all.accept_source_route\s*=\s*.*$'''
+    executable: /bin/bash
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -15112,9 +15273,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.all.accept_source_route\s*=\s*{{ sysctl_net_ipv6_conf_all_accept_source_route_value }}$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.all.accept_source_route\s*=\s*{{ sysctl_net_ipv6_conf_all_accept_source_route_value }}$'''
+    executable: /bin/bash
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -15261,9 +15421,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.all.forwarding\s*=\s*.*$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.all.forwarding\s*=\s*.*$'''
+    executable: /bin/bash
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -15295,9 +15454,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.all.forwarding\s*=\s*{{ sysctl_net_ipv6_conf_all_forwarding_value }}$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.all.forwarding\s*=\s*{{ sysctl_net_ipv6_conf_all_forwarding_value }}$'''
+    executable: /bin/bash
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -15447,9 +15605,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.default.accept_ra\s*=\s*.*$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.default.accept_ra\s*=\s*.*$'''
+    executable: /bin/bash
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -15480,9 +15637,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.default.accept_ra\s*=\s*{{ sysctl_net_ipv6_conf_default_accept_ra_value }}$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.default.accept_ra\s*=\s*{{ sysctl_net_ipv6_conf_default_accept_ra_value }}$'''
+    executable: /bin/bash
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -15628,9 +15784,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.default.accept_redirects\s*=\s*.*$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.default.accept_redirects\s*=\s*.*$'''
+    executable: /bin/bash
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -15661,9 +15816,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.default.accept_redirects\s*=\s*{{ sysctl_net_ipv6_conf_default_accept_redirects_value }}$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.default.accept_redirects\s*=\s*{{ sysctl_net_ipv6_conf_default_accept_redirects_value }}$'''
+    executable: /bin/bash
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -15814,9 +15968,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.default.accept_source_route\s*=\s*.*$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.default.accept_source_route\s*=\s*.*$'''
+    executable: /bin/bash
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -15852,9 +16005,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.default.accept_source_route\s*=\s*{{ sysctl_net_ipv6_conf_default_accept_source_route_value }}$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.default.accept_source_route\s*=\s*{{ sysctl_net_ipv6_conf_default_accept_source_route_value }}$'''
+    executable: /bin/bash
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -16016,9 +16168,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.default.forwarding\s*=\s*.*$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.default.forwarding\s*=\s*.*$'''
+    executable: /bin/bash
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -16045,9 +16196,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.default.forwarding\s*=\s*{{ sysctl_net_ipv6_conf_default_forwarding_value }}$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.default.forwarding\s*=\s*{{ sysctl_net_ipv6_conf_default_forwarding_value }}$'''
+    executable: /bin/bash
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -16179,9 +16329,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.all.accept_redirects\s*=\s*.*$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.all.accept_redirects\s*=\s*.*$'''
+    executable: /bin/bash
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -16214,9 +16363,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.all.accept_redirects\s*=\s*{{ sysctl_net_ipv4_conf_all_accept_redirects_value }}$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.all.accept_redirects\s*=\s*{{ sysctl_net_ipv4_conf_all_accept_redirects_value }}$'''
+    executable: /bin/bash
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -16372,9 +16520,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.all.accept_source_route\s*=\s*.*$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.all.accept_source_route\s*=\s*.*$'''
+    executable: /bin/bash
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -16407,9 +16554,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.all.accept_source_route\s*=\s*{{ sysctl_net_ipv4_conf_all_accept_source_route_value }}$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.all.accept_source_route\s*=\s*{{ sysctl_net_ipv4_conf_all_accept_source_route_value }}$'''
+    executable: /bin/bash
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -16560,9 +16706,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.all.forwarding\s*=\s*.*$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.all.forwarding\s*=\s*.*$'''
+    executable: /bin/bash
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -16590,9 +16735,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.all.forwarding\s*=\s*{{ sysctl_net_ipv4_conf_all_forwarding_value }}$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.all.forwarding\s*=\s*{{ sysctl_net_ipv4_conf_all_forwarding_value }}$'''
+    executable: /bin/bash
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -16726,9 +16870,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.all.log_martians\s*=\s*.*$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.all.log_martians\s*=\s*.*$'''
+    executable: /bin/bash
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -16759,9 +16902,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.all.log_martians\s*=\s*{{ sysctl_net_ipv4_conf_all_log_martians_value }}$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.all.log_martians\s*=\s*{{ sysctl_net_ipv4_conf_all_log_martians_value }}$'''
+    executable: /bin/bash
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -16911,9 +17053,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.all.rp_filter\s*=\s*.*$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.all.rp_filter\s*=\s*.*$'''
+    executable: /bin/bash
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -16948,9 +17089,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.all.rp_filter\s*=\s*{{ sysctl_net_ipv4_conf_all_rp_filter_value }}$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.all.rp_filter\s*=\s*{{ sysctl_net_ipv4_conf_all_rp_filter_value }}$'''
+    executable: /bin/bash
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -17114,9 +17254,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.all.secure_redirects\s*=\s*.*$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.all.secure_redirects\s*=\s*.*$'''
+    executable: /bin/bash
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -17149,9 +17288,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.all.secure_redirects\s*=\s*{{ sysctl_net_ipv4_conf_all_secure_redirects_value }}$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.all.secure_redirects\s*=\s*{{ sysctl_net_ipv4_conf_all_secure_redirects_value }}$'''
+    executable: /bin/bash
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -17310,9 +17448,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.default.accept_redirects\s*=\s*.*$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.default.accept_redirects\s*=\s*.*$'''
+    executable: /bin/bash
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -17348,9 +17485,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.default.accept_redirects\s*=\s*{{ sysctl_net_ipv4_conf_default_accept_redirects_value }}$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.default.accept_redirects\s*=\s*{{ sysctl_net_ipv4_conf_default_accept_redirects_value }}$'''
+    executable: /bin/bash
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -17518,9 +17654,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.default.accept_source_route\s*=\s*.*$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.default.accept_source_route\s*=\s*.*$'''
+    executable: /bin/bash
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -17553,9 +17688,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.default.accept_source_route\s*=\s*{{ sysctl_net_ipv4_conf_default_accept_source_route_value }}$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.default.accept_source_route\s*=\s*{{ sysctl_net_ipv4_conf_default_accept_source_route_value }}$'''
+    executable: /bin/bash
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -17703,9 +17837,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.default.forwarding\s*=\s*.*$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.default.forwarding\s*=\s*.*$'''
+    executable: /bin/bash
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -17730,9 +17863,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.default.forwarding\s*=\s*{{ sysctl_net_ipv4_conf_default_forwarding_value }}$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.default.forwarding\s*=\s*{{ sysctl_net_ipv4_conf_default_forwarding_value }}$'''
+    executable: /bin/bash
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -17854,9 +17986,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.default.log_martians\s*=\s*.*$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.default.log_martians\s*=\s*.*$'''
+    executable: /bin/bash
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -17887,9 +18018,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.default.log_martians\s*=\s*{{ sysctl_net_ipv4_conf_default_log_martians_value }}$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.default.log_martians\s*=\s*{{ sysctl_net_ipv4_conf_default_log_martians_value }}$'''
+    executable: /bin/bash
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -18036,9 +18166,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.default.rp_filter\s*=\s*.*$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.default.rp_filter\s*=\s*.*$'''
+    executable: /bin/bash
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -18070,9 +18199,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.default.rp_filter\s*=\s*{{ sysctl_net_ipv4_conf_default_rp_filter_value }}$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.default.rp_filter\s*=\s*{{ sysctl_net_ipv4_conf_default_rp_filter_value }}$'''
+    executable: /bin/bash
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -18221,9 +18349,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.default.secure_redirects\s*=\s*.*$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.default.secure_redirects\s*=\s*.*$'''
+    executable: /bin/bash
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -18253,9 +18380,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.default.secure_redirects\s*=\s*{{ sysctl_net_ipv4_conf_default_secure_redirects_value }}$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.default.secure_redirects\s*=\s*{{ sysctl_net_ipv4_conf_default_secure_redirects_value }}$'''
+    executable: /bin/bash
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -18401,9 +18527,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.icmp_echo_ignore_broadcasts\s*=\s*.*$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.icmp_echo_ignore_broadcasts\s*=\s*.*$'''
+    executable: /bin/bash
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -18438,9 +18563,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.icmp_echo_ignore_broadcasts\s*=\s*{{ sysctl_net_ipv4_icmp_echo_ignore_broadcasts_value }}$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.icmp_echo_ignore_broadcasts\s*=\s*{{ sysctl_net_ipv4_icmp_echo_ignore_broadcasts_value }}$'''
+    executable: /bin/bash
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -18603,9 +18727,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.icmp_ignore_bogus_error_responses\s*=\s*.*$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.icmp_ignore_bogus_error_responses\s*=\s*.*$'''
+    executable: /bin/bash
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -18637,9 +18760,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.icmp_ignore_bogus_error_responses\s*=\s*{{ sysctl_net_ipv4_icmp_ignore_bogus_error_responses_value }}$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.icmp_ignore_bogus_error_responses\s*=\s*{{ sysctl_net_ipv4_icmp_ignore_bogus_error_responses_value }}$'''
+    executable: /bin/bash
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -18794,9 +18916,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.tcp_syncookies\s*=\s*.*$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.tcp_syncookies\s*=\s*.*$'''
+    executable: /bin/bash
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -18832,9 +18953,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.tcp_syncookies\s*=\s*{{ sysctl_net_ipv4_tcp_syncookies_value }}$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.tcp_syncookies\s*=\s*{{ sysctl_net_ipv4_tcp_syncookies_value }}$'''
+    executable: /bin/bash
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -19005,9 +19125,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.all.send_redirects\s*=\s*.*$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.all.send_redirects\s*=\s*.*$'''
+    executable: /bin/bash
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -19043,9 +19162,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.all.send_redirects\s*=\s*0$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.all.send_redirects\s*=\s*0$'''
+    executable: /bin/bash
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -19216,9 +19334,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.default.send_redirects\s*=\s*.*$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.default.send_redirects\s*=\s*.*$'''
+    executable: /bin/bash
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -19254,9 +19371,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.default.send_redirects\s*=\s*0$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.default.send_redirects\s*=\s*0$'''
+    executable: /bin/bash
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -19426,9 +19542,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.ip_forward\s*=\s*.*$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.ip_forward\s*=\s*.*$'''
+    executable: /bin/bash
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -19463,9 +19578,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.ip_forward\s*=\s*0$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.ip_forward\s*=\s*0$'''
+    executable: /bin/bash
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -20438,9 +20552,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*fs.protected_hardlinks\s*=\s*.*$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*fs.protected_hardlinks\s*=\s*.*$'''
+    executable: /bin/bash
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -20469,9 +20582,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*fs.protected_hardlinks\s*=\s*1$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*fs.protected_hardlinks\s*=\s*1$'''
+    executable: /bin/bash
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -25943,9 +26055,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*kernel.dmesg_restrict\s*=\s*.*$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*kernel.dmesg_restrict\s*=\s*.*$'''
+    executable: /bin/bash
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -25975,9 +26086,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*kernel.dmesg_restrict\s*=\s*1$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*kernel.dmesg_restrict\s*=\s*1$'''
+    executable: /bin/bash
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -26116,9 +26226,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*kernel.yama.ptrace_scope\s*=\s*.*$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*kernel.yama.ptrace_scope\s*=\s*.*$'''
+    executable: /bin/bash
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -26146,9 +26255,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*kernel.yama.ptrace_scope\s*=\s*1$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*kernel.yama.ptrace_scope\s*=\s*1$'''
+    executable: /bin/bash
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -26314,6 +26422,36 @@
   - medium_severity
   - no_reboot_needed
   - restrict_strategy
+- name: Disable core dump backtraces - Collect current permissions of existing drop-in files
+  ansible.builtin.stat:
+    path: '{{item}}'
+  register: systemd_dropin_existing_modes
+  when:
+  - DISA_STIG_RHEL_08_010675 | bool
+  - coredump_disable_backtraces | bool
+  - low_complexity | bool
+  - low_disruption | bool
+  - medium_severity | bool
+  - no_reboot_needed | bool
+  - restrict_strategy | bool
+  - '"kernel-core" in ansible_facts.packages'
+  - '"systemd" in ansible_facts.packages'
+  - count_of_systemd_dropin_files_with_section | int > 0
+  loop: '{{systemd_dropin_files_with_section.results | sum(attribute=''files'', start=[]) | map(attribute=''path'') | list }}'
+  tags:
+  - CCE-82251-0
+  - DISA-STIG-RHEL-08-010675
+  - NIST-800-53-CM-6
+  - PCI-DSS-Req-3.2
+  - PCI-DSSv4-3.3
+  - PCI-DSSv4-3.3.1
+  - PCI-DSSv4-3.3.1.1
+  - coredump_disable_backtraces
+  - low_complexity
+  - low_disruption
+  - medium_severity
+  - no_reboot_needed
+  - restrict_strategy
 - name: Disable core dump backtraces - Add missing configuration to correct section
   redhat.rhel_hardening_roles.ini_file:
     path: '{{item}}'
@@ -26322,7 +26460,7 @@
     value: '0'
     state: present
     no_extra_spaces: true
-    mode: 420
+    mode: '{{ (systemd_dropin_existing_modes.results | selectattr(''item'', ''equalto'', item) | map(attribute=''stat.mode'') | first) | default(''0644'', true) }}'
   when:
   - DISA_STIG_RHEL_08_010675 | bool
   - coredump_disable_backtraces | bool
@@ -26358,7 +26496,7 @@
     state: present
     no_extra_spaces: true
     create: true
-    mode: 420
+    mode: '0644'
   when:
   - DISA_STIG_RHEL_08_010675 | bool
   - coredump_disable_backtraces | bool
@@ -26448,6 +26586,36 @@
   - medium_severity
   - no_reboot_needed
   - restrict_strategy
+- name: Disable storing core dump - Collect current permissions of existing drop-in files
+  ansible.builtin.stat:
+    path: '{{item}}'
+  register: systemd_dropin_existing_modes
+  when:
+  - DISA_STIG_RHEL_08_010674 | bool
+  - coredump_disable_storage | bool
+  - low_complexity | bool
+  - low_disruption | bool
+  - medium_severity | bool
+  - no_reboot_needed | bool
+  - restrict_strategy | bool
+  - '"kernel-core" in ansible_facts.packages'
+  - '"systemd" in ansible_facts.packages'
+  - count_of_systemd_dropin_files_with_section | int > 0
+  loop: '{{systemd_dropin_files_with_section.results | sum(attribute=''files'', start=[]) | map(attribute=''path'') | list }}'
+  tags:
+  - CCE-82252-8
+  - DISA-STIG-RHEL-08-010674
+  - NIST-800-53-CM-6
+  - PCI-DSS-Req-3.2
+  - PCI-DSSv4-3.3
+  - PCI-DSSv4-3.3.1
+  - PCI-DSSv4-3.3.1.1
+  - coredump_disable_storage
+  - low_complexity
+  - low_disruption
+  - medium_severity
+  - no_reboot_needed
+  - restrict_strategy
 - name: Disable storing core dump - Add missing configuration to correct section
   redhat.rhel_hardening_roles.ini_file:
     path: '{{item}}'
@@ -26456,7 +26624,7 @@
     value: none
     state: present
     no_extra_spaces: true
-    mode: 420
+    mode: '{{ (systemd_dropin_existing_modes.results | selectattr(''item'', ''equalto'', item) | map(attribute=''stat.mode'') | first) | default(''0644'', true) }}'
   when:
   - DISA_STIG_RHEL_08_010674 | bool
   - coredump_disable_storage | bool
@@ -26492,7 +26660,7 @@
     state: present
     no_extra_spaces: true
     create: true
-    mode: 420
+    mode: '0644'
   when:
   - DISA_STIG_RHEL_08_010674 | bool
   - coredump_disable_storage | bool
@@ -26823,9 +26991,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*fs.suid_dumpable\s*=\s*.*$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*fs.suid_dumpable\s*=\s*.*$'''
+    executable: /bin/bash
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -26855,9 +27022,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*fs.suid_dumpable\s*=\s*0$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*fs.suid_dumpable\s*=\s*0$'''
+    executable: /bin/bash
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -26999,9 +27165,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*kernel.kptr_restrict\s*=\s*.*$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*kernel.kptr_restrict\s*=\s*.*$'''
+    executable: /bin/bash
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -27032,9 +27197,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*kernel.kptr_restrict\s*=\s*1$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*kernel.kptr_restrict\s*=\s*1$'''
+    executable: /bin/bash
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -27184,9 +27348,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*kernel.randomize_va_space\s*=\s*.*$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*kernel.randomize_va_space\s*=\s*.*$'''
+    executable: /bin/bash
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -27221,9 +27384,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*kernel.randomize_va_space\s*=\s*2$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*kernel.randomize_va_space\s*=\s*2$'''
+    executable: /bin/bash
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -27598,6 +27760,36 @@
   - reboot_required
   - restrict_strategy
   - selinux_not_disabled
+- name: Check the current permissions of /etc/selinux/config to preserve them
+  ansible.builtin.stat:
+    path: /etc/selinux/config
+  register: kvp_mode_stat
+  when:
+  - DISA_STIG_RHEL_08_010450 | bool
+  - configure_strategy | bool
+  - low_complexity | bool
+  - low_disruption | bool
+  - medium_severity | bool
+  - no_reboot_needed | bool
+  - selinux_policytype | bool
+  - '"kernel-core" in ansible_facts.packages'
+  tags:
+  - CCE-80868-3
+  - DISA-STIG-RHEL-08-010450
+  - NIST-800-171-3.1.2
+  - NIST-800-171-3.7.2
+  - NIST-800-53-AC-3
+  - NIST-800-53-AC-3(3)(a)
+  - NIST-800-53-AU-9
+  - NIST-800-53-SC-7(21)
+  - PCI-DSSv4-1.2
+  - PCI-DSSv4-1.2.6
+  - configure_strategy
+  - low_complexity
+  - low_disruption
+  - medium_severity
+  - no_reboot_needed
+  - selinux_policytype
 - name: Configure SELinux Policy
   block:
   - name: Check for duplicate values
@@ -27605,7 +27797,7 @@
       path: /etc/selinux/config
       create: true
       regexp: (?i)^SELINUXTYPE=
-      mode: '0644'
+      mode: '{{ kvp_mode_stat.stat.mode if kvp_mode_stat.stat.exists else ''0644'' }}'
       state: absent
     check_mode: true
     changed_when: false
@@ -27615,7 +27807,7 @@
       path: /etc/selinux/config
       create: true
       regexp: (?i)^SELINUXTYPE=
-      mode: '0644'
+      mode: '{{ kvp_mode_stat.stat.mode if kvp_mode_stat.stat.exists else ''0644'' }}'
       state: absent
     when: dupes.found is defined and dupes.found > 1
   - name: Insert correct line to /etc/selinux/config
@@ -27623,7 +27815,7 @@
       path: /etc/selinux/config
       create: true
       regexp: (?i)^SELINUXTYPE=
-      mode: '0644'
+      mode: '{{ kvp_mode_stat.stat.mode if kvp_mode_stat.stat.exists else ''0644'' }}'
       line: SELINUXTYPE={{ var_selinux_policy_name }}
       state: present
   when:
@@ -27675,13 +27867,37 @@
   - low_disruption
   - medium_severity
   - no_reboot_needed
+- name: Test for existence /etc/cron.d/
+  ansible.builtin.stat:
+    path: /etc/cron.d/
+  register: file_exists
+  when:
+  - configure_strategy | bool
+  - file_groupowner_cron_d | bool
+  - low_complexity | bool
+  - low_disruption | bool
+  - medium_severity | bool
+  - no_reboot_needed | bool
+  - '"kernel-core" in ansible_facts.packages'
+  tags:
+  - CCE-82268-4
+  - NIST-800-53-AC-6(1)
+  - NIST-800-53-CM-6(a)
+  - PCI-DSSv4-2.2
+  - PCI-DSSv4-2.2.6
+  - configure_strategy
+  - file_groupowner_cron_d
+  - low_complexity
+  - low_disruption
+  - medium_severity
+  - no_reboot_needed
 - name: Ensure group owner on /etc/cron.d/
   ansible.builtin.file:
     path: /etc/cron.d/
     follow: false
     state: directory
     group: '{{ file_groupowner_cron_d_newgroup }}'
-    mode: '0700'
+    mode: '{{ file_exists.stat.mode if file_exists.stat.exists else ''0700'' }}'
   when:
   - configure_strategy | bool
   - file_groupowner_cron_d | bool
@@ -27725,13 +27941,37 @@
   - low_disruption
   - medium_severity
   - no_reboot_needed
+- name: Test for existence /etc/cron.daily/
+  ansible.builtin.stat:
+    path: /etc/cron.daily/
+  register: file_exists
+  when:
+  - configure_strategy | bool
+  - file_groupowner_cron_daily | bool
+  - low_complexity | bool
+  - low_disruption | bool
+  - medium_severity | bool
+  - no_reboot_needed | bool
+  - '"kernel-core" in ansible_facts.packages'
+  tags:
+  - CCE-82234-6
+  - NIST-800-53-AC-6(1)
+  - NIST-800-53-CM-6(a)
+  - PCI-DSSv4-2.2
+  - PCI-DSSv4-2.2.6
+  - configure_strategy
+  - file_groupowner_cron_daily
+  - low_complexity
+  - low_disruption
+  - medium_severity
+  - no_reboot_needed
 - name: Ensure group owner on /etc/cron.daily/
   ansible.builtin.file:
     path: /etc/cron.daily/
     follow: false
     state: directory
     group: '{{ file_groupowner_cron_daily_newgroup }}'
-    mode: '0700'
+    mode: '{{ file_exists.stat.mode if file_exists.stat.exists else ''0700'' }}'
   when:
   - configure_strategy | bool
   - file_groupowner_cron_daily | bool
@@ -27775,13 +28015,37 @@
   - low_disruption
   - medium_severity
   - no_reboot_needed
+- name: Test for existence /etc/cron.hourly/
+  ansible.builtin.stat:
+    path: /etc/cron.hourly/
+  register: file_exists
+  when:
+  - configure_strategy | bool
+  - file_groupowner_cron_hourly | bool
+  - low_complexity | bool
+  - low_disruption | bool
+  - medium_severity | bool
+  - no_reboot_needed | bool
+  - '"kernel-core" in ansible_facts.packages'
+  tags:
+  - CCE-82227-0
+  - NIST-800-53-AC-6(1)
+  - NIST-800-53-CM-6(a)
+  - PCI-DSSv4-2.2
+  - PCI-DSSv4-2.2.6
+  - configure_strategy
+  - file_groupowner_cron_hourly
+  - low_complexity
+  - low_disruption
+  - medium_severity
+  - no_reboot_needed
 - name: Ensure group owner on /etc/cron.hourly/
   ansible.builtin.file:
     path: /etc/cron.hourly/
     follow: false
     state: directory
     group: '{{ file_groupowner_cron_hourly_newgroup }}'
-    mode: '0700'
+    mode: '{{ file_exists.stat.mode if file_exists.stat.exists else ''0700'' }}'
   when:
   - configure_strategy | bool
   - file_groupowner_cron_hourly | bool
@@ -27825,13 +28089,37 @@
   - low_disruption
   - medium_severity
   - no_reboot_needed
+- name: Test for existence /etc/cron.monthly/
+  ansible.builtin.stat:
+    path: /etc/cron.monthly/
+  register: file_exists
+  when:
+  - configure_strategy | bool
+  - file_groupowner_cron_monthly | bool
+  - low_complexity | bool
+  - low_disruption | bool
+  - medium_severity | bool
+  - no_reboot_needed | bool
+  - '"kernel-core" in ansible_facts.packages'
+  tags:
+  - CCE-82256-9
+  - NIST-800-53-AC-6(1)
+  - NIST-800-53-CM-6(a)
+  - PCI-DSSv4-2.2
+  - PCI-DSSv4-2.2.6
+  - configure_strategy
+  - file_groupowner_cron_monthly
+  - low_complexity
+  - low_disruption
+  - medium_severity
+  - no_reboot_needed
 - name: Ensure group owner on /etc/cron.monthly/
   ansible.builtin.file:
     path: /etc/cron.monthly/
     follow: false
     state: directory
     group: '{{ file_groupowner_cron_monthly_newgroup }}'
-    mode: '0700'
+    mode: '{{ file_exists.stat.mode if file_exists.stat.exists else ''0700'' }}'
   when:
   - configure_strategy | bool
   - file_groupowner_cron_monthly | bool
@@ -27875,13 +28163,37 @@
   - low_disruption
   - medium_severity
   - no_reboot_needed
+- name: Test for existence /etc/cron.weekly/
+  ansible.builtin.stat:
+    path: /etc/cron.weekly/
+  register: file_exists
+  when:
+  - configure_strategy | bool
+  - file_groupowner_cron_weekly | bool
+  - low_complexity | bool
+  - low_disruption | bool
+  - medium_severity | bool
+  - no_reboot_needed | bool
+  - '"kernel-core" in ansible_facts.packages'
+  tags:
+  - CCE-82244-5
+  - NIST-800-53-AC-6(1)
+  - NIST-800-53-CM-6(a)
+  - PCI-DSSv4-2.2
+  - PCI-DSSv4-2.2.6
+  - configure_strategy
+  - file_groupowner_cron_weekly
+  - low_complexity
+  - low_disruption
+  - medium_severity
+  - no_reboot_needed
 - name: Ensure group owner on /etc/cron.weekly/
   ansible.builtin.file:
     path: /etc/cron.weekly/
     follow: false
     state: directory
     group: '{{ file_groupowner_cron_weekly_newgroup }}'
-    mode: '0700'
+    mode: '{{ file_exists.stat.mode if file_exists.stat.exists else ''0700'' }}'
   when:
   - configure_strategy | bool
   - file_groupowner_cron_weekly | bool
@@ -27923,13 +28235,35 @@
   - low_disruption
   - medium_severity
   - no_reboot_needed
+- name: Test for existence /etc/cron.yearly/
+  ansible.builtin.stat:
+    path: /etc/cron.yearly/
+  register: file_exists
+  when:
+  - configure_strategy | bool
+  - file_groupowner_cron_yearly | bool
+  - low_complexity | bool
+  - low_disruption | bool
+  - medium_severity | bool
+  - no_reboot_needed | bool
+  - '"kernel-core" in ansible_facts.packages'
+  tags:
+  - CCE-87776-1
+  - NIST-800-53-AC-6(1)
+  - NIST-800-53-CM-6(a)
+  - configure_strategy
+  - file_groupowner_cron_yearly
+  - low_complexity
+  - low_disruption
+  - medium_severity
+  - no_reboot_needed
 - name: Ensure group owner on /etc/cron.yearly/
   ansible.builtin.file:
     path: /etc/cron.yearly/
     follow: false
     state: directory
     group: '{{ file_groupowner_cron_yearly_newgroup }}'
-    mode: '0700'
+    mode: '{{ file_exists.stat.mode if file_exists.stat.exists else ''0700'' }}'
   when:
   - configure_strategy | bool
   - file_groupowner_cron_yearly | bool
@@ -28044,13 +28378,37 @@
   - low_disruption
   - medium_severity
   - no_reboot_needed
+- name: Test for existence /etc/cron.d/
+  ansible.builtin.stat:
+    path: /etc/cron.d/
+  register: file_exists
+  when:
+  - configure_strategy | bool
+  - file_owner_cron_d | bool
+  - low_complexity | bool
+  - low_disruption | bool
+  - medium_severity | bool
+  - no_reboot_needed | bool
+  - '"kernel-core" in ansible_facts.packages'
+  tags:
+  - CCE-82272-6
+  - NIST-800-53-AC-6(1)
+  - NIST-800-53-CM-6(a)
+  - PCI-DSSv4-2.2
+  - PCI-DSSv4-2.2.6
+  - configure_strategy
+  - file_owner_cron_d
+  - low_complexity
+  - low_disruption
+  - medium_severity
+  - no_reboot_needed
 - name: Ensure owner on directory /etc/cron.d/
   ansible.builtin.file:
     path: /etc/cron.d/
     follow: false
     state: directory
     owner: '{{ file_owner_cron_d_newown }}'
-    mode: '0700'
+    mode: '{{ file_exists.stat.mode if file_exists.stat.exists else ''0700'' }}'
   when:
   - configure_strategy | bool
   - file_owner_cron_d | bool
@@ -28094,13 +28452,37 @@
   - low_disruption
   - medium_severity
   - no_reboot_needed
+- name: Test for existence /etc/cron.daily/
+  ansible.builtin.stat:
+    path: /etc/cron.daily/
+  register: file_exists
+  when:
+  - configure_strategy | bool
+  - file_owner_cron_daily | bool
+  - low_complexity | bool
+  - low_disruption | bool
+  - medium_severity | bool
+  - no_reboot_needed | bool
+  - '"kernel-core" in ansible_facts.packages'
+  tags:
+  - CCE-82237-9
+  - NIST-800-53-AC-6(1)
+  - NIST-800-53-CM-6(a)
+  - PCI-DSSv4-2.2
+  - PCI-DSSv4-2.2.6
+  - configure_strategy
+  - file_owner_cron_daily
+  - low_complexity
+  - low_disruption
+  - medium_severity
+  - no_reboot_needed
 - name: Ensure owner on directory /etc/cron.daily/
   ansible.builtin.file:
     path: /etc/cron.daily/
     follow: false
     state: directory
     owner: '{{ file_owner_cron_daily_newown }}'
-    mode: '0700'
+    mode: '{{ file_exists.stat.mode if file_exists.stat.exists else ''0700'' }}'
   when:
   - configure_strategy | bool
   - file_owner_cron_daily | bool
@@ -28144,13 +28526,37 @@
   - low_disruption
   - medium_severity
   - no_reboot_needed
+- name: Test for existence /etc/cron.hourly/
+  ansible.builtin.stat:
+    path: /etc/cron.hourly/
+  register: file_exists
+  when:
+  - configure_strategy | bool
+  - file_owner_cron_hourly | bool
+  - low_complexity | bool
+  - low_disruption | bool
+  - medium_severity | bool
+  - no_reboot_needed | bool
+  - '"kernel-core" in ansible_facts.packages'
+  tags:
+  - CCE-82209-8
+  - NIST-800-53-AC-6(1)
+  - NIST-800-53-CM-6(a)
+  - PCI-DSSv4-2.2
+  - PCI-DSSv4-2.2.6
+  - configure_strategy
+  - file_owner_cron_hourly
+  - low_complexity
+  - low_disruption
+  - medium_severity
+  - no_reboot_needed
 - name: Ensure owner on directory /etc/cron.hourly/
   ansible.builtin.file:
     path: /etc/cron.hourly/
     follow: false
     state: directory
     owner: '{{ file_owner_cron_hourly_newown }}'
-    mode: '0700'
+    mode: '{{ file_exists.stat.mode if file_exists.stat.exists else ''0700'' }}'
   when:
   - configure_strategy | bool
   - file_owner_cron_hourly | bool
@@ -28194,13 +28600,37 @@
   - low_disruption
   - medium_severity
   - no_reboot_needed
+- name: Test for existence /etc/cron.monthly/
+  ansible.builtin.stat:
+    path: /etc/cron.monthly/
+  register: file_exists
+  when:
+  - configure_strategy | bool
+  - file_owner_cron_monthly | bool
+  - low_complexity | bool
+  - low_disruption | bool
+  - medium_severity | bool
+  - no_reboot_needed | bool
+  - '"kernel-core" in ansible_facts.packages'
+  tags:
+  - CCE-82260-1
+  - NIST-800-53-AC-6(1)
+  - NIST-800-53-CM-6(a)
+  - PCI-DSSv4-2.2
+  - PCI-DSSv4-2.2.6
+  - configure_strategy
+  - file_owner_cron_monthly
+  - low_complexity
+  - low_disruption
+  - medium_severity
+  - no_reboot_needed
 - name: Ensure owner on directory /etc/cron.monthly/
   ansible.builtin.file:
     path: /etc/cron.monthly/
     follow: false
     state: directory
     owner: '{{ file_owner_cron_monthly_newown }}'
-    mode: '0700'
+    mode: '{{ file_exists.stat.mode if file_exists.stat.exists else ''0700'' }}'
   when:
   - configure_strategy | bool
   - file_owner_cron_monthly | bool
@@ -28244,13 +28674,37 @@
   - low_disruption
   - medium_severity
   - no_reboot_needed
+- name: Test for existence /etc/cron.weekly/
+  ansible.builtin.stat:
+    path: /etc/cron.weekly/
+  register: file_exists
+  when:
+  - configure_strategy | bool
+  - file_owner_cron_weekly | bool
+  - low_complexity | bool
+  - low_disruption | bool
+  - medium_severity | bool
+  - no_reboot_needed | bool
+  - '"kernel-core" in ansible_facts.packages'
+  tags:
+  - CCE-82247-8
+  - NIST-800-53-AC-6(1)
+  - NIST-800-53-CM-6(a)
+  - PCI-DSSv4-2.2
+  - PCI-DSSv4-2.2.6
+  - configure_strategy
+  - file_owner_cron_weekly
+  - low_complexity
+  - low_disruption
+  - medium_severity
+  - no_reboot_needed
 - name: Ensure owner on directory /etc/cron.weekly/
   ansible.builtin.file:
     path: /etc/cron.weekly/
     follow: false
     state: directory
     owner: '{{ file_owner_cron_weekly_newown }}'
-    mode: '0700'
+    mode: '{{ file_exists.stat.mode if file_exists.stat.exists else ''0700'' }}'
   when:
   - configure_strategy | bool
   - file_owner_cron_weekly | bool
@@ -28292,13 +28746,35 @@
   - low_disruption
   - medium_severity
   - no_reboot_needed
+- name: Test for existence /etc/cron.yearly/
+  ansible.builtin.stat:
+    path: /etc/cron.yearly/
+  register: file_exists
+  when:
+  - configure_strategy | bool
+  - file_owner_cron_yearly | bool
+  - low_complexity | bool
+  - low_disruption | bool
+  - medium_severity | bool
+  - no_reboot_needed | bool
+  - '"kernel-core" in ansible_facts.packages'
+  tags:
+  - CCE-88838-8
+  - NIST-800-53-AC-6(1)
+  - NIST-800-53-CM-6(a)
+  - configure_strategy
+  - file_owner_cron_yearly
+  - low_complexity
+  - low_disruption
+  - medium_severity
+  - no_reboot_needed
 - name: Ensure owner on directory /etc/cron.yearly/
   ansible.builtin.file:
     path: /etc/cron.yearly/
     follow: false
     state: directory
     owner: '{{ file_owner_cron_yearly_newown }}'
-    mode: '0700'
+    mode: '{{ file_exists.stat.mode if file_exists.stat.exists else ''0700'' }}'
   when:
   - configure_strategy | bool
   - file_owner_cron_yearly | bool
@@ -29297,6 +29773,7 @@
     cmd: 'set -o pipefail
 
       grep ''^[[:space:]]*sourcedir[[:space:]]\+'' /etc/chrony.conf | awk ''{print $2}'''
+    executable: /bin/bash
   register: chrony_sourcedir_paths
   changed_when: false
   failed_when: false
@@ -29362,6 +29839,7 @@
     cmd: 'set -o pipefail
 
       grep ''^[[:space:]]*confdir[[:space:]]\+'' /etc/chrony.conf | awk ''{print $2}'''
+    executable: /bin/bash
   register: chrony_confdir_paths
   changed_when: false
   failed_when: false

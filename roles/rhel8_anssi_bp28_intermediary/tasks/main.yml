@@ -396,6 +396,10 @@
     manager: auto
   tags:
   - always
+- name: Gather the service facts
+  ansible.builtin.service_facts: null
+  tags:
+  - always
 - name: Enable the SSSD Service - Enable service sssd
   block:
   - name: Enable the SSSD Service - Enable Service sssd
@@ -626,13 +630,33 @@
   - low_disruption
   - medium_severity
   - no_reboot_needed
+- name: Test for existence /etc/sudoers.d/
+  ansible.builtin.stat:
+    path: /etc/sudoers.d/
+  register: file_exists
+  when:
+  - configure_strategy | bool
+  - directory_groupowner_etc_sudoersd | bool
+  - low_complexity | bool
+  - low_disruption | bool
+  - medium_severity | bool
+  - no_reboot_needed | bool
+  - '"kernel-core" in ansible_facts.packages'
+  tags:
+  - CCE-86340-7
+  - configure_strategy
+  - directory_groupowner_etc_sudoersd
+  - low_complexity
+  - low_disruption
+  - medium_severity
+  - no_reboot_needed
 - name: Ensure group owner on /etc/sudoers.d/
   ansible.builtin.file:
     path: /etc/sudoers.d/
     follow: false
     state: directory
     group: '{{ directory_groupowner_etc_sudoersd_newgroup }}'
-    mode: '0750'
+    mode: '{{ file_exists.stat.mode if file_exists.stat.exists else ''0750'' }}'
   when:
   - configure_strategy | bool
   - directory_groupowner_etc_sudoersd | bool
@@ -668,13 +692,33 @@
   - low_disruption
   - medium_severity
   - no_reboot_needed
+- name: Test for existence /etc/sudoers.d/
+  ansible.builtin.stat:
+    path: /etc/sudoers.d/
+  register: file_exists
+  when:
+  - configure_strategy | bool
+  - directory_owner_etc_sudoersd | bool
+  - low_complexity | bool
+  - low_disruption | bool
+  - medium_severity | bool
+  - no_reboot_needed | bool
+  - '"kernel-core" in ansible_facts.packages'
+  tags:
+  - CCE-86355-5
+  - configure_strategy
+  - directory_owner_etc_sudoersd
+  - low_complexity
+  - low_disruption
+  - medium_severity
+  - no_reboot_needed
 - name: Ensure owner on directory /etc/sudoers.d/
   ansible.builtin.file:
     path: /etc/sudoers.d/
     follow: false
     state: directory
     owner: '{{ directory_owner_etc_sudoersd_newown }}'
-    mode: '0750'
+    mode: '{{ file_exists.stat.mode if file_exists.stat.exists else ''0750'' }}'
   when:
   - configure_strategy | bool
   - directory_owner_etc_sudoersd | bool
@@ -1421,9 +1465,10 @@
   - no_reboot_needed | bool
   - restrict_strategy | bool
 - name: 'Ensure Red Hat GPG Key Installed: Import RedHat GPG key'
-  ansible.builtin.rpm_key:
-    state: present
-    key: /etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
+  redhat.rhel_hardening_roles.ssg_hardening:
+    operation: rpm_import
+    path: /etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
+  changed_when: true
   when:
   - DISA_STIG_RHEL_08_010019 | bool
   - ensure_redhat_gpgkey_installed | bool
@@ -1729,6 +1774,7 @@
       cmd: 'set -o pipefail
 
         authselect current | tail -n+3 | awk ''{ print $2 }'''
+      executable: /bin/bash
     register: result_authselect_features
     changed_when: false
     check_mode: false
@@ -1809,6 +1855,7 @@
         cmd: 'set -o pipefail
 
           authselect current -r | awk ''{ print $1 }'''
+        executable: /bin/bash
       register: result_authselect_profile
       changed_when: false
       when:
@@ -1832,6 +1879,7 @@
         cmd: 'set -o pipefail
 
           authselect current | tail -n+3 | awk ''{ print $2 }'''
+        executable: /bin/bash
       register: result_authselect_features
       changed_when: false
       check_mode: false
@@ -2059,6 +2107,7 @@
             cmd: 'set -o pipefail
 
               authselect current -r | awk ''{ print $1 }'''
+            executable: /bin/bash
           register: result_authselect_profile
           changed_when: false
           when:
@@ -2082,6 +2131,7 @@
             cmd: 'set -o pipefail
 
               authselect current | tail -n+3 | awk ''{ print $2 }'''
+            executable: /bin/bash
           register: result_authselect_features
           changed_when: false
           check_mode: false
@@ -2241,6 +2291,7 @@
         cmd: 'set -o pipefail
 
           authselect current -r | awk ''{ print $1 }'''
+        executable: /bin/bash
       register: result_authselect_profile
       changed_when: false
       when:
@@ -2264,6 +2315,7 @@
         cmd: 'set -o pipefail
 
           authselect current | tail -n+3 | awk ''{ print $2 }'''
+        executable: /bin/bash
       register: result_authselect_features
       changed_when: false
       check_mode: false
@@ -2505,6 +2557,7 @@
       cmd: 'set -o pipefail
 
         authselect current | tail -n+3 | awk ''{ print $2 }'''
+      executable: /bin/bash
     register: result_authselect_features
     changed_when: false
     check_mode: false
@@ -2725,6 +2778,7 @@
           cmd: 'set -o pipefail
 
             authselect current -r | awk ''{ print $1 }'''
+          executable: /bin/bash
         register: result_authselect_profile
         changed_when: false
         when:
@@ -2748,6 +2802,7 @@
           cmd: 'set -o pipefail
 
             authselect current | tail -n+3 | awk ''{ print $2 }'''
+          executable: /bin/bash
         register: result_authselect_features
         changed_when: false
         check_mode: false
@@ -2886,6 +2941,7 @@
           cmd: 'set -o pipefail
 
             authselect current -r | awk ''{ print $1 }'''
+          executable: /bin/bash
         register: result_authselect_profile
         changed_when: false
         when:
@@ -2909,6 +2965,7 @@
           cmd: 'set -o pipefail
 
             authselect current | tail -n+3 | awk ''{ print $2 }'''
+          executable: /bin/bash
         register: result_authselect_features
         changed_when: false
         check_mode: false
@@ -3172,6 +3229,7 @@
       cmd: 'set -o pipefail
 
         authselect current | tail -n+3 | awk ''{ print $2 }'''
+      executable: /bin/bash
     register: result_authselect_features
     changed_when: false
     check_mode: false
@@ -3376,6 +3434,7 @@
           cmd: 'set -o pipefail
 
             authselect current -r | awk ''{ print $1 }'''
+          executable: /bin/bash
         register: result_authselect_profile
         changed_when: false
         when:
@@ -3399,6 +3458,7 @@
           cmd: 'set -o pipefail
 
             authselect current | tail -n+3 | awk ''{ print $2 }'''
+          executable: /bin/bash
         register: result_authselect_features
         changed_when: false
         check_mode: false
@@ -3537,6 +3597,7 @@
           cmd: 'set -o pipefail
 
             authselect current -r | awk ''{ print $1 }'''
+          executable: /bin/bash
         register: result_authselect_profile
         changed_when: false
         when:
@@ -3560,6 +3621,7 @@
           cmd: 'set -o pipefail
 
             authselect current | tail -n+3 | awk ''{ print $2 }'''
+          executable: /bin/bash
         register: result_authselect_features
         changed_when: false
         check_mode: false
@@ -3792,6 +3854,7 @@
       cmd: 'set -o pipefail
 
         authselect current | tail -n+3 | awk ''{ print $2 }'''
+      executable: /bin/bash
     register: result_authselect_features
     changed_when: false
     check_mode: false
@@ -4000,6 +4063,7 @@
           cmd: 'set -o pipefail
 
             authselect current -r | awk ''{ print $1 }'''
+          executable: /bin/bash
         register: result_authselect_profile
         changed_when: false
         when:
@@ -4023,6 +4087,7 @@
           cmd: 'set -o pipefail
 
             authselect current | tail -n+3 | awk ''{ print $2 }'''
+          executable: /bin/bash
         register: result_authselect_features
         changed_when: false
         check_mode: false
@@ -4161,6 +4226,7 @@
           cmd: 'set -o pipefail
 
             authselect current -r | awk ''{ print $1 }'''
+          executable: /bin/bash
         register: result_authselect_profile
         changed_when: false
         when:
@@ -4184,6 +4250,7 @@
           cmd: 'set -o pipefail
 
             authselect current | tail -n+3 | awk ''{ print $2 }'''
+          executable: /bin/bash
         register: result_authselect_features
         changed_when: false
         check_mode: false
@@ -4447,6 +4514,7 @@
       cmd: 'set -o pipefail
 
         authselect current | tail -n+3 | awk ''{ print $2 }'''
+      executable: /bin/bash
     register: result_authselect_features
     changed_when: false
     check_mode: false
@@ -4675,6 +4743,7 @@
           cmd: 'set -o pipefail
 
             authselect current -r | awk ''{ print $1 }'''
+          executable: /bin/bash
         register: result_authselect_profile
         changed_when: false
         when:
@@ -4698,6 +4767,7 @@
           cmd: 'set -o pipefail
 
             authselect current | tail -n+3 | awk ''{ print $2 }'''
+          executable: /bin/bash
         register: result_authselect_features
         changed_when: false
         check_mode: false
@@ -4836,6 +4906,7 @@
           cmd: 'set -o pipefail
 
             authselect current -r | awk ''{ print $1 }'''
+          executable: /bin/bash
         register: result_authselect_profile
         changed_when: false
         when:
@@ -4859,6 +4930,7 @@
           cmd: 'set -o pipefail
 
             authselect current | tail -n+3 | awk ''{ print $2 }'''
+          executable: /bin/bash
         register: result_authselect_features
         changed_when: false
         check_mode: false
@@ -5631,6 +5703,7 @@
         cmd: 'set -o pipefail
 
           authselect current -r | awk ''{ print $1 }'''
+        executable: /bin/bash
       register: result_authselect_profile
       changed_when: false
       when:
@@ -5654,6 +5727,7 @@
         cmd: 'set -o pipefail
 
           authselect current | tail -n+3 | awk ''{ print $2 }'''
+        executable: /bin/bash
       register: result_authselect_features
       changed_when: false
       check_mode: false
@@ -5837,6 +5911,7 @@
         cmd: 'set -o pipefail
 
           authselect current -r | awk ''{ print $1 }'''
+        executable: /bin/bash
       register: result_authselect_profile
       changed_when: false
       when:
@@ -5860,6 +5935,7 @@
         cmd: 'set -o pipefail
 
           authselect current | tail -n+3 | awk ''{ print $2 }'''
+        executable: /bin/bash
       register: result_authselect_features
       changed_when: false
       check_mode: false
@@ -6137,6 +6213,7 @@
         cmd: 'set -o pipefail
 
           authselect current -r | awk ''{ print $1 }'''
+        executable: /bin/bash
       register: result_authselect_profile
       changed_when: false
       when:
@@ -6160,6 +6237,7 @@
         cmd: 'set -o pipefail
 
           authselect current | tail -n+3 | awk ''{ print $2 }'''
+        executable: /bin/bash
       register: result_authselect_features
       changed_when: false
       check_mode: false
@@ -6405,6 +6483,7 @@
         cmd: 'set -o pipefail
 
           authselect current -r | awk ''{ print $1 }'''
+        executable: /bin/bash
       register: result_authselect_profile
       changed_when: false
       when:
@@ -6428,6 +6507,7 @@
         cmd: 'set -o pipefail
 
           authselect current | tail -n+3 | awk ''{ print $2 }'''
+        executable: /bin/bash
       register: result_authselect_features
       changed_when: false
       check_mode: false
@@ -6736,6 +6816,7 @@
         cmd: 'set -o pipefail
 
           authselect current -r | awk ''{ print $1 }'''
+        executable: /bin/bash
       register: result_authselect_profile
       changed_when: false
       when:
@@ -6759,6 +6840,7 @@
         cmd: 'set -o pipefail
 
           authselect current | tail -n+3 | awk ''{ print $2 }'''
+        executable: /bin/bash
       register: result_authselect_features
       changed_when: false
       check_mode: false
@@ -6991,6 +7073,7 @@
         cmd: 'set -o pipefail
 
           authselect current -r | awk ''{ print $1 }'''
+        executable: /bin/bash
       register: result_authselect_profile
       changed_when: false
       when:
@@ -7014,6 +7097,7 @@
         cmd: 'set -o pipefail
 
           authselect current | tail -n+3 | awk ''{ print $2 }'''
+        executable: /bin/bash
       register: result_authselect_features
       changed_when: false
       check_mode: false
@@ -8396,13 +8480,33 @@
   - low_disruption
   - medium_severity
   - no_reboot_needed
+- name: Test for existence /etc/ipsec.d/
+  ansible.builtin.stat:
+    path: /etc/ipsec.d/
+  register: file_exists
+  when:
+  - configure_strategy | bool
+  - directory_groupowner_etc_ipsecd | bool
+  - low_complexity | bool
+  - low_disruption | bool
+  - medium_severity | bool
+  - no_reboot_needed | bool
+  - '"libreswan" in ansible_facts.packages'
+  tags:
+  - CCE-86438-9
+  - configure_strategy
+  - directory_groupowner_etc_ipsecd
+  - low_complexity
+  - low_disruption
+  - medium_severity
+  - no_reboot_needed
 - name: Ensure group owner on /etc/ipsec.d/
   ansible.builtin.file:
     path: /etc/ipsec.d/
     follow: false
     state: directory
     group: '{{ directory_groupowner_etc_ipsecd_newgroup }}'
-    mode: '0700'
+    mode: '{{ file_exists.stat.mode if file_exists.stat.exists else ''0700'' }}'
   when:
   - configure_strategy | bool
   - directory_groupowner_etc_ipsecd | bool
@@ -8438,13 +8542,33 @@
   - low_disruption
   - medium_severity
   - no_reboot_needed
+- name: Test for existence /etc/ipsec.d/
+  ansible.builtin.stat:
+    path: /etc/ipsec.d/
+  register: file_exists
+  when:
+  - configure_strategy | bool
+  - directory_owner_etc_ipsecd | bool
+  - low_complexity | bool
+  - low_disruption | bool
+  - medium_severity | bool
+  - no_reboot_needed | bool
+  - '"libreswan" in ansible_facts.packages'
+  tags:
+  - CCE-86302-7
+  - configure_strategy
+  - directory_owner_etc_ipsecd
+  - low_complexity
+  - low_disruption
+  - medium_severity
+  - no_reboot_needed
 - name: Ensure owner on directory /etc/ipsec.d/
   ansible.builtin.file:
     path: /etc/ipsec.d/
     follow: false
     state: directory
     owner: '{{ directory_owner_etc_ipsecd_newown }}'
-    mode: '0700'
+    mode: '{{ file_exists.stat.mode if file_exists.stat.exists else ''0700'' }}'
   when:
   - configure_strategy | bool
   - directory_owner_etc_ipsecd | bool
@@ -8920,13 +9044,33 @@
   - low_disruption
   - medium_severity
   - no_reboot_needed
+- name: Test for existence /etc/iptables/
+  ansible.builtin.stat:
+    path: /etc/iptables/
+  register: file_exists
+  when:
+  - configure_strategy | bool
+  - directory_groupowner_etc_iptables | bool
+  - low_complexity | bool
+  - low_disruption | bool
+  - medium_severity | bool
+  - no_reboot_needed | bool
+  - '"iptables" in ansible_facts.packages'
+  tags:
+  - CCE-86426-4
+  - configure_strategy
+  - directory_groupowner_etc_iptables
+  - low_complexity
+  - low_disruption
+  - medium_severity
+  - no_reboot_needed
 - name: Ensure group owner on /etc/iptables/
   ansible.builtin.file:
     path: /etc/iptables/
     follow: false
     state: directory
     group: '{{ directory_groupowner_etc_iptables_newgroup }}'
-    mode: '0700'
+    mode: '{{ file_exists.stat.mode if file_exists.stat.exists else ''0700'' }}'
   when:
   - configure_strategy | bool
   - directory_groupowner_etc_iptables | bool
@@ -8962,13 +9106,33 @@
   - low_disruption
   - medium_severity
   - no_reboot_needed
+- name: Test for existence /etc/iptables/
+  ansible.builtin.stat:
+    path: /etc/iptables/
+  register: file_exists
+  when:
+  - configure_strategy | bool
+  - directory_owner_etc_iptables | bool
+  - low_complexity | bool
+  - low_disruption | bool
+  - medium_severity | bool
+  - no_reboot_needed | bool
+  - '"iptables" in ansible_facts.packages'
+  tags:
+  - CCE-86429-8
+  - configure_strategy
+  - directory_owner_etc_iptables
+  - low_complexity
+  - low_disruption
+  - medium_severity
+  - no_reboot_needed
 - name: Ensure owner on directory /etc/iptables/
   ansible.builtin.file:
     path: /etc/iptables/
     follow: false
     state: directory
     owner: '{{ directory_owner_etc_iptables_newown }}'
-    mode: '0700'
+    mode: '{{ file_exists.stat.mode if file_exists.stat.exists else ''0700'' }}'
   when:
   - configure_strategy | bool
   - directory_owner_etc_iptables | bool
@@ -9056,9 +9220,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.all.accept_ra_defrtr\s*=\s*.*$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.all.accept_ra_defrtr\s*=\s*.*$'''
+    executable: /bin/bash
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -9083,9 +9246,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.all.accept_ra_defrtr\s*=\s*{{ sysctl_net_ipv6_conf_all_accept_ra_defrtr_value }}$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.all.accept_ra_defrtr\s*=\s*{{ sysctl_net_ipv6_conf_all_accept_ra_defrtr_value }}$'''
+    executable: /bin/bash
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -9201,9 +9363,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.all.accept_ra_pinfo\s*=\s*.*$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.all.accept_ra_pinfo\s*=\s*.*$'''
+    executable: /bin/bash
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -9228,9 +9389,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.all.accept_ra_pinfo\s*=\s*{{ sysctl_net_ipv6_conf_all_accept_ra_pinfo_value }}$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.all.accept_ra_pinfo\s*=\s*{{ sysctl_net_ipv6_conf_all_accept_ra_pinfo_value }}$'''
+    executable: /bin/bash
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -9346,9 +9506,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.all.accept_ra_rtr_pref\s*=\s*.*$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.all.accept_ra_rtr_pref\s*=\s*.*$'''
+    executable: /bin/bash
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -9373,9 +9532,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.all.accept_ra_rtr_pref\s*=\s*{{ sysctl_net_ipv6_conf_all_accept_ra_rtr_pref_value }}$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.all.accept_ra_rtr_pref\s*=\s*{{ sysctl_net_ipv6_conf_all_accept_ra_rtr_pref_value }}$'''
+    executable: /bin/bash
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -9499,9 +9657,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.all.accept_redirects\s*=\s*.*$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.all.accept_redirects\s*=\s*.*$'''
+    executable: /bin/bash
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -9534,9 +9691,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.all.accept_redirects\s*=\s*{{ sysctl_net_ipv6_conf_all_accept_redirects_value }}$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.all.accept_redirects\s*=\s*{{ sysctl_net_ipv6_conf_all_accept_redirects_value }}$'''
+    executable: /bin/bash
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -9690,9 +9846,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.all.accept_source_route\s*=\s*.*$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.all.accept_source_route\s*=\s*.*$'''
+    executable: /bin/bash
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -9723,9 +9878,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.all.accept_source_route\s*=\s*{{ sysctl_net_ipv6_conf_all_accept_source_route_value }}$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.all.accept_source_route\s*=\s*{{ sysctl_net_ipv6_conf_all_accept_source_route_value }}$'''
+    executable: /bin/bash
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -9865,9 +10019,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.all.autoconf\s*=\s*.*$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.all.autoconf\s*=\s*.*$'''
+    executable: /bin/bash
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -9892,9 +10045,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.all.autoconf\s*=\s*{{ sysctl_net_ipv6_conf_all_autoconf_value }}$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.all.autoconf\s*=\s*{{ sysctl_net_ipv6_conf_all_autoconf_value }}$'''
+    executable: /bin/bash
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -10010,9 +10162,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.all.max_addresses\s*=\s*.*$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.all.max_addresses\s*=\s*.*$'''
+    executable: /bin/bash
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -10037,9 +10188,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.all.max_addresses\s*=\s*{{ sysctl_net_ipv6_conf_all_max_addresses_value }}$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.all.max_addresses\s*=\s*{{ sysctl_net_ipv6_conf_all_max_addresses_value }}$'''
+    executable: /bin/bash
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -10155,9 +10305,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.all.router_solicitations\s*=\s*.*$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.all.router_solicitations\s*=\s*.*$'''
+    executable: /bin/bash
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -10182,9 +10331,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.all.router_solicitations\s*=\s*{{ sysctl_net_ipv6_conf_all_router_solicitations_value }}$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.all.router_solicitations\s*=\s*{{ sysctl_net_ipv6_conf_all_router_solicitations_value }}$'''
+    executable: /bin/bash
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -10300,9 +10448,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.default.accept_ra_defrtr\s*=\s*.*$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.default.accept_ra_defrtr\s*=\s*.*$'''
+    executable: /bin/bash
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -10327,9 +10474,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.default.accept_ra_defrtr\s*=\s*{{ sysctl_net_ipv6_conf_default_accept_ra_defrtr_value }}$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.default.accept_ra_defrtr\s*=\s*{{ sysctl_net_ipv6_conf_default_accept_ra_defrtr_value }}$'''
+    executable: /bin/bash
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -10445,9 +10591,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.default.accept_ra_pinfo\s*=\s*.*$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.default.accept_ra_pinfo\s*=\s*.*$'''
+    executable: /bin/bash
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -10472,9 +10617,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.default.accept_ra_pinfo\s*=\s*{{ sysctl_net_ipv6_conf_default_accept_ra_pinfo_value }}$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.default.accept_ra_pinfo\s*=\s*{{ sysctl_net_ipv6_conf_default_accept_ra_pinfo_value }}$'''
+    executable: /bin/bash
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -10590,9 +10734,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.default.accept_ra_rtr_pref\s*=\s*.*$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.default.accept_ra_rtr_pref\s*=\s*.*$'''
+    executable: /bin/bash
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -10617,9 +10760,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.default.accept_ra_rtr_pref\s*=\s*{{ sysctl_net_ipv6_conf_default_accept_ra_rtr_pref_value }}$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.default.accept_ra_rtr_pref\s*=\s*{{ sysctl_net_ipv6_conf_default_accept_ra_rtr_pref_value }}$'''
+    executable: /bin/bash
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -10741,9 +10883,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.default.accept_redirects\s*=\s*.*$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.default.accept_redirects\s*=\s*.*$'''
+    executable: /bin/bash
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -10774,9 +10915,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.default.accept_redirects\s*=\s*{{ sysctl_net_ipv6_conf_default_accept_redirects_value }}$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.default.accept_redirects\s*=\s*{{ sysctl_net_ipv6_conf_default_accept_redirects_value }}$'''
+    executable: /bin/bash
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -10927,9 +11067,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.default.accept_source_route\s*=\s*.*$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.default.accept_source_route\s*=\s*.*$'''
+    executable: /bin/bash
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -10965,9 +11104,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.default.accept_source_route\s*=\s*{{ sysctl_net_ipv6_conf_default_accept_source_route_value }}$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.default.accept_source_route\s*=\s*{{ sysctl_net_ipv6_conf_default_accept_source_route_value }}$'''
+    executable: /bin/bash
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -11127,9 +11265,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.default.autoconf\s*=\s*.*$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.default.autoconf\s*=\s*.*$'''
+    executable: /bin/bash
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -11154,9 +11291,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.default.autoconf\s*=\s*{{ sysctl_net_ipv6_conf_default_autoconf_value }}$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.default.autoconf\s*=\s*{{ sysctl_net_ipv6_conf_default_autoconf_value }}$'''
+    executable: /bin/bash
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -11272,9 +11408,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.default.max_addresses\s*=\s*.*$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.default.max_addresses\s*=\s*.*$'''
+    executable: /bin/bash
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -11299,9 +11434,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.default.max_addresses\s*=\s*{{ sysctl_net_ipv6_conf_default_max_addresses_value }}$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.default.max_addresses\s*=\s*{{ sysctl_net_ipv6_conf_default_max_addresses_value }}$'''
+    executable: /bin/bash
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -11417,9 +11551,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.default.router_solicitations\s*=\s*.*$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.default.router_solicitations\s*=\s*.*$'''
+    executable: /bin/bash
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -11444,9 +11577,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.default.router_solicitations\s*=\s*{{ sysctl_net_ipv6_conf_default_router_solicitations_value }}$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv6.conf.default.router_solicitations\s*=\s*{{ sysctl_net_ipv6_conf_default_router_solicitations_value }}$'''
+    executable: /bin/bash
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -11562,9 +11694,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.all.accept_local\s*=\s*.*$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.all.accept_local\s*=\s*.*$'''
+    executable: /bin/bash
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -11589,9 +11720,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.all.accept_local\s*=\s*0$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.all.accept_local\s*=\s*0$'''
+    executable: /bin/bash
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -11715,9 +11845,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.all.accept_redirects\s*=\s*.*$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.all.accept_redirects\s*=\s*.*$'''
+    executable: /bin/bash
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -11750,9 +11879,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.all.accept_redirects\s*=\s*{{ sysctl_net_ipv4_conf_all_accept_redirects_value }}$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.all.accept_redirects\s*=\s*{{ sysctl_net_ipv4_conf_all_accept_redirects_value }}$'''
+    executable: /bin/bash
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -11908,9 +12036,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.all.accept_source_route\s*=\s*.*$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.all.accept_source_route\s*=\s*.*$'''
+    executable: /bin/bash
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -11943,9 +12070,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.all.accept_source_route\s*=\s*{{ sysctl_net_ipv4_conf_all_accept_source_route_value }}$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.all.accept_source_route\s*=\s*{{ sysctl_net_ipv4_conf_all_accept_source_route_value }}$'''
+    executable: /bin/bash
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -12093,9 +12219,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.all.arp_filter\s*=\s*.*$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.all.arp_filter\s*=\s*.*$'''
+    executable: /bin/bash
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -12120,9 +12245,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.all.arp_filter\s*=\s*{{ sysctl_net_ipv4_conf_all_arp_filter_value }}$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.all.arp_filter\s*=\s*{{ sysctl_net_ipv4_conf_all_arp_filter_value }}$'''
+    executable: /bin/bash
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -12238,9 +12362,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.all.arp_ignore\s*=\s*.*$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.all.arp_ignore\s*=\s*.*$'''
+    executable: /bin/bash
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -12265,9 +12388,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.all.arp_ignore\s*=\s*{{ sysctl_net_ipv4_conf_all_arp_ignore_value }}$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.all.arp_ignore\s*=\s*{{ sysctl_net_ipv4_conf_all_arp_ignore_value }}$'''
+    executable: /bin/bash
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -12383,9 +12505,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.all.drop_gratuitous_arp\s*=\s*.*$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.all.drop_gratuitous_arp\s*=\s*.*$'''
+    executable: /bin/bash
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -12410,9 +12531,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.all.drop_gratuitous_arp\s*=\s*1$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.all.drop_gratuitous_arp\s*=\s*1$'''
+    executable: /bin/bash
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -12528,9 +12648,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.all.route_localnet\s*=\s*.*$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.all.route_localnet\s*=\s*.*$'''
+    executable: /bin/bash
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -12555,9 +12674,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.all.route_localnet\s*=\s*0$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.all.route_localnet\s*=\s*0$'''
+    executable: /bin/bash
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -12683,9 +12801,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.all.rp_filter\s*=\s*.*$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.all.rp_filter\s*=\s*.*$'''
+    executable: /bin/bash
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -12720,9 +12837,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.all.rp_filter\s*=\s*{{ sysctl_net_ipv4_conf_all_rp_filter_value }}$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.all.rp_filter\s*=\s*{{ sysctl_net_ipv4_conf_all_rp_filter_value }}$'''
+    executable: /bin/bash
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -12886,9 +13002,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.all.secure_redirects\s*=\s*.*$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.all.secure_redirects\s*=\s*.*$'''
+    executable: /bin/bash
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -12921,9 +13036,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.all.secure_redirects\s*=\s*{{ sysctl_net_ipv4_conf_all_secure_redirects_value }}$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.all.secure_redirects\s*=\s*{{ sysctl_net_ipv4_conf_all_secure_redirects_value }}$'''
+    executable: /bin/bash
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -13071,9 +13185,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.all.shared_media\s*=\s*.*$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.all.shared_media\s*=\s*.*$'''
+    executable: /bin/bash
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -13098,9 +13211,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.all.shared_media\s*=\s*{{ sysctl_net_ipv4_conf_all_shared_media_value }}$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.all.shared_media\s*=\s*{{ sysctl_net_ipv4_conf_all_shared_media_value }}$'''
+    executable: /bin/bash
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -13227,9 +13339,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.default.accept_redirects\s*=\s*.*$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.default.accept_redirects\s*=\s*.*$'''
+    executable: /bin/bash
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -13265,9 +13376,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.default.accept_redirects\s*=\s*{{ sysctl_net_ipv4_conf_default_accept_redirects_value }}$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.default.accept_redirects\s*=\s*{{ sysctl_net_ipv4_conf_default_accept_redirects_value }}$'''
+    executable: /bin/bash
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -13435,9 +13545,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.default.accept_source_route\s*=\s*.*$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.default.accept_source_route\s*=\s*.*$'''
+    executable: /bin/bash
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -13470,9 +13579,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.default.accept_source_route\s*=\s*{{ sysctl_net_ipv4_conf_default_accept_source_route_value }}$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.default.accept_source_route\s*=\s*{{ sysctl_net_ipv4_conf_default_accept_source_route_value }}$'''
+    executable: /bin/bash
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -13627,9 +13735,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.default.rp_filter\s*=\s*.*$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.default.rp_filter\s*=\s*.*$'''
+    executable: /bin/bash
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -13661,9 +13768,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.default.rp_filter\s*=\s*{{ sysctl_net_ipv4_conf_default_rp_filter_value }}$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.default.rp_filter\s*=\s*{{ sysctl_net_ipv4_conf_default_rp_filter_value }}$'''
+    executable: /bin/bash
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -13812,9 +13918,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.default.secure_redirects\s*=\s*.*$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.default.secure_redirects\s*=\s*.*$'''
+    executable: /bin/bash
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -13844,9 +13949,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.default.secure_redirects\s*=\s*{{ sysctl_net_ipv4_conf_default_secure_redirects_value }}$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.default.secure_redirects\s*=\s*{{ sysctl_net_ipv4_conf_default_secure_redirects_value }}$'''
+    executable: /bin/bash
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -13982,9 +14086,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.default.shared_media\s*=\s*.*$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.default.shared_media\s*=\s*.*$'''
+    executable: /bin/bash
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -14009,9 +14112,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.default.shared_media\s*=\s*{{ sysctl_net_ipv4_conf_default_shared_media_value }}$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.default.shared_media\s*=\s*{{ sysctl_net_ipv4_conf_default_shared_media_value }}$'''
+    executable: /bin/bash
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -14134,9 +14236,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.icmp_ignore_bogus_error_responses\s*=\s*.*$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.icmp_ignore_bogus_error_responses\s*=\s*.*$'''
+    executable: /bin/bash
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -14168,9 +14269,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.icmp_ignore_bogus_error_responses\s*=\s*{{ sysctl_net_ipv4_icmp_ignore_bogus_error_responses_value }}$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.icmp_ignore_bogus_error_responses\s*=\s*{{ sysctl_net_ipv4_icmp_ignore_bogus_error_responses_value }}$'''
+    executable: /bin/bash
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -14314,9 +14414,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.ip_local_port_range\s*=\s*.*$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.ip_local_port_range\s*=\s*.*$'''
+    executable: /bin/bash
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -14341,9 +14440,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.ip_local_port_range\s*=\s*32768 65535$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.ip_local_port_range\s*=\s*32768 65535$'''
+    executable: /bin/bash
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -14459,9 +14557,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.tcp_rfc1337\s*=\s*.*$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.tcp_rfc1337\s*=\s*.*$'''
+    executable: /bin/bash
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -14486,9 +14583,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.tcp_rfc1337\s*=\s*{{ sysctl_net_ipv4_tcp_rfc1337_value }}$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.tcp_rfc1337\s*=\s*{{ sysctl_net_ipv4_tcp_rfc1337_value }}$'''
+    executable: /bin/bash
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -14615,9 +14711,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.tcp_syncookies\s*=\s*.*$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.tcp_syncookies\s*=\s*.*$'''
+    executable: /bin/bash
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -14653,9 +14748,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.tcp_syncookies\s*=\s*{{ sysctl_net_ipv4_tcp_syncookies_value }}$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.tcp_syncookies\s*=\s*{{ sysctl_net_ipv4_tcp_syncookies_value }}$'''
+    executable: /bin/bash
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -14826,9 +14920,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.all.send_redirects\s*=\s*.*$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.all.send_redirects\s*=\s*.*$'''
+    executable: /bin/bash
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -14864,9 +14957,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.all.send_redirects\s*=\s*0$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.all.send_redirects\s*=\s*0$'''
+    executable: /bin/bash
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -15037,9 +15129,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.default.send_redirects\s*=\s*.*$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.default.send_redirects\s*=\s*.*$'''
+    executable: /bin/bash
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -15075,9 +15166,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.default.send_redirects\s*=\s*0$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.conf.default.send_redirects\s*=\s*0$'''
+    executable: /bin/bash
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -15247,9 +15337,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.ip_forward\s*=\s*.*$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.ip_forward\s*=\s*.*$'''
+    executable: /bin/bash
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -15284,9 +15373,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.ip_forward\s*=\s*0$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.ipv4.ip_forward\s*=\s*0$'''
+    executable: /bin/bash
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -15458,13 +15546,33 @@
   - low_disruption
   - medium_severity
   - no_reboot_needed
+- name: Test for existence /etc/nftables/
+  ansible.builtin.stat:
+    path: /etc/nftables/
+  register: file_exists
+  when:
+  - configure_strategy | bool
+  - directory_groupowner_etc_nftables | bool
+  - low_complexity | bool
+  - low_disruption | bool
+  - medium_severity | bool
+  - no_reboot_needed | bool
+  - '"nftables" in ansible_facts.packages'
+  tags:
+  - CCE-86308-4
+  - configure_strategy
+  - directory_groupowner_etc_nftables
+  - low_complexity
+  - low_disruption
+  - medium_severity
+  - no_reboot_needed
 - name: Ensure group owner on /etc/nftables/
   ansible.builtin.file:
     path: /etc/nftables/
     follow: false
     state: directory
     group: '{{ directory_groupowner_etc_nftables_newgroup }}'
-    mode: '0700'
+    mode: '{{ file_exists.stat.mode if file_exists.stat.exists else ''0700'' }}'
   when:
   - configure_strategy | bool
   - directory_groupowner_etc_nftables | bool
@@ -15500,13 +15608,33 @@
   - low_disruption
   - medium_severity
   - no_reboot_needed
+- name: Test for existence /etc/nftables/
+  ansible.builtin.stat:
+    path: /etc/nftables/
+  register: file_exists
+  when:
+  - configure_strategy | bool
+  - directory_owner_etc_nftables | bool
+  - low_complexity | bool
+  - low_disruption | bool
+  - medium_severity | bool
+  - no_reboot_needed | bool
+  - '"nftables" in ansible_facts.packages'
+  tags:
+  - CCE-86311-8
+  - configure_strategy
+  - directory_owner_etc_nftables
+  - low_complexity
+  - low_disruption
+  - medium_severity
+  - no_reboot_needed
 - name: Ensure owner on directory /etc/nftables/
   ansible.builtin.file:
     path: /etc/nftables/
     follow: false
     state: directory
     owner: '{{ directory_owner_etc_nftables_newown }}'
-    mode: '0700'
+    mode: '{{ file_exists.stat.mode if file_exists.stat.exists else ''0700'' }}'
   when:
   - configure_strategy | bool
   - directory_owner_etc_nftables | bool
@@ -16330,9 +16458,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*fs.protected_hardlinks\s*=\s*.*$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*fs.protected_hardlinks\s*=\s*.*$'''
+    executable: /bin/bash
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -16361,9 +16488,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*fs.protected_hardlinks\s*=\s*1$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*fs.protected_hardlinks\s*=\s*1$'''
+    executable: /bin/bash
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -16499,9 +16625,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*fs.protected_symlinks\s*=\s*.*$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*fs.protected_symlinks\s*=\s*.*$'''
+    executable: /bin/bash
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -16530,9 +16655,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*fs.protected_symlinks\s*=\s*1$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*fs.protected_symlinks\s*=\s*1$'''
+    executable: /bin/bash
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -17631,13 +17755,33 @@
   - low_disruption
   - medium_severity
   - no_reboot_needed
+- name: Test for existence /etc/sysctl.d/
+  ansible.builtin.stat:
+    path: /etc/sysctl.d/
+  register: file_exists
+  when:
+  - configure_strategy | bool
+  - directory_groupowner_etc_sysctld | bool
+  - low_complexity | bool
+  - low_disruption | bool
+  - medium_severity | bool
+  - no_reboot_needed | bool
+  - '"kernel-core" in ansible_facts.packages'
+  tags:
+  - CCE-86324-1
+  - configure_strategy
+  - directory_groupowner_etc_sysctld
+  - low_complexity
+  - low_disruption
+  - medium_severity
+  - no_reboot_needed
 - name: Ensure group owner on /etc/sysctl.d/
   ansible.builtin.file:
     path: /etc/sysctl.d/
     follow: false
     state: directory
     group: '{{ directory_groupowner_etc_sysctld_newgroup }}'
-    mode: '0755'
+    mode: '{{ file_exists.stat.mode if file_exists.stat.exists else ''0755'' }}'
   when:
   - configure_strategy | bool
   - directory_groupowner_etc_sysctld | bool
@@ -17673,13 +17817,33 @@
   - low_disruption
   - medium_severity
   - no_reboot_needed
+- name: Test for existence /etc/sysctl.d/
+  ansible.builtin.stat:
+    path: /etc/sysctl.d/
+  register: file_exists
+  when:
+  - configure_strategy | bool
+  - directory_owner_etc_sysctld | bool
+  - low_complexity | bool
+  - low_disruption | bool
+  - medium_severity | bool
+  - no_reboot_needed | bool
+  - '"kernel-core" in ansible_facts.packages'
+  tags:
+  - CCE-86329-0
+  - configure_strategy
+  - directory_owner_etc_sysctld
+  - low_complexity
+  - low_disruption
+  - medium_severity
+  - no_reboot_needed
 - name: Ensure owner on directory /etc/sysctl.d/
   ansible.builtin.file:
     path: /etc/sysctl.d/
     follow: false
     state: directory
     owner: '{{ directory_owner_etc_sysctld_newown }}'
-    mode: '0755'
+    mode: '{{ file_exists.stat.mode if file_exists.stat.exists else ''0755'' }}'
   when:
   - configure_strategy | bool
   - directory_owner_etc_sysctld | bool
@@ -20189,9 +20353,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*kernel.dmesg_restrict\s*=\s*.*$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*kernel.dmesg_restrict\s*=\s*.*$'''
+    executable: /bin/bash
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -20221,9 +20384,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*kernel.dmesg_restrict\s*=\s*1$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*kernel.dmesg_restrict\s*=\s*1$'''
+    executable: /bin/bash
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -20359,9 +20521,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*kernel.panic_on_oops\s*=\s*.*$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*kernel.panic_on_oops\s*=\s*.*$'''
+    executable: /bin/bash
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -20386,9 +20547,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*kernel.panic_on_oops\s*=\s*1$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*kernel.panic_on_oops\s*=\s*1$'''
+    executable: /bin/bash
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -20504,9 +20664,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*kernel.perf_cpu_time_max_percent\s*=\s*.*$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*kernel.perf_cpu_time_max_percent\s*=\s*.*$'''
+    executable: /bin/bash
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -20531,9 +20690,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*kernel.perf_cpu_time_max_percent\s*=\s*1$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*kernel.perf_cpu_time_max_percent\s*=\s*1$'''
+    executable: /bin/bash
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -20649,9 +20807,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*kernel.perf_event_max_sample_rate\s*=\s*.*$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*kernel.perf_event_max_sample_rate\s*=\s*.*$'''
+    executable: /bin/bash
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -20676,9 +20833,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*kernel.perf_event_max_sample_rate\s*=\s*1$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*kernel.perf_event_max_sample_rate\s*=\s*1$'''
+    executable: /bin/bash
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -20797,9 +20953,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*kernel.perf_event_paranoid\s*=\s*.*$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*kernel.perf_event_paranoid\s*=\s*.*$'''
+    executable: /bin/bash
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -20827,9 +20982,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*kernel.perf_event_paranoid\s*=\s*2$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*kernel.perf_event_paranoid\s*=\s*2$'''
+    executable: /bin/bash
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -20957,9 +21111,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*kernel.pid_max\s*=\s*.*$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*kernel.pid_max\s*=\s*.*$'''
+    executable: /bin/bash
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -20984,9 +21137,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*kernel.pid_max\s*=\s*65536$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*kernel.pid_max\s*=\s*65536$'''
+    executable: /bin/bash
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -21102,9 +21254,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*kernel.sysrq\s*=\s*.*$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*kernel.sysrq\s*=\s*.*$'''
+    executable: /bin/bash
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -21129,9 +21280,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*kernel.sysrq\s*=\s*0$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*kernel.sysrq\s*=\s*0$'''
+    executable: /bin/bash
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -21251,9 +21401,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*kernel.unprivileged_bpf_disabled\s*=\s*.*$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*kernel.unprivileged_bpf_disabled\s*=\s*.*$'''
+    executable: /bin/bash
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -21282,9 +21431,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*kernel.unprivileged_bpf_disabled\s*=\s*1$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*kernel.unprivileged_bpf_disabled\s*=\s*1$'''
+    executable: /bin/bash
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -21419,9 +21567,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*kernel.yama.ptrace_scope\s*=\s*.*$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*kernel.yama.ptrace_scope\s*=\s*.*$'''
+    executable: /bin/bash
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -21449,9 +21596,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*kernel.yama.ptrace_scope\s*=\s*1$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*kernel.yama.ptrace_scope\s*=\s*1$'''
+    executable: /bin/bash
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -21583,9 +21729,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.core.bpf_jit_harden\s*=\s*.*$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.core.bpf_jit_harden\s*=\s*.*$'''
+    executable: /bin/bash
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -21614,9 +21759,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.core.bpf_jit_harden\s*=\s*2$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*net.core.bpf_jit_harden\s*=\s*2$'''
+    executable: /bin/bash
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -21748,9 +21892,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*vm.mmap_min_addr\s*=\s*.*$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*vm.mmap_min_addr\s*=\s*.*$'''
+    executable: /bin/bash
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -21775,9 +21918,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*vm.mmap_min_addr\s*=\s*65536$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*vm.mmap_min_addr\s*=\s*65536$'''
+    executable: /bin/bash
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -21898,9 +22040,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*fs.suid_dumpable\s*=\s*.*$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*fs.suid_dumpable\s*=\s*.*$'''
+    executable: /bin/bash
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -21930,9 +22071,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*fs.suid_dumpable\s*=\s*0$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*fs.suid_dumpable\s*=\s*0$'''
+    executable: /bin/bash
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -22074,9 +22214,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*kernel.kptr_restrict\s*=\s*.*$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*kernel.kptr_restrict\s*=\s*.*$'''
+    executable: /bin/bash
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -22107,9 +22246,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*kernel.kptr_restrict\s*=\s*1$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*kernel.kptr_restrict\s*=\s*1$'''
+    executable: /bin/bash
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -22259,9 +22397,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*kernel.randomize_va_space\s*=\s*.*$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*kernel.randomize_va_space\s*=\s*.*$'''
+    executable: /bin/bash
   register: find_all_values
   check_mode: false
   changed_when: false
@@ -22296,9 +22433,8 @@
   ansible.builtin.shell:
     cmd: 'set -o pipefail
 
-      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*kernel.randomize_va_space\s*=\s*2$''
-
-      '
+      find -L {{ sysctl_paths | join(" ") }} -type f -name ''*.conf'' | xargs grep -HP ''^\s*kernel.randomize_va_space\s*=\s*2$'''
+    executable: /bin/bash
   register: find_correct_value
   check_mode: false
   changed_when: false
@@ -22612,13 +22748,33 @@
   - low_disruption
   - medium_severity
   - no_reboot_needed
+- name: Test for existence /etc/selinux/
+  ansible.builtin.stat:
+    path: /etc/selinux/
+  register: file_exists
+  when:
+  - configure_strategy | bool
+  - directory_groupowner_etc_selinux | bool
+  - low_complexity | bool
+  - low_disruption | bool
+  - medium_severity | bool
+  - no_reboot_needed | bool
+  - '"kernel-core" in ansible_facts.packages'
+  tags:
+  - CCE-86273-0
+  - configure_strategy
+  - directory_groupowner_etc_selinux
+  - low_complexity
+  - low_disruption
+  - medium_severity
+  - no_reboot_needed
 - name: Ensure group owner on /etc/selinux/
   ansible.builtin.file:
     path: /etc/selinux/
     follow: false
     state: directory
     group: '{{ directory_groupowner_etc_selinux_newgroup }}'
-    mode: '0755'
+    mode: '{{ file_exists.stat.mode if file_exists.stat.exists else ''0755'' }}'
   when:
   - configure_strategy | bool
   - directory_groupowner_etc_selinux | bool
@@ -22654,13 +22810,33 @@
   - low_disruption
   - medium_severity
   - no_reboot_needed
+- name: Test for existence /etc/selinux/
+  ansible.builtin.stat:
+    path: /etc/selinux/
+  register: file_exists
+  when:
+  - configure_strategy | bool
+  - directory_owner_etc_selinux | bool
+  - low_complexity | bool
+  - low_disruption | bool
+  - medium_severity | bool
+  - no_reboot_needed | bool
+  - '"kernel-core" in ansible_facts.packages'
+  tags:
+  - CCE-86270-6
+  - configure_strategy
+  - directory_owner_etc_selinux
+  - low_complexity
+  - low_disruption
+  - medium_severity
+  - no_reboot_needed
 - name: Ensure owner on directory /etc/selinux/
   ansible.builtin.file:
     path: /etc/selinux/
     follow: false
     state: directory
     owner: '{{ directory_owner_etc_selinux_newown }}'
-    mode: '0755'
+    mode: '{{ file_exists.stat.mode if file_exists.stat.exists else ''0755'' }}'
   when:
   - configure_strategy | bool
   - directory_owner_etc_selinux | bool
