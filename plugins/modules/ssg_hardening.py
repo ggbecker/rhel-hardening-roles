@@ -25,6 +25,14 @@ vendored into the collection at build time; the datastream and standalone
 playbooks keep the original ``command`` tasks.
 """
 
+# ansible-test's future-import-boilerplate and metaclass-boilerplate sanity
+# tests (enforced on the ansible-core 2.16 certification floor) require these on
+# every module, and the collection declares requires_ansible ">=2.9", so the
+# Python 2 compatibility boilerplate must stay even though the code is Python 3.
+from __future__ import absolute_import, division, print_function
+
+__metaclass__ = type
+
 DOCUMENTATION = r"""
 ---
 module: ssg_hardening
