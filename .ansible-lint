@@ -1,7 +1,13 @@
 ---
-# Ansible Lint configuration for the redhat.rhel_hardening_roles collection.
-# The certification checker runs the "production" profile, which is the profile
-# required for Automation Hub certification.
+# Ansible Lint configuration for the generated hardening collection.
+#
+# This file is emitted by utils/ansible_roles_to_collection.py so it is bundled
+# inside the collection tarball; do not edit it in the published collection, edit
+# ANSIBLE_LINT_CONFIG in that script instead.
+#
+# Automation Hub certification requires the "production" profile. The roles are
+# machine-generated from the SCAP remediations in ComplianceAsCode/content, so
+# the waivers below are inherent to that generation, not authored defects.
 profile: production
 
 # Generated collection metadata that should not be linted as playbook content.
@@ -9,19 +15,7 @@ exclude_paths:
   - changelogs
   - .ansible
   - .github
-  # The RHEL 10 roles correctly declare EL version "10" in meta/main.yml, but
-  # ansible-lint's schema[meta] rule (which cannot be waived via skip_list) only
-  # accepts EL versions present in the schema bundled with the linter pinned to
-  # the ansible-core 2.16 certification floor (24.12.2), whose EL enum caps at
-  # "9". Exclude only these meta files from schema validation so the accurate
-  # version is kept; the roles' tasks are still fully linted.
-  - "roles/rhel10_*/meta/main.yml"
 
-# The roles in this collection are machine-generated from the SCAP remediations
-# in ComplianceAsCode/content. The findings below are inherent to that
-# generation, not authored defects. The first group mirrors the waivers in
-# tests/ansible-lint_config.yml in ComplianceAsCode/content; the second group
-# covers rules that only the strict "production" profile enforces.
 skip_list:
   # Waived upstream in ComplianceAsCode/content CI:
   - yaml                       # yamllint is run separately upstream
@@ -31,7 +25,7 @@ skip_list:
   - fqcn[action-core]
   - name[template]
   - no-tabs
-  # Enforced only by the production profile:
+  # Enforced under the production profile; tripped by generated content:
   - var-naming[no-role-prefix] # SCAP variable names are not role-prefixed
   - var-naming[pattern]        # SCAP variable names
   - ignore-errors

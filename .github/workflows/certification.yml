@@ -36,15 +36,20 @@ concurrency:
 # for each affected version of ansible-core (for example, `tests/sanity/ignore-2.18.txt`) and add corresponding entries.
 jobs:
   call:
-    uses: ansible-collections/partner-certification-checker/.github/workflows/certification-reusable.yml@v5.0.0 # zizmor: ignore[unpinned-uses]
+    uses: ansible-collections/partner-certification-checker/.github/workflows/certification-reusable.yml@v6.0.0 # zizmor: ignore[unpinned-uses]
     # For details on tested ansible-core branches and Python versions,
     # see: https://github.com/ansible-collections/partner-certification-checker#tested-ansible-core-branches-and-python-versions
     with:
       # redhat.rhel_hardening_roles declares ansible.posix as a runtime dependency;
       # install it so galaxy-importer and ansible-lint can resolve its modules.
+      # The checker does not auto-install dependencies from galaxy.yml.
       collection-deps: 'ansible.posix'
-    # ansible.posix is available on public Galaxy, so no Automation Hub token is
-    # required. If a dependency ever needs to be pulled from Red Hat Automation Hub,
-    # set 'automation-hub: true' above and provide the AH_TOKEN secret below.
+    # Other available inputs (see the reusable workflow docs linked above):
+    #   ansible-core-version: '2.18.0'
+    #   skip-sanity-versions: 'stable-2.16'
+    #   collection-root: 'ansible_collections/junipernetworks/junos'
+    #   automation-hub: true
+    # Uncomment the lines below if you have 'automation-hub: true' and need to install collections from Red Hat Ansible Automation Hub.
+    # This requires setting a repository secret called 'AH_TOKEN' which value contains a Red Hat Ansible Automation Hub token.
     # secrets:
     #   AH_TOKEN: ${{ secrets.AH_TOKEN }}
